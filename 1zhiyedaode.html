@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>职业道德互动课程</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:2rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>职业道德核心要点与互动刷题</h1>
+
+  <div class="summary">
+    <h2>核心要点速览</h2>
+    <p><strong>职业道德定义：</strong>职业道德是从业人员在职业活动中自觉履行的行为规范和价值准则。</p>
+    <p><strong>主要特征：</strong>实践性、实用性、自觉性、时代性；核心品质为<strong>诚实守信、尊重规范、履责奉献</strong>。</p>
+    <p><strong>价值意义：</strong>个人层面塑造职业形象；企业层面提升满意度与竞争力；社会层面维护公平、促进行业健康发展。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// -------- 24 道代表性试题 --------
+const questions=[
+ {stem:"职业道德是从业人员在职业活动中（   ）。",options:["必须遵循的命令要求","应该积极履行的行为规范","衡量绩效的核心标准","决定前途命运的唯一要素"],answer:"B",explanation:"职业道德强调主动、自觉的行为规范，而非外在命令。"},
+ {stem:"职业道德是人们（   ）。",options:["在社会公共生活中所必须遵守的行为规范的总和","在职业活动中所遵守的行为规范的总和","在家庭生活中所应遵守的行为规范的总和","在物质交往和精神向往中产生和发展起来的特殊关系"],answer:"B",explanation:"职业道德专指职业领域的道德规范。"},
+ {stem:"职业道德行为养成是指（   ）。",options:["从业者在一定的职业道德知识、情感信念支配下所采取的自觉行动","按照职业道德规范要求，对职业道德行为进行有意识的训练和培养","对本行业从业人员在职业活动中的行为要求","本行业对社会所承担的道德责任和义务"],answer:"B",explanation:"强调通过训练和培养形成稳定的职业道德行为。"},
+ {stem:"俗话说：国有国法，行有行规。这里的“行规”是指（   ）。",options:["道德","职业道德","职业道德基本规范","行业职业道德规范"],answer:"D",explanation:"“行规”即行业层面的职业道德规范。"},
+ {stem:"下列关于职业道德的说法中，正确的是（   ）。",options:["职业道德与人格无关","职业道德的养成只能靠教化","职业道德的提高与个人的利益无关","职业道德从一个侧面反映人的整体道德素质"],answer:"D",explanation:"职业道德是整体道德素质的重要体现。"},
+ {stem:"专业和职业有很大的不同，但两者之间又是密切相联的。（   ）",options:["正确","错误"],answer:"A",explanation:"专业知识是职业能力的重要基础，两者相辅相成。"},
+ {stem:"职业道德是指在工作中遵守的一套行为准则和道德规范，它包括社会责任的承担。（   ）",options:["正确","错误"],answer:"A",explanation:"承担社会责任是职业道德的重要内容。"},
+ {stem:"职业道德的特征包括（   ）。",options:["适用范围不定","内容模糊","实践性强","形式单一"],answer:"C",explanation:"职业道德指向具体职业行为，重在实践。"},
+ {stem:"职业道德可以用条例、章程、守则、公约等形式来规定，这些规定具体实用，简单易行。这一特点指的是（   ）。",options:["职业道德的行为性","职业道德的时代性","职业道德的广泛性","职业道德的实用性"],answer:"D",explanation:"简明、可执行体现出实用性特点。"},
+ {stem:"职业道德行为的最大特点（   ）。",options:["实践性和实用性","普遍性和广泛性","自觉性和习惯性","时代性和创造性"],answer:"C",explanation:"职业道德依赖自我约束并逐渐形成习惯。"},
+ {stem:"职业道德的特征包括（   ）。",options:["个人自由发展","追求个人目标的手段","诚实守信","忽视客户需求"],answer:"C",explanation:"诚实守信是核心职业品质之一。"},
+ {stem:"职业道德的特征之一是（   ）。",options:["个人主观意识的发挥","追求个人利益最大化","尊重职业规范和道德准则","忽视职业道德的约束"],answer:"C",explanation:"尊重并遵守职业规范是职业道德要义。"},
+ {stem:"职业道德的特征之一是尊重职业规范和道德准则。（   ）",options:["正确","错误"],answer:"A",explanation:"此陈述正确。"},
+ {stem:"职业道德要求从业人员追求个人利益最大化。（   ）",options:["正确","错误"],answer:"B",explanation:"职业道德强调兼顾个人、企业与社会利益。"},
+ {stem:"职业道德对企业发展的积极影响包括（   ）。",options:["增加员工福利支出","提高员工满意度和忠诚度","降低企业竞争力","忽视法律合规"],answer:"B",explanation:"良好职业道德能增强员工的满意度与忠诚度。"},
+ {stem:"职业道德对企业发展的重要作用之一是（   ）。",options:["限制员工创新能力","提高企业形象和声誉","忽视客户需求","降低员工薪酬待遇"],answer:"B",explanation:"职业道德塑造企业良好形象与声誉。"},
+ {stem:"职业道德的遵守有助于企业（   ）。",options:["增加员工不满和离职率","减少员工参与企业发展的积极性","提高企业竞争力和市场地位","忽视企业社会责任"],answer:"C",explanation:"职业道德综合提升竞争力与市场地位。"},
+ {stem:"职工道德修养是指（   ）。",options:["个人的道德素养和道德修养","个人的技术能力和专业知识","个人的社交能力和人际关系","个人的工作态度和职业发展"],answer:"A",explanation:"核心强调个人在道德层面的素质与修养。"},
+ {stem:"职工道德修养的核心是（   ）。",options:["追求个人利益最大化","忽视职业道德准则","尊重他人权益和社会公共利益","个人主观意识的发挥"],answer:"C",explanation:"尊重他人与社会利益是修养的核心。"},
+ {stem:"职工道德修养的重要内容之一是（   ）。",options:["忽视工作效率和质量","忽视个人职业发展","建立正确的职业道德观念","降低工作责任感"],answer:"C",explanation:"应培养正确职业道德观念与自律。"},
+ {stem:"职工道德修养的培养需要注重（   ）。",options:["忽视团队合作和协作能力","提高个人技术能力和专业素养","忽视企业的利益和发展","降低个人的自我管理能力"],answer:"B",explanation:"技术与专业素养是修养的重要支撑。"},
+ {stem:"职工道德修养的目标是（   ）。",options:["追求个人利益最大化","忽视职业道德准则","建立良好的职业道德品质和行为习惯","降低工作效率和质量"],answer:"C",explanation:"目标在于形成稳定的良好职业行为。"},
+ {stem:"职工道德修养的核心是尊重他人权益和社会公共利益。（   ）",options:["正确","错误"],answer:"A",explanation:"该说法正确。"},
+ {stem:"职工道德修养的目标是追求个人利益最大化。（   ）",options:["正确","错误"],answer:"B",explanation:"目标应是兼顾个人与社会、形成良好品质。"}
+];
+
+// -------- 渲染与交互 --------
+const quizDiv=document.getElementById('quiz');
+const scoreBtn=document.getElementById('showScore');
+const resultDiv=document.getElementById('result');
+let answered=0,correct=0;
+
+questions.forEach((q,idx)=>{
+  const wrapper=document.createElement('div');
+  wrapper.className='question';
+  wrapper.innerHTML=`<h3>${idx+1}. ${q.stem}</h3>`;
+  const optDiv=document.createElement('div');
+  optDiv.className='options';
+
+  q.options.forEach((text,letterIdx)=>{
+    const letter=String.fromCharCode(65+letterIdx); // A,B,C,D...
+    const id=`q${idx}_${letter}`;
+    const label=document.createElement('label');
+    label.innerHTML=`<input type="radio" name="q${idx}" id="${id}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback=document.createElement('div');
+  feedback.className='feedback';
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  // 事件监听
+  optDiv.addEventListener('change',e=>{
+    const choice=e.target.value;
+    if(e.target.checked){
+      answered++;
+      if(choice===q.answer){correct++;feedback.textContent='✔ 回答正确！';feedback.className='feedback correct';}
+      else {feedback.textContent=`✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;feedback.className='feedback incorrect';}
+      // 锁定本题其它选项
+      [...optDiv.querySelectorAll('input')].forEach(inp=>inp.disabled=true);
+      if(answered===questions.length){scoreBtn.disabled=false;}
+    }
+  });
+});
+
+scoreBtn.onclick=()=>{
+  resultDiv.textContent=`您共答对 ${correct} 题，答错 ${questions.length-correct} 题。`;
+  scoreBtn.disabled=true;
+};
+</script>
+</body>
+</html>
