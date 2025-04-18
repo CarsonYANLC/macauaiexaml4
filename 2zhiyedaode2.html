@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>职业道德互动课程</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:2rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>职业道德核心要点</h1>
+
+  <div class="summary">
+    <h2>核心要点速览</h2>
+    <p><strong>职业道德定义：</strong>职业道德是从业人员在职业活动中自觉履行的行为规范和价值准则。</p>
+    <p><strong>主要维度：</strong>诚实公正、严谨求是、遵章守法、恪尽职守、勤勉好学。</p>
+    <p><strong>价值意义：</strong>个人层面塑造职业形象；企业层面提升满意度与竞争力；社会层面维护公平、促进行业健康发展。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+
+<script>
+// -------- 30 道代表性试题 --------
+const questions = [
+ {stem:"在工作场所，以下（   ）行为最能体现诚实公正的原则。",options:["向上级汇报同事的错误","隐藏重要信息以取得个人利益","拒绝贿赂","参与团队合作"],answer:"C",explanation:"拒绝贿赂体现了对公平与诚信底线的坚守。"},
+ {stem:"在处理与客户的关系时，以下（   ）做法最能体现诚实公正的职业道德。",options:["为了获得更多业务，向客户提供不实的承诺","为了满足客户的要求，违反公司规定","向客户清晰、准确地解释所有条款和条件","为了提高工作效率，省略必要的步骤"],answer:"C",explanation:"如实、透明地告知客户条款是诚信服务的表现。"},
+ {stem:"在团队中，以下（   ）行为最能体现诚实公正的职业道德。",options:["为自己谋取私利而不顾团队整体利益","不与同事分享关键信息","为了避免冲突，不提出自己的观点","对团队成员的贡献给予公正的认可和奖励"],answer:"D",explanation:"公正认可同事贡献，有助于营造公平的团队氛围。"},
+ {stem:"在你的工作生活中，以下（   ）最能体现诚实公正和职业道德的综合原则。",options:["在竞争中采取不正当手段，以获得晋升","不惜违反规则，以保护自己的利益","遵守规则，同时对他人的不规范行为保持公正的态度","对待他人不公正，以实现自己的目标"],answer:"C",explanation:"既自律又敢于公正评价他人，体现职业道德。"},
+ {stem:"在你的职业生涯中，你发现自己有误，以下（   ）做法最符合职业道德。",options:["掩饰错误，继续进行工作","忽视错误，以避免承担责任","承认错误，并采取行动进行纠正和补偿","把错误推给别人，以保护自己的名誉"],answer:"C",explanation:"主动承认并纠正错误是诚信的最佳体现。"},
+ {stem:"承认自己的错误并采取行动进行纠正和补偿是一种道德上正确的行为。（   ）",options:["正确","错误"],answer:"A",explanation:"勇于纠错符合职业诚信要求。"},
+ {stem:"在处理利益冲突时，采取行动以保护自己的利益是诚实和公正的。（   ）",options:["正确","错误"],answer:"B",explanation:"仅顾私利而忽视公平并不诚实公正。"},
+ {stem:"在工作中，以下（   ）行为最能体现严谨求是的态度。",options:["对工作数据做出不准确的报告，以掩盖自己的错误","对工作数据进行了初步估算，但未进行详细核实","对工作数据进行了核实，但未考虑到相关变量和影响因素","对工作数据进行了精确测量，并充分考虑了相关变量和影响因素"],answer:"D",explanation:"精准测量并充分考虑变量体现严谨与求真。"},
+ {stem:"当你在工作中发现同事有违规行为时，以下（   ）做法最符合严谨求是与职业道德的原则。",options:["忽视同事的违规行为，以避免卷入是非","向更高级别的领导汇报同事的违规行为，但未进行充分核实","向同事指出其违规行为，并帮助其采取改正措施","为了保护自己，将同事的违规行为公开"],answer:"C",explanation:"在核实基础上帮助改正，既严谨又负责任。"},
+ {stem:"在你的工作生活中，以下（   ）最能体现严谨求是与职业道德的综合原则。",options:["遵守规则，同时对工作中的问题寻求正确、科学的解决方案","忽视规则，以完成任务为目标","在工作中追求速度，不注重质量","对待工作马虎应付，只关注个人利益"],answer:"A",explanation:"坚持规则并追求科学解决方案体现严谨求是。"},
+ {stem:"在工作生活中，以下（   ）行为最能体现严谨求是的态度。",options:["追求个人利益最大化","忽视职业道德准则","履行工作职责，不推卸责任","忽视公司的利益和发展"],answer:"C",explanation:"认真履职、敢担责是严谨求是的表现。"},
+ {stem:"当你在工作中面临利益冲突时，以下（   ）做法最符合严谨求是的职业道德。",options:["采取公正和诚实的态度，以维护职业道德","为了达成目标，不择手段","寻找借口来掩盖利益冲突","为了保护自己的利益，不惜违反道德规范"],answer:"A",explanation:"保持公正诚实、遵守职业道德。"},
+ {stem:"在工作中，为了尽快完成任务，我们可以忽略细节和规则，只要最终结果正确就行。（   ）",options:["正确","错误"],answer:"B",explanation:"忽视细节会埋下隐患，不符合严谨原则。"},
+ {stem:"在工作中，自己的利益高于职业道德和严谨求是原则，只要能达到目标，可以采用任何方式。（   ）",options:["正确","错误"],answer:"B",explanation:"手段不当违背职业道德。"},
+ {stem:"在工作场所，以下（   ）行为最能体现遵章守法的原则。",options:["按照行业标准进行操作","完全听从上级的指示","按照公司规定完成工作任务","坚持自己的原则，不考虑规定的限制"],answer:"C",explanation:"严格按公司规程执行是守法合规的体现。"},
+ {stem:"在你的职业生涯中，你发现自己已经违反了职业道德，以下（   ）做法最符合遵章守法的原则。",options:["继续隐瞒，以避免处罚","向更高级别的领导汇报自己的错误","为了保护自己，将错误推给别人","寻求专业的法律咨询，了解如何纠正错误"],answer:"B",explanation:"主动报告错误，接受纠正。"},
+ {stem:"当你在工作中发现同事有违法行为时，以下（   ）做法最符合遵章守法和职业道德的原则。",options:["忽视同事的违法行为，以避免卷入是非","向更高级别的领导汇报同事的违法行为，但未进行充分核实","向同事指出其违法行为，并帮助其采取改正措施","为了保护自己，将同事的违法行为公开"],answer:"C",explanation:"帮助其改正并保存证据，兼顾合法与合德。"},
+ {stem:"在你的工作生活中，以下（   ）最能体现遵章守法与职业道德的综合原则。",options:["忽视规定，以完成任务为目标","对待工作马虎应付，只关注个人利益","遵守规定，同时对工作中的问题寻求正确、合规的解决方案","对待他人不公正，以实现自己的目标"],answer:"C",explanation:"合规与解决问题并重。"},
+ {stem:"在工作中，当个人利益与公司规定或职业道德发生冲突时，以下（   ）做法最合适。",options:["优先考虑个人利益，忽视公司规定和职业道德","遵守公司规定，但会尝试找借口或解释以维护个人利益","遵守公司规定，同时尽可能寻求妥协和平衡","完全遵守公司规定，但会采取不合作态度以维护个人利益"],answer:"C",explanation:"在遵规基础上寻求平衡，是负责任的表现。"},
+ {stem:"在工作中，为了保护公司的利益，我可以采取任何合法和必要的措施来确保任务的成功完成。（   ）",options:["正确","错误"],answer:"A",explanation:"只要合法且符合职业道德即可。"},
+ {stem:"在工作中，如果我发现同事正在进行违法行为，我有义务向领导或相关部门报告这一情况。（   ）",options:["正确","错误"],answer:"A",explanation:"这是守法合规的责任。"},
+ {stem:"在工作中，以下（   ）行为最能体现恪尽职守的职业道德。",options:["在遇到困难时，推卸责任给其他同事","在工作时间内，经常进行私人通话","在完成自己的工作时，也帮助其他同事解决问题","在工作中经常抱怨，消极怠工"],answer:"C",explanation:"乐于助人、共同完成任务体现敬业精神。"},
+ {stem:"以下（   ）做法最符合恪尽职守与职业道德的原则。",options:["为了逃避责任，不记录工作中的重要事件","为了节省时间，不遵守操作规程和流程","在工作中始终遵守公司规定，尽职尽责","为了个人利益，将工作设备用于私人用途"],answer:"C",explanation:"遵守流程、尽职尽责。"},
+ {stem:"当你在工作中发现同事有违规行为时，以下（   ）做法最符合恪尽职守和职业道德的原则。",options:["忽视同事的违规行为，避免被视为告密者","将同事的违规行为记录下来，但未向任何人报告","向同事指出其违规行为，并协助其改正","向更高级别的领导汇报同事的违规行为，但未进行充分核实"],answer:"C",explanation:"积极帮助同事改正，并保留证据。"},
+ {stem:"在你的职业生涯中，你发现自己无法完成某项任务，以下（   ）做法最符合恪尽职守和职业道德的原则。",options:["隐瞒自己的能力限制，并尝试完成这项任务","请求同事的帮助，并分享工作中的责任和压力","寻找替代方案，以最大程度地减少工作对同事的影响","以忙碌为由，将工作推给他人"],answer:"B",explanation:"诚实求助，共担责任。"},
+ {stem:"在你的工作生活中，以下（   ）最能体现恪尽职守和职业道德的综合原则。",options:["在工作中追求个人利益，忽视团队目标","对待工作马虎应付，经常出错，但常以“人非圣贤，孰能无过”来安慰自己","严格遵守工作规定，认真执行工作流程，尽最大努力保证工作质量","为了完成自己的工作，常利用休息时间加班加点，不顾自己的健康和个人时间"],answer:"C",explanation:"质量优先、流程遵循体现敬业。"},
+ {stem:"在工作中，为了完成任务，我们可以忽略职业道德和规范，只要达到目标即可。（   ）",options:["正确","错误"],answer:"B",explanation:"达成目标不得以牺牲职业道德为代价。"},
+ {stem:"在工作中，我们可以以不违反法律为借口，而违反公司规定和职业道德。（   ）",options:["正确","错误"],answer:"B",explanation:"职业道德与公司规定同样必须遵守。"},
+ {stem:"在工作中，以下（   ）行为最能体现勤勉好学的精神。",options:["对自己的工作技能满足于现状，不寻求提升","积极学习新知识，不断提高自己的工作技能","热衷于谈论八卦，对工作技能提升不感兴趣","对工作任务能应付则应付，不追求精益求精"],answer:"B",explanation:"积极学习和提升能力体现勤勉好学。"},
+ {stem:"当你在工作中面对困难时，以下（   ）做法最符合勤勉好学的职业道德。",options:["放弃努力，寻求轻松解决方案","推卸责任，将问题留给其他人","坚持克服困难，寻求最佳解决方案","为避免问题，选择不作为"],answer:"C",explanation:"迎难而上、坚持学习。"},
+ {stem:"在你的职业生涯中，当发现自己有不足之处，以下（   ）做法最符合职业道德。",options:["忽视问题，继续工作","为避免批评，选择掩饰问题","承认问题，并积极寻找解决办法","为完成任务，欺骗他人以获得支持"],answer:"C",explanation:"正视不足并改进。"},
+ {stem:"当你在工作中发现同事有不当行为时，以下（   ）做法最符合勤勉好学与职业道德的原则。",options:["忽视同事的不当行为，以避免卷入是非","为了正义感，向更高级别的领导汇报同事的不当行为","与同事沟通，寻求共同解决的办法","为了保护自己，将同事的不当行为公开"],answer:"C",explanation:"先沟通、共同提升。"},
+ {stem:"在你的工作生活中，以下（   ）最能体现勤勉好学与职业道德的综合原则。",options:["在困难面前逃避，以完成任务为目标","对工作任务应付了事，不寻求更好的解决方案","对工作保持积极进取的态度，不断提升自己的工作技能","对待工作马虎应付，只关注个人利益"],answer:"C",explanation:"持续学习与改进体现进取心。"},
+ {stem:"在工作中，即使我遇到了困难，我也不能寻求他人的帮助，因为这是软弱的表现。（   ）",options:["正确","错误"],answer:"B",explanation:"合作与求助是成熟职业心态的表现。"},
+ {stem:"在工作中，我可以随意将工作任务分配给他人，只要能完成目标即可，无需对他人负责。（   ）",options:["正确","错误"],answer:"B",explanation:"应对分工负责并尊重他人。"}
+];
+
+// -------- 渲染与交互 --------
+const quizDiv = document.getElementById('quiz');
+const scoreBtn = document.getElementById('showScore');
+const resultDiv = document.getElementById('result');
+let answered = 0, correct = 0;
+
+questions.forEach((q, idx) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'question';
+  wrapper.innerHTML = `<h3>${idx + 1}. ${q.stem}</h3>`;
+
+  const optDiv = document.createElement('div');
+  optDiv.className = 'options';
+
+  q.options.forEach((text, letterIdx) => {
+    const letter = String.fromCharCode(65 + letterIdx); // A,B,C,D...
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="q${idx}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  // 事件监听
+  optDiv.addEventListener('change', e => {
+    const choice = e.target.value;
+    if (e.target.checked) {
+      answered++;
+      if (choice === q.answer) {
+        correct++;
+        feedback.textContent = '✔ 回答正确！';
+        feedback.className = 'feedback correct';
+      } else {
+        feedback.textContent = `✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;
+        feedback.className = 'feedback incorrect';
+      }
+      // 锁定本题其它选项
+      [...optDiv.querySelectorAll('input')].forEach(inp => inp.disabled = true);
+      if (answered === questions.length) scoreBtn.disabled = false;
+    }
+  });
+});
+
+scoreBtn.onclick = () => {
+  resultDiv.textContent = `您共答对 ${correct} 题，答错 ${questions.length - correct} 题。`;
+  scoreBtn.disabled = true;
+};
+</script>
+</body>
+</html>
