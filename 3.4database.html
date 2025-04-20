@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>数据库基础 &amp; 备份恢复 互动刷题</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:1.9rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>数据库基础 &amp; 备份恢复 — 刷题练习</h1>
+
+  <div class="summary">
+    <h2>核心要点速览</h2>
+    <p>💾 <strong>数据库 (DB) 与 DBMS</strong>：DBMS 以<strong>表格（关系模型）</strong>保存结构化数据，提供 <em>存储、检索、更新</em> 等基本功能，依赖 <code>SQL</code> 进行数据查询。</p>
+    <p>🔍 <strong>性能与可靠</strong>：<em>索引</em>提高检索效率；事务遵循 <strong>ACID</strong>（原子性、一致性、隔离性、持久性）保证可靠操作。</p>
+    <p>🛡️ <strong>备份与恢复</strong>：核心目标是<strong>防止数据丢失/损坏</strong>并确保业务连续性。常见策略：冷备、热备、增量/差异备份；恢复可分为物理、逻辑及基于重做 / 回滚日志。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// ---------- 题库（75‑90，共 16 题） ----------
+const questions = [
+ {stem:"数据库是用于存储和管理大量结构化数据的（ ）系统。",options:["操作系统","网络系统","文件系统","数据管理系统"],answer:"D",explanation:"DB 解决持久化、并发与安全等问题。"},
+ {stem:"数据库中的数据通常以（ ）方式组织。",options:["表格","文件","目录","文件夹"],answer:"A",explanation:"关系模型采用二维表结构。"},
+ {stem:"DBMS 不提供下列（ ）基本功能。",options:["数据存储","数据检索","数据更新","数据清洗"],answer:"D",explanation:"清洗属 ETL/数据治理。"},
+ {stem:"关系数据库基于（ ）数据模型。",options:["层次","网状","关系","对象"],answer:"C",explanation:"E.F. Codd 提出的关系模型。"},
+ {stem:"数据库的主要优点之一是实现数据的（ ）特性。",options:["持久性","可共享性","安全性","高可用性"],answer:"B",explanation:"集中管理使多应用可同时访问数据。"},
+ {stem:"下列模型中基于表格结构的是（ ）。",options:["层次模型","网状模型","关系模型","文件模型"],answer:"C",explanation:"再次强调表格=关系。"},
+ {stem:"数据库查询常用语言是（ ）。",options:["HTML","CSS","JavaScript","SQL"],answer:"D",explanation:"SQL(结构化查询语言) 用于检索/操作数据。"},
+ {stem:"数据库索引的作用是（ ）。",options:["提高数据检索效率","加密数据","压缩数据","删除数据"],answer:"A",explanation:"索引类似书籍目录。"},
+ {stem:"数据库事务具有（ ）性质。",options:["原子性","可见性","并发性","便利性"],answer:"A",explanation:"ACID 中的 A（Atomicity）。"},
+ {stem:"数据库备份与恢复的主要目的在于（ ）。",options:["提升存储效率","提速查询","防止数据丢失或损坏","压缩数据库"],answer:"C",explanation:"保障业务连续性。"},
+ {stem:"使用 SELECT 语句可以筛选满足条件的数据记录。（ ）",options:["正确","错误"],answer:"A",explanation:"SQL 基础操作 SELECT … WHERE。"},
+ {stem:"备份文件通常存放在（ ）。",options:["内存","硬盘/外部存储","光盘","云端"],answer:"B",explanation:"本地磁盘或网络存储为默认目标。"},
+ {stem:"下列操作不属于数据库恢复策略。（ ）",options:["重做日志恢复","回滚日志恢复","逻辑恢复","删除数据"],answer:"D",explanation:"删除会破坏数据完整性。"},
+ {stem:"以下备份方式可在备份期间仍保持数据库可用。（ ）",options:["冷备份","热备份","增量备份","差异备份"],answer:"B",explanation:"热备在在线状态完成。"},
+ {stem:"数据库备份的目的是提高数据存储效率。（ ）",options:["正确","错误"],answer:"B",explanation:"主要目的是数据保护。"},
+ {stem:"物理恢复和逻辑恢复是数据库恢复的常用策略。（ ）",options:["正确","错误"],answer:"A",explanation:"物理→块/文件级；逻辑→SQL/日志级。"}
+];
+
+// ---------- 渲染与交互 ----------
+const quizDiv = document.getElementById('quiz');
+const scoreBtn = document.getElementById('showScore');
+const resultDiv = document.getElementById('result');
+let answered = 0, correct = 0;
+
+questions.forEach((q, idx) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'question';
+  wrapper.innerHTML = `<h3>${idx + 1}. ${q.stem}</h3>`;
+
+  const optDiv = document.createElement('div');
+  optDiv.className = 'options';
+
+  q.options.forEach((text, letterIdx) => {
+    const letter = String.fromCharCode(65 + letterIdx);
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="q${idx}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  optDiv.addEventListener('change', e => {
+    if (!e.target.checked) return;
+    const choice = e.target.value;
+    answered++;
+    if (choice === q.answer) {
+      correct++;
+      feedback.textContent = `✔ 回答正确！${q.explanation}`;
+      feedback.className = 'feedback correct';
+    } else {
+      feedback.textContent = `✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;
+      feedback.className = 'feedback incorrect';
+    }
+    [...optDiv.querySelectorAll('input')].forEach(inp => inp.disabled = true);
+    if (answered === questions.length) scoreBtn.disabled = false;
+  });
+});
+
+scoreBtn.onclick = () => {
+  resultDiv.textContent = `您共答对 ${correct} 题，答错 ${questions.length - correct} 题。`;
+  scoreBtn.disabled = true;
+};
+</script>
+</body>
+</html>

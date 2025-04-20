@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>网络基础与协议 互动刷题</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:1.9rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>网络基础与协议 —— 核心要点 &amp; 刷题</h1>
+
+  <div class="summary">
+    <h2>核心要点速览</h2>
+    <p>📡 <strong>网络概念</strong>：<em>多台计算机通过通信链路互联</em>以实现<strong>资源共享、分布式处理、互联互通</strong>与可靠冗余。</p>
+    <p>🌍 <strong>覆盖分类</strong>：LAN（楼宇/园区）、MAN（城市）、WAN（跨地域）、互联网（全球 TCP/IP）。手机蜂窝网属于广域无线 WAN。</p>
+    <p>🧩 <strong>网络协议</strong>：规定<strong>数据格式、时序、错误控制、路由、安全等规则</strong>，分层（OSI 7/ TCP‑IP 4 层）设计保证开放互操作。可靠性指数据顺序与完整性，而非速度。</p>
+    <p>🔑 <strong>典型协议</strong>：<code>TCP</code>—可靠传输；<code>UDP</code>—无连接快速；<code>HTTP</code>—网页；<code>SMTP</code>—邮件发送；<code>SSH</code>—加密远程；<code>FTP</code>—文件传输等。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// -------- 题库（48‑74，共 27 题） --------
+const questions = [
+ {stem:"下列（ ）最准确地描述网络概念。",options:["一台计算机集合","互联网代名词","数据存储处理系统","多台计算机通过通信链路连接的集合"],answer:"D",explanation:"网络强调多节点互联互通。"},
+ {stem:"网络的特点不包括（ ）。",options:["资源共享","分布式处理","可靠性","不安全性"],answer:"D",explanation:"不安全性是挑战，而非网络特性。"},
+ {stem:"在网络中，（ ）特点意味着每个节点可扮演客户端和服务器。",options:["可扩展性","互联互通性","分布式处理","可靠性"],answer:"C",explanation:"P2P 架构的体现。"},
+ {stem:"网络概念最早起源于（ ）。",options:["20 世纪 50 年代","20 世纪 60 年代","70 年代","80 年代"],answer:"B",explanation:"1969 ARPANET 被视为互联网雏形。"},
+ {stem:"以下（ ）特点使数据可经多条路径传输，提高可靠性。",options:["可靠性","可扩展性","冗余性","安全性"],answer:"C",explanation:"链路冗余 + 路由协议实现容错。"},
+ {stem:"网络具有资源独享和集中处理两大特点。（ ）",options:["正确","错误"],answer:"B",explanation:"网络强调资源共享与分布式处理。"},
+ {stem:"下列分类依据不属于覆盖范围的是（ ）。",options:["LAN","WAN","MAN","手机网络"],answer:"D",explanation:"手机网络描述接入技术，不是传统覆盖范围分类。"},
+ {stem:"下列（ ）最准确地描述局域网（LAN）。",options:["覆盖范围广","多个 LAN 互连","覆盖范围小，通常一栋楼内","多个 WAN 互连"],answer:"C",explanation:"LAN 典型介质为以太网/Wi‑Fi。"},
+ {stem:"广域网（WAN）的特点包括（ ）。",options:["覆盖范围广，跨越多个地理位置","多个 LAN 互连","范围小","交换机连接多个 WAN"],answer:"A",explanation:"WAN 常使用路由器及公共通信线路。"},
+ {stem:"互联网是指（ ）。",options:["多个 LAN 连接","全球范围内的广域网","ISP 组成的网","手机网络"],answer:"B",explanation:"本质为全球互联的 TCP/IP 网络。"},
+ {stem:"手机网络属于以下（ ）类型。",options:["LAN","WAN","互联网","WLAN"],answer:"B",explanation:"蜂窝网络覆盖区域大，属无线 WAN。"},
+ {stem:"LAN 覆盖范围通常在同一建筑或园区。（ ）",options:["正确","错误"],answer:"A",explanation:"数百米至数公里级。"},
+ {stem:"WAN 跨越多个地理位置，覆盖范围广。（ ）",options:["正确","错误"],answer:"A",explanation:"典型如骨干网、MPLS 网络。"},
+ {stem:"以下说法关于网络协议是错误的：",options:["未规定数据传输格式和顺序","保证可靠性","实现路由选择","控制访问安全"],answer:"A",explanation:"协议首要任务即定义格式和时序。"},
+ {stem:"下列（ ）最能概括网络协议的作用。",options:["控制流量","提供 ISP 服务","规定计算机通信的规则与格式","管理硬件"],answer:"C",explanation:"如 TCP、IP、HTTP 等都是通信规则。"},
+ {stem:"网络协议的分层结构指（ ）。",options:["地理区域","硬件设备","按功能划分不同层次","连接互联网"],answer:"C",explanation:"OSI 7 层 / TCP-IP 4 层模型。"},
+ {stem:"网络协议中的可靠性指（ ）。",options:["传输速度","数据传输顺序和完整性","带宽","安全性"],answer:"B",explanation:"TCP 通过序号、确认、重传保证可靠。"},
+ {stem:"网络协议的开放性体现在（ ）。",options:["可在不同 OS/硬件平台使用","只能特定厂商使用","仅限特定环境","仅专业人士配置"],answer:"A",explanation:"RFC 文档公开、跨平台实现。"},
+ {stem:"网络协议规定通信规则和格式。（ ）",options:["正确","错误"],answer:"A",explanation:"协议栈本质就是规则集合。"},
+ {stem:"协议的可靠性就是传输速度和时延。（ ）",options:["正确","错误"],answer:"B",explanation:"可靠性关注错误控制，不等价于速度。"},
+ {stem:"下列协议中，TCP 用于传输控制与可靠通信。",options:["TCP","UDP","HTTP","FTP"],answer:"A",explanation:"TCP 位于传输层，面向连接。"},
+ {stem:"下列协议中，SMTP 用于电子邮件传输。",options:["TCP","UDP","SMTP","POP3"],answer:"C",explanation:"SMTP 负责邮件发送 / 中继。"},
+ {stem:"下列协议中，HTTP 用于网页浏览。",options:["TCP","UDP","HTTP","FTP"],answer:"C",explanation:"浏览器通过 HTTP/HTTPS 获取资源。"},
+ {stem:"下列协议中，SSH 提供较安全的远程登录。",options:["TCP","UDP","SSH","Telnet"],answer:"C",explanation:"采用加密隧道替代明文 Telnet。"},
+ {stem:"下列协议中，FTP 最常用于文件传输服务。",options:["TCP","UDP","FTP","TFTP"],answer:"C",explanation:"FTP 支持双通道命令+数据连接。"},
+ {stem:"计算机之间通信必须依赖网络协议。（ ）",options:["正确","错误"],answer:"A",explanation:"无协议即无共同语言。"},
+ {stem:"所有网络协议都能跨所有操作系统运行。（ ）",options:["正确","错误"],answer:"B",explanation:"部分协议受驱动或栈实现限制。"}
+];
+
+// -------- 渲染与交互 --------
+const quizDiv = document.getElementById('quiz');
+const scoreBtn = document.getElementById('showScore');
+const resultDiv = document.getElementById('result');
+let answered = 0, correct = 0;
+
+questions.forEach((q, idx) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'question';
+  wrapper.innerHTML = `<h3>${idx + 1}. ${q.stem}</h3>`;
+
+  const optDiv = document.createElement('div');
+  optDiv.className = 'options';
+
+  q.options.forEach((text, letterIdx) => {
+    const letter = String.fromCharCode(65 + letterIdx);
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="q${idx}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  // 事件监听
+  optDiv.addEventListener('change', e => {
+    if (!e.target.checked) return;
+    const choice = e.target.value;
+    answered++;
+    if (choice === q.answer) {
+      correct++;
+      feedback.textContent = `✔ 回答正确！${q.explanation}`;
+      feedback.className = 'feedback correct';
+    } else {
+      feedback.textContent = `✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;
+      feedback.className = 'feedback incorrect';
+    }
+    [...optDiv.querySelectorAll('input')].forEach(inp => inp.disabled = true);
+    if (answered === questions.length) scoreBtn.disabled = false;
+  });
+});
+
+scoreBtn.onclick = () => {
+  resultDiv.textContent = `您共答对 ${correct} 题，答错 ${questions.length - correct} 题。`;
+  scoreBtn.disabled = true;
+};
+</script>
+</body>
+</html>
