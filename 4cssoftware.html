@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>Office 基础操作互动刷题</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:1.9rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>Office 通用操作要点 &amp; 互动刷题</h1>
+
+  <div class="summary">
+    <h2>计算机办公应用核心要点</h2>
+    <p>🖥️ <strong>通用认识</strong>：Word 用于<strong>文字排版</strong>、Excel 擅长<strong>数据表格与分析</strong>、PowerPoint 负责<strong>演示设计</strong>，Access 进行<strong>小型数据库</strong>管理。</p>
+    <p>⌨️ <strong>高效操作</strong>：熟悉快捷键（如 <code>Ctrl+Enter</code> 分页、<code>Ctrl+M</code> 新幻灯片、<code>Ctrl+End</code> 跳至文档尾）能极大提升效率。</p>
+    <p>📑 <strong>版式与格式</strong>：Word 布局靠 “布局/页面布局” 页签，文字格式集中在 “开始→字体/段落”；Excel 在 “数据” 页签完成排序、筛选；PowerPoint 设计主题、切换动画分属 “设计/切换” 页签。</p>
+    <p>📊 <strong>数据分析</strong>：Excel 函数（<code>SUM</code>, <code>AVERAGE</code>, <code>COUNTIF</code>, <code>FREQUENCY</code> …）与数据透视表是统计汇总利器。</p>
+    <p>🎯 <strong>输出共享</strong>：Word 页眉页脚、页码，PowerPoint 导出 PDF/图片，Excel 打印区域、分页预览等都是最终交付质量的保证。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// ------- 题库（60 题） -------
+const questions = [
+ // 通用‑Office（1‑6）
+ {stem:"下列 （   ） 软件主要用于文字处理。",options:["Word","Excel","PowerPoint","Access"],answer:"A",explanation:"Word 是文字处理软件；Excel 处理表格，PowerPoint 做演示，Access 管理数据库。"},
+ {stem:"下列 （   ） 软件主要用于制作报表与电子表格。",options:["Word","Excel","PowerPoint","Access"],answer:"B",explanation:"Excel 以单元格为核心，用于数据录入、分析、制表。"},
+ {stem:"下列 （   ） 软件主要用于幻灯片演示。",options:["Word","Excel","PowerPoint","Access"],answer:"C",explanation:"PowerPoint 专用于演示文稿的设计与放映。"},
+ {stem:"下列 （   ） 软件主要用于关系型数据库管理。",options:["Word","Excel","PowerPoint","Access"],answer:"D",explanation:"Access 提供表、查询、报表等数据库对象的创建与维护功能。"},
+ {stem:"所有计算机都预装了 Office 软件。（   ）",options:["正确","错误"],answer:"B",explanation:"是否预装取决于操作系统版本和厂商授权，并非所有电脑自带。"},
+ {stem:"所有计算机都能够打开并编辑 Office 文件。（   ）",options:["正确","错误"],answer:"B",explanation:"若缺少兼容软件或格式支持，无法直接编辑。"},
+ // Word 模块（7‑24）
+ {stem:"下列 （   ） 快捷键用于在当前文档中插入分节符／新页面。",options:["Ctrl+N","Ctrl+Shift+N","Ctrl+Enter","Ctrl+Shift+M"],answer:"C",explanation:"Ctrl+Enter 插入分页符；其余组合含义不同。"},
+ {stem:"以下 （   ） 选项可在 Word 中创建自动编号标题。",options:["插入表格","插入图片","应用多级列表","插入页眉"],answer:"C",explanation:"“多级列表”提供层次化编号，是章节标题常用功能。"},
+ {stem:"要在 Word 文档中插入页码，应使用 （   ）。",options:["插入目录","插入图片","插入表格","“插入”选项卡中的“页码”命令"],answer:"D",explanation:"“插入→页码”可自动编号。"},
+ {stem:"设置页面边距应在 Word 的 （   ） 选项卡完成。",options:["页面布局","文本样式","格式刷","插入图形"],answer:"A",explanation:"“布局/页面布局”管理页边距、纸张大小等。"},
+ {stem:"对字体、字号、加粗等文字格式进行设置，最便捷的选项卡是 （   ）。",options:["页面布局","开始（文本样式）","格式刷","插入图形"],answer:"B",explanation:"“开始”页签的“字体”组集中常见文本格式工具。"},
+ {stem:"进行拼写与语法检查应切换到 （   ） 选项卡。",options:["页面布局","开始","引用","校对"],answer:"D",explanation:"“审阅/校对”包含拼写检查等语言工具。"},
+ {stem:"Word 文档中的表格可以用于整齐排列和组织数据。（   ）",options:["正确","错误"],answer:"A",explanation:"表格提供行列结构，便于排版数据。"},
+ {stem:"Word 支持插入图片并绘制形状。（   ）",options:["正确","错误"],answer:"A",explanation:"“插入”菜单含图片、形状等对象。"},
+ {stem:"下列 （   ） 功能可在 Word 中实现“剪切移动”文本。",options:["复制","粘贴","剪切","插入"],answer:"C",explanation:"剪切后粘贴 = 移动；复制则保留原文。"},
+ {stem:"快捷键 Shift+F3 在选中文本上主要用于 （   ）。",options:["快速切换大小写","下划线","设置字号","打印"],answer:"A",explanation:"Shift+F3 在三种大小写间循环。"},
+ {stem:"快速跳转到文档结尾的快捷键是 （   ）。",options:["Ctrl+End","Ctrl+Home","Ctrl+Page Down","Ctrl+Page Up"],answer:"A",explanation:"Ctrl+End → 文档末尾；Ctrl+Home → 开头。"},
+ {stem:"点击 （   ） 按钮可在插入点位置输入当前日期时间。",options:["日期和时间","插入","格式","对齐"],answer:"A",explanation:"“插入→日期和时间”可写入系统日期。"},
+ {stem:"将选中文本设置为蓝色字体属于 （   ） 操作。",options:["字体样式","段落样式","链接样式","自动样式"],answer:"A",explanation:"字体颜色是字符级样式设置的一部分。"},
+ {stem:"在 Word 中，快捷键 Ctrl+Space 用于恢复默认字符格式，而非中英文输入法切换。（   ）",options:["正确","错误"],answer:"A",explanation:"Ctrl+Space = 清除字符级格式。"},
+ {stem:"下列 （   ） 命令可新建表格。",options:["图表","插入表格","邮件合并","文本框"],answer:"B",explanation:"“插入表格”是创建表格最直接方式。"},
+ {stem:"创建页眉页脚应选择 （   ）。",options:["字体","样式","段落","页眉页脚"],answer:"D",explanation:"“插入→页眉/页脚”添加统一元素。"},
+ {stem:"更改文本左、中、右或两端对齐，需在 （   ） 分组操作。",options:["字体","样式","段落","页眉页脚"],answer:"C",explanation:"“段落”组含对齐、缩进等布局选项。"},
+ {stem:"在 Word 中快捷键 Ctrl+I 才是“斜体”；Ctrl+/** 并非默认斜体命令。（   ）",options:["正确","错误"],answer:"A",explanation:"Ctrl+I = Italic；Ctrl+/ 不是 Office 内置斜体。"},
+ // Excel 模块（25‑43）
+ {stem:"以下 （   ） 命令用于插入新的工作表。",options:["文件→新建","插入→工作表","编辑→插入","格式→工作表"],answer:"B",explanation:"“插入”菜单或“+”按钮均可添加工作表。"},
+ {stem:"将选定单元格合并为一个，应使用 （   ）。",options:["编辑→合并单元格","格式→合并单元格","数据→合并单元格","查看→合并单元格"],answer:"B",explanation:"“开始→合并居中/合并单元格”属于格式化操作。"},
+ {stem:"对数据进行升降序排序，通常点击 （   ）。",options:["数据→排序","编辑→排序","格式→排序","查看→排序"],answer:"A",explanation:"“数据”选项卡含排序、筛选等工具。"},
+ {stem:"设置单元格边框样式的位置是 （   ）。",options:["格式→边框","编辑→边框","查看→边框","数据→边框"],answer:"A",explanation:"“开始→字体→边框”或“格式单元格→边框”。"},
+ {stem:"对数据执行自动筛选应点击 （   ）。",options:["查看→筛选","编辑→筛选","数据→筛选","格式→筛选"],answer:"C",explanation:"“数据→筛选”快速添加下拉按钮。"},
+ {stem:"将若干列合并后，只保留左上角单元格内容，其他被覆盖数据会丢失。（   ）",options:["正确","错误"],answer:"A",explanation:"合并单元格会清除其余内容，需注意。"},
+ {stem:"Excel 支持按条件筛选显示特定记录。（   ）",options:["正确","错误"],answer:"A",explanation:"自动筛选、高级筛选均可应用条件。"},
+ {stem:"以下 （   ） 函数可计算平均值。",options:["SUM","AVERAGE","MAX","MIN"],answer:"B",explanation:"AVERAGE(范围) 返回算术平均。"},
+ {stem:"以下 （   ） 函数可计算标准差。",options:["SUM","AVERAGE","STDEV","VAR"],answer:"C",explanation:"STDEV/ STDEV.S 用于样本标准差。"},
+ {stem:"下列 （   ） 函数不能直接截取文本。",options:["LEFT","RIGHT","MID","CONCATENATE"],answer:"D",explanation:"CONCATENATE 用于拼接文本而非截取。"},
+ {stem:"以下 （   ） 函数用于求和。",options:["SUM","AVERAGE","MAX","MIN"],answer:"A",explanation:"SUM(范围) 求总和。"},
+ {stem:"条件公式常借助 （   ） 运算符完成比较。",options:["$","&",">=","+"],answer:"C",explanation:">=、<=、<> 等逻辑运算符用于判断大小关系。"},
+ {stem:"Excel 公式可实现自动计算与分析。（   ）",options:["正确","错误"],answer:"A",explanation:"公式与函数是电子表格核心。"},
+ {stem:"所有 Excel 函数都只能接收数字参数。（   ）",options:["正确","错误"],answer:"B",explanation:"文本函数如 LEFT、FIND 接收文本。"},
+ {stem:"要对数据执行自定义多列排序，可使用 （   ） 对话框。",options:["SORT","高级排序（Sort by）","SORT A","SORT X"],answer:"A",explanation:"传统界面“数据→排序”/365 新增 SORT 函数。"},
+ {stem:"下列 （   ） 函数可按条件统计（计数）。",options:["IF","COUNTIF","VLOOKUP","FILTER"],answer:"B",explanation:"COUNTIF(范围,条件) 计数满足条件项目。"},
+ {stem:"创建交互式汇总表最常用的工具是 （   ）。",options:["数据透视表","数据标签","分类汇总","条件格式"],answer:"A",explanation:"数据透视表支持多角度汇总。"},
+ {stem:"下列 （   ） 函数可计算频率分布。",options:["SUM","AVERAGE","FREQUENCY","COUNT"],answer:"C",explanation:"FREQUENCY 返回各区间计数数组。"},
+ {stem:"使用高级筛选（Advanced Filter）可以一次性提取符合多条件的行。（   ）",options:["正确","错误"],answer:"A",explanation:"高级筛选通过条件区域实现复杂查询。"},
+ // PowerPoint 模块（44‑60）
+ {stem:"下列 （   ） 命令用于插入新幻灯片。",options:["复制","粘贴","新建幻灯片","删除幻灯片"],answer:"C",explanation:"“开始→新建幻灯片”或 Ctrl+M。"},
+ {stem:"设置幻灯片背景/主题应选择 （   ）。",options:["设计","切换","动画","幻灯片版式"],answer:"A",explanation:"“设计”页签含主题、背景样式。"},
+ {stem:"以下格式中 （   ） 不是常见图片格式，因此无法直接插入为静态图像。",options:["PNG","JPG","Excel","GIF"],answer:"C",explanation:"Excel 为工作簿格式，非图片文件。"},
+ {stem:"下列 （   ） 按钮可开始幻灯片放映。",options:["上一页","下一页","播放（从头开始）","暂停"],answer:"C",explanation:"“幻灯片放映→从头开始”或 F5。"},
+ {stem:"设置切换动画效果应点击 （   ） 页签。",options:["切换","讲义","大纲","切换效果"],answer:"A",explanation:"“切换”页签含切换方式及时间。"},
+ {stem:"PowerPoint 默认支持 Ctrl+Space 恢复文本默认格式，而非中英文输入法切换。（   ）",options:["正确","错误"],answer:"A",explanation:"与 Word 行为一致。"},
+ {stem:"所有幻灯片必须使用相同背景这一说法是错误的。（   ）",options:["正确","错误"],answer:"A",explanation:"可为单独幻灯片设置不同背景或版式。"},
+ {stem:"调整文本字体、大小和颜色时最直接的工具栏是 （   ）。",options:["文本框","艺术字","字体（开始页签）","图片文本"],answer:"C",explanation:"“开始→字体”组。"},
+ {stem:"下列 （   ） 工具可插入柱状、饼图等图表对象。",options:["内置图表","剪贴画","形状","图片"],answer:"A",explanation:"“插入→图表”。"},
+ {stem:"制作组织结构图等智能图形应使用 （   ）。",options:["内置图表","剪贴画","SmartArt 形状","图片"],answer:"C",explanation:"SmartArt 提供层次图等模板。"},
+ {stem:"在 PowerPoint 中按 F5 可从头放映；按 Shift+F5 可从当前幻灯片放映。（   ）",options:["正确","错误"],answer:"A",explanation:"放映快捷键知识点。"},
+ {stem:"排练计时功能的入口位于 （   ）。",options:["切换","动画","幻灯片编号","排练计时"],answer:"D",explanation:"“幻灯片放映→排练计时”。"},
+ {stem:"打印演示文稿应选择 （   ）。",options:["打印预览","打印","另存为 PDF","另存为 JPG"],answer:"B",explanation:"“文件→打印”。"},
+ {stem:"要将整个演示导出为图片，请使用 （   ）。",options:["复制","粘贴","另存为图片","导出"],answer:"C",explanation:"“文件→导出→图像格式”。"},
+ {stem:"将演示导出为 PDF 文件请选择 （   ）。",options:["打印预览","打印","导出为 PDF","另存为 JPG"],answer:"C",explanation:"“文件→导出→创建 PDF/XPS”。"},
+ {stem:"快捷键 Ctrl+P 打开的是打印对话框，而不是放映。（   ）",options:["正确","错误"],answer:"A",explanation:"Ctrl+P = 打印，放映为 F5/Shift+F5。"},
+ {stem:"PowerPoint 支持在同一演示中应用多主题或混合版式，因此“所有幻灯片必须使用相同主题”说法不正确。（   ）",options:["正确","错误"],answer:"A",explanation:"可通过“设计→变体→应用到所选幻灯片”。"}
+];
+
+// ------- 渲染与交互 -------
+const quizDiv = document.getElementById('quiz');
+const scoreBtn = document.getElementById('showScore');
+const resultDiv = document.getElementById('result');
+let answered = 0, correct = 0;
+
+questions.forEach((q, idx) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'question';
+  wrapper.innerHTML = `<h3>${idx + 1}. ${q.stem}</h3>`;
+
+  const optDiv = document.createElement('div');
+  optDiv.className = 'options';
+
+  q.options.forEach((text, letterIdx) => {
+    const letter = String.fromCharCode(65 + letterIdx);
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="q${idx}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  optDiv.addEventListener('change', e => {
+    const choice = e.target.value;
+    if (e.target.checked) {
+      answered++;
+      if (choice === q.answer) {
+        correct++;
+        // -------- 修改处：正确也给出解析 --------
+        feedback.textContent = `✔ 回答正确！${q.explanation}`;
+        feedback.className = 'feedback correct';
+      } else {
+        feedback.textContent = `✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;
+        feedback.className = 'feedback incorrect';
+      }
+      [...optDiv.querySelectorAll('input')].forEach(inp => (inp.disabled = true));
+      if (answered === questions.length) scoreBtn.disabled = false;
+    }
+  });
+});
+
+scoreBtn.onclick = () => {
+  resultDiv.textContent = `您共答对 ${correct} 题，答错 ${questions.length - correct} 题。`;
+  scoreBtn.disabled = true;
+};
+</script>
+</body>
+</html> 
