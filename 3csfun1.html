@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>计算机基础与软件分类互动刷题</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:1.9rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>计算机组成 &amp; 软件分类——核心要点与刷题</h1>
+
+  <div class="summary">
+    <h2>核心要点速览</h2>
+    <p>🖥️ <strong>硬件组成</strong>：<em>CPU=控制单元+运算单元+寄存器</em>；内存负责<strong>高速临时存储</strong>，硬盘/SSD 属于<strong>外部永久存储</strong>；显示器将结果呈现给用户。</p>
+    <p>📊 <strong>计算机分类</strong>：服务器&nbsp;▶高并发/大数据；工作站&nbsp;▶专业图形/科学计算；个人电脑&nbsp;▶桌面办公；嵌入式设备&nbsp;▶定制控制。</p>
+    <p>🗄️ <strong>软件体系</strong>：系统软件（操作系统、编译器、DBMS 等）直接管理硬件并为应用提供支撑；应用软件（Office、Photoshop、浏览器等）面向具体任务。</p>
+    <p>🔄 <strong>兼容性</strong>：操作系统与 CPU 架构决定能运行哪些程序，因此<strong>并非所有计算机可装同一 OS 或软件</strong>。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// -------- 24 道题 --------
+const questions = [
+ {stem:"下列（ ）不是计算机核心组成组件。",options:["运算器","控制器","硬盘驱动器","内存"],answer:"C",explanation:"核心由运算器、控制器及寄存器层次结构组成；硬盘属于外部存储。"},
+ {stem:"下面（ ）不是中央处理器（CPU）的组成部分。",options:["执行单元","指令单元","本地单元","控制单元"],answer:"C",explanation:"CPU 主要包含控制单元、运算/执行单元和寄存器组，没有“本地单元”官方叫法。"},
+ {stem:"在计算机组成中，下面（ ）组件用于临时存储数据。",options:["硬盘驱动器","USB 存储","寄存器","缓冲区"],answer:"C",explanation:"寄存器位于 CPU 内部，速度最快、容量最小，用于瞬时数据暂存。"},
+ {stem:"计算机的哪个部件负责把处理结果呈现给用户？",options:["内存","CPU","硬盘","显示器"],answer:"D",explanation:"显示器/显卡子系统负责最终可视化输出。"},
+ {stem:"数据库系统对数据进行管理的核心是（ ）。",options:["数据库管理系统","数据库","操作系统","数据仓库"],answer:"A",explanation:"DBMS 负责定义、存储、检索、维护数据库。"},
+ {stem:"CPU 由运算器和控制器构成。（ ）",options:["正确","错误"],answer:"A",explanation:"CPU 两大基本部件正是运算器 (ALU) 与控制单元 (CU)。"},
+ {stem:"内存的存储容量通常比硬盘驱动器大。（ ）",options:["正确","错误"],answer:"B",explanation:"外部存储（硬盘/SSD）容量远大于易失性的主存。"},
+ {stem:"下列（ ）计算机最适合高性能计算与大规模数据运算。",options:["个人电脑","工作站","服务器","嵌入式计算机"],answer:"C",explanation:"服务器硬件冗余高、处理能力强，面向 HPC/大数据任务。"},
+ {stem:"下列（ ）计算机类型属于最早期现代电子计算机。",options:["机械计算机","电子管计算机","晶体管计算机","集成电路计算机"],answer:"B",explanation:"ENIAC 等第一代计算机基于真空电子管。"},
+ {stem:"下列（ ）计算机是专为个人用户设计的。",options:["工作站","服务器","个人电脑","嵌入式计算机"],answer:"C",explanation:"PC (Personal Computer) 面向单一终端使用者。"},
+ {stem:"用于永久存储程序和数据的通常是硬盘。（ ）",options:["正确","错误"],answer:"A",explanation:"硬盘、SSD、磁带等外存具备断电后数据持久性。"},
+ {stem:"所有计算机都可以使用完全相同的方法来操作软件。（ ）",options:["正确","错误"],answer:"B",explanation:"硬件/操作系统差异导致操作方式多样。"},
+ // 软件分类与应用（13-24）
+ {stem:"下列（ ）属于操作系统。",options:["Windows","Microsoft Office","Adobe Photoshop","Mozilla Firefox"],answer:"A",explanation:"其余皆为应用软件。"},
+ {stem:"用于处理文字的办公软件是（ ）。",options:["Windows","Excel","Word","PowerPoint"],answer:"C",explanation:"Word 提供专门的文字排版功能。"},
+ {stem:"下列（ ）软件用于图像处理。",options:["Windows","Excel","Adobe Photoshop","PowerPoint"],answer:"C",explanation:"Photoshop 主打位图编辑。"},
+ {stem:"下列（ ）软件用于音频处理。",options:["Windows","Excel","Audacity","PowerPoint"],answer:"C",explanation:"Audacity 开源且针对波形编辑。"},
+ {stem:"下列（ ）软件用于视频剪辑/处理。",options:["Windows","Excel","Adobe Premiere Pro","PowerPoint"],answer:"C",explanation:"Premiere Pro 面向专业非线编。"},
+ {stem:"所有计算机都可以运行同一款操作系统。（ ）",options:["正确","错误"],answer:"B",explanation:"硬件平台/兼容性及授权限制不同。"},
+ {stem:"所有计算机都能运行同一套软件。（ ）",options:["正确","错误"],answer:"B",explanation:"软件需与 OS 和 CPU 架构匹配。"},
+ {stem:"下列（ ）软件属于系统软件范畴。",options:["Windows","Excel","Photoshop","Firefox"],answer:"A",explanation:"系统软件直接管理/支撑硬件与应用。"},
+ {stem:"下列（ ）属于典型的编译器软件。",options:["HTML “编译器”","C++ 编译器","Python 解释器","JavaScript 解析器"],answer:"B",explanation:"编译器将高级语言翻译为机器码。"},
+ {stem:"消费级电脑市场使用比例最高的操作系统是（ ）。",options:["Windows","Office 套件","Adobe Creative Suite","Java SDK"],answer:"A",explanation:"Windows 长期在桌面端占据主导份额。"},
+ {stem:"下列（ ）属于数据库管理系统。",options:["Windows","Excel","Oracle","Firefox"],answer:"C",explanation:"Oracle DB 为典型商用关系数据库。"},
+ {stem:"下列（ ）软件属于浏览器。",options:["Outlook","Firefox","Microsoft Office","Adobe Photoshop"],answer:"B",explanation:"Firefox 基于 Gecko 内核，用于网页浏览。"}
+];
+
+// -------- 渲染与交互 --------
+const quizDiv=document.getElementById('quiz');
+const scoreBtn=document.getElementById('showScore');
+const resultDiv=document.getElementById('result');
+let answered=0,correct=0;
+
+questions.forEach((q,idx)=>{
+  const wrapper=document.createElement('div');
+  wrapper.className='question';
+  wrapper.innerHTML=`<h3>${idx+1}. ${q.stem}</h3>`;
+
+  const optDiv=document.createElement('div');
+  optDiv.className='options';
+
+  q.options.forEach((text,letterIdx)=>{
+    const letter=String.fromCharCode(65+letterIdx);
+    const label=document.createElement('label');
+    label.innerHTML=`<input type="radio" name="q${idx}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback=document.createElement('div');
+  feedback.className='feedback';
+
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  // 事件监听
+  optDiv.addEventListener('change',e=>{
+    const choice=e.target.value;
+    if(e.target.checked){
+      answered++;
+      if(choice===q.answer){
+        correct++;
+        feedback.textContent=`✔ 回答正确！${q.explanation}`;
+        feedback.className='feedback correct';
+      }else{
+        feedback.textContent=`✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;
+        feedback.className='feedback incorrect';
+      }
+      // 锁定本题其它选项
+      [...optDiv.querySelectorAll('input')].forEach(inp=>inp.disabled=true);
+      if(answered===questions.length) scoreBtn.disabled=false;
+    }
+  });
+});
+
+scoreBtn.onclick=()=>{
+  resultDiv.textContent=`您共答对 ${correct} 题，答错 ${questions.length-correct} 题。`;
+  scoreBtn.disabled=true;
+};
+</script>
+</body>
+</html>
