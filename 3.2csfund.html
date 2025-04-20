@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>操作系统 & 终端安全 互动刷题</title>
+<style>
+ html,body{margin:0;padding:0;background:#fff;color:#333;font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif;line-height:1.6;}
+ .container{max-width:960px;margin:0 auto;padding:24px;}
+ h1{font-size:1.9rem;margin-top:0;}
+ .summary{background:#f9f9f9;border-left:4px solid #4caf50;padding:16px 20px;margin-bottom:32px;}
+ .question{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:24px;}
+ .question h3{margin:0 0 8px;font-size:1rem;}
+ .options label{display:block;margin:6px 0;cursor:pointer;}
+ .feedback{margin-top:8px;font-weight:600;}
+ .correct{color:#4caf50;}
+ .incorrect{color:#f44336;}
+ button{background:#4caf50;color:#fff;border:none;border-radius:4px;padding:10px 18px;font-size:1rem;cursor:pointer;}
+ button:disabled{background:#9e9e9e;cursor:not-allowed;}
+ #result{font-size:1.2rem;margin-top:24px;font-weight:700;}
+ @media(max-width:600px){.container{padding:16px;}}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>操作系统基础 &amp; 终端安全 — 核心要点与刷题</h1>
+
+  <div class="summary">
+    <h2>核心要点速览</h2>
+    <p><strong>操作系统（OS）：</strong>位于硬件与应用之间的<strong>系统软件</strong>，负责<em>进程 / 内存 / 文件 / 设备 / 用户界面</em>等管理，向上提供抽象 API，向下调度硬件资源。按特性可分为单/多用户、批处理、实时、分时、并行等类型。</p>
+    <p><strong>终端安全：</strong>聚焦<strong>终端设备（PC、移动端等）</strong>的数据与系统完整性。典型措施：强密码 / 多因素认证、补丁更新、恶意软件检测与清除、备份恢复等。防病毒软件通过<em>实时监控 + 特征库/行为分析</em>识别并阻断病毒、蠕虫、木马等威胁，核心目标是阻止<strong>恶意攻击 &amp; 数据泄露</strong>。</p>
+  </div>
+
+  <div id="quiz"></div>
+  <button id="showScore" disabled>查看成绩</button>
+  <div id="result"></div>
+</div>
+
+<script>
+// ---------- 题库（25‑47，共 23 题） ----------
+const questions = [
+ // 操作系统基础
+ {stem:"操作系统是指（ ）。",options:["一种软件程序","一种硬件设备","一种网络协议","一种编程语言"],answer:"A",explanation:"OS 属于系统软件，负责管理硬件并为应用提供环境。"},
+ {stem:"操作系统的主要功能包括（ ）。",options:["硬件管理、文件管理、进程管理、用户界面等","网络管理、数据库管理","硬件管理、文件管理、网络管理、用户界面等","数据库管理、进程管理、安全管理、用户界面等"],answer:"A",explanation:"四大核心管理功能是 OS 基本职责。"},
+ {stem:"操作系统负责控制硬件资源并为用户提供接口。（ ）",options:["正确","错误"],answer:"A",explanation:"这是 OS 最本质的定位。"},
+ {stem:"在操作系统中，用户界面指的是（ ）。",options:["用户与硬件接口","用户与操作系统之间的接口","用户与应用接口","用户与网络接口"],answer:"B",explanation:"如 CLI、GUI 等均属于 OS 的 UI。"},
+ {stem:"操作系统的文件管理功能包括（ ）。",options:["创建、复制、删除文件等","安装/卸载软件","网络连接","进程调度"],answer:"A",explanation:"文件系统提供基本文件/目录操作。"},
+ {stem:"操作系统的作用是提供网络连接。（ ）",options:["正确","错误"],answer:"B",explanation:"网络功能只是可选子系统，并非 OS 唯一目的。"},
+ {stem:"按用户数量划分，操作系统可分为（ ）。",options:["单用户 OS / 多用户 OS","批处理/交互式","实时/非实时","分时/并行"],answer:"A",explanation:"UNIX 是多用户系统的典型代表。"},
+ {stem:"批处理操作系统适用于（ ）。",options:["需要大量重复任务处理的场景","响应时间极短领域","多用户分时","并行处理"],answer:"A",explanation:"如早期财务批处理、报表等。"},
+ {stem:"实时操作系统的显著特点是（ ）。",options:["保证任务在时间约束内完成","并发性高","适合个人 PC","可多程序"],answer:"A",explanation:"RTOS 常用于工业控制、汽车 ECU。"},
+ {stem:"分时操作系统适用于（ ）。",options:["多用户共享计算资源的场景","硬实时领域","大型机专属","SMP 并行"],answer:"A",explanation:"通过时间片轮转让每个用户觉得独占机器。"},
+ {stem:"多用户操作系统可同时支持多个用户。（ ）",options:["正确","错误"],answer:"A",explanation:"通过账户、权限、进程隔离实现。"},
+ {stem:"并行操作系统适合多处理器并行执行任务。（ ）",options:["正确","错误"],answer:"A",explanation:"如 Linux SMP、分布式 OS。"},
+ // 终端安全与防病毒
+ {stem:"终端安全防护是指对计算机网络中的（ ）进行保护。",options:["服务器","路由器","终端设备","防火墙"],answer:"C",explanation:"终端=用户侧 PC、手机、平板等。"},
+ {stem:"终端安全防护的目的是防止（ ）安全威胁。",options:["数据泄露","接口损坏","网络延迟","电源故障"],answer:"A",explanation:"防止数据被窃取、篡改或破坏。"},
+ {stem:"下列（ ）属于终端安全防护的直接措施。",options:["使用强密码","定期备份","安装监控","关闭防火墙"],answer:"A",explanation:"强口令、多因子是身份安全基础。"},
+ {stem:"终端防病毒软件主要用于检测和清除（ ）等恶意软件。",options:["病毒","访问控制软件","防火墙软件","操作系统补丁"],answer:"A",explanation:"也拓展到蠕虫、木马、勒索程序等。"},
+ {stem:"终端安全防护中的更新与补丁管理是指定期更新（ ）。",options:["驱动","操作系统","网页","防火墙规则"],answer:"B",explanation:"及时修补系统漏洞，关闭攻击面。"},
+ {stem:"终端安全防护的总体目标是防止恶意攻击和数据泄露。（ ）",options:["正确","错误"],answer:"A",explanation:"CIA 模型中的机密性、完整性。"},
+ {stem:"终端安全防护不包括使用强密码与多因素认证。（ ）",options:["正确","错误"],answer:"B",explanation:"强身份认证是核心环节之一。"},
+ {stem:"下列（ ）属于防病毒软件的常见功能。",options:["实时防护","硬件升级","数据恢复","网络加速"],answer:"A",explanation:"实时监控文件访问 / 网络流量以阻断恶意行为。"},
+ {stem:"防病毒软件的扫描功能可以检查计算机中的（ ）。",options:["系统文件","应用程序","媒体文件","所有文件"],answer:"D",explanation:"全盘扫描对所有可访问文件做特征比对。"},
+ {stem:"防病毒软件的主要作用是保护系统免受病毒感染。（ ）",options:["正确","错误"],answer:"A",explanation:"现代杀毒也扩展到恶意脚本、挖矿等威胁。"},
+ {stem:"防病毒软件更新的目的是及时识别新出现的间谍软件。（ ）",options:["正确","错误"],answer:"B",explanation:"核心是更新病毒码/特征库，间谍软件只是其中一类。"}
+];
+
+// ---------- 渲染与交互 ----------
+const quizDiv = document.getElementById('quiz');
+const scoreBtn = document.getElementById('showScore');
+const resultDiv = document.getElementById('result');
+let answered = 0, correct = 0;
+
+questions.forEach((q, idx) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'question';
+  wrapper.innerHTML = `<h3>${idx + 1}. ${q.stem}</h3>`;
+
+  const optDiv = document.createElement('div');
+  optDiv.className = 'options';
+
+  q.options.forEach((text, letterIdx) => {
+    const letter = String.fromCharCode(65 + letterIdx); // A,B,C,...
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="q${idx}" value="${letter}"> ${letter}. ${text}`;
+    optDiv.appendChild(label);
+  });
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+
+  wrapper.appendChild(optDiv);
+  wrapper.appendChild(feedback);
+  quizDiv.appendChild(wrapper);
+
+  // 事件监听
+  optDiv.addEventListener('change', e => {
+    const choice = e.target.value;
+    if (e.target.checked) {
+      answered++;
+      if (choice === q.answer) {
+        correct++;
+        feedback.textContent = `✔ 回答正确！${q.explanation}`;
+        feedback.className = 'feedback correct';
+      } else {
+        feedback.textContent = `✘ 回答错误。正确答案：${q.answer}。${q.explanation}`;
+        feedback.className = 'feedback incorrect';
+      }
+      // 锁定本题其它选项
+      [...optDiv.querySelectorAll('input')].forEach(inp => inp.disabled = true);
+      if (answered === questions.length) scoreBtn.disabled = false;
+    }
+  });
+});
+
+// 统计成绩
+scoreBtn.onclick = () => {
+  resultDiv.textContent = `您共答对 ${correct} 题，答错 ${questions.length - correct} 题。`;
+  scoreBtn.disabled = true;
+};
+</script>
+</body>
+</html>
