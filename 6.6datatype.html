@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>数据基础与大数据互动刷题</title>
+  <style>
+    html, body { margin:0; padding:0; background:#fff; color:#333;
+      font-family:"Microsoft YaHei", Arial, sans-serif; line-height:1.6; }
+    .container { max-width:900px; margin:0 auto; padding:24px; }
+    h1 { font-size:2rem; margin-bottom:16px; text-align:center; }
+    .summary { background:#f9f9f9; border-left:4px solid #007ACC;
+      padding:16px; margin-bottom:24px; }
+    .summary p { margin:8px 0; }
+    .question { border:1px solid #e0e0e0; border-radius:6px;
+      padding:16px; margin-bottom:20px; }
+    .question h3 { margin:0 0 8px; font-size:1rem; }
+    .options label { display:block; margin:6px 0; cursor:pointer; }
+    .feedback { margin-top:8px; font-weight:600; }
+    .correct { color:#007ACC; }
+    .incorrect { color:#D32F2F; }
+    button { background:#007ACC; color:#fff; border:none;
+      border-radius:4px; padding:10px 18px; font-size:1rem; cursor:pointer; }
+    button:disabled { background:#9e9e9e; cursor:not-allowed; }
+    #result { font-size:1.1rem; margin-top:20px;
+      font-weight:700; text-align:center; }
+    @media(max-width:600px) { .container { padding:16px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>数据基础与大数据互动刷题</h1>
+    <div class="summary">
+      <p>本测验涵盖：<strong>数据类型</strong>（定性/定量）、<strong>数据结构</strong>（结构化/半结构化/非结构化）、<strong>数据清理与质量</strong>、<strong>数据挖掘</strong>、<strong>DIKW模型</strong>及<strong>大数据5V</strong>（容量、类型、速度、价值、真实性）等核心知识。</p>
+      <p>通过本练习，您将熟悉各类数据的定义、可视化方式与评估指标，理解清洗与分类技术，掌握数据价值演进模型及大数据平台技术选型。</p>
+    </div>
+    <div id="quiz"></div>
+    <button id="showScore" disabled>查看成绩</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      {stem:"1. 下列哪种数据类型属于定性数据？", opts:["A. 整数","B. 浮点数","C. 字符串","D. 二进制"], ans:"C",
+       exp:"定性数据用文字/符号描述，不可度量。"},
+      {stem:"2. 下列哪项最能代表定量数据？", opts:["A. 年龄","B. 性别","C. 地址","D. 姓名"], ans:"A",
+       exp:"定量数据可度量并用于数学运算。"},
+      {stem:"3. 下列哪种图形更适合表现定性/分类数据？", opts:["A. 直方图","B. 散点图","C. 饼图","D. 热力图"], ans:"C",
+       exp:"饼图直观展示类别占比，其他多用于数值型数据。"},
+      {stem:"4. 下列统计量中，最适合衡量定性数据集中趋势的是", opts:["A. 平均值","B. 中位数","C. 方差","D. 众数"], ans:"D",
+       exp:"众数表示出现频率最高的类别。"},
+      {stem:"5. 关于定性数据，以下说法正确的是：定性数据没有数值意义，只能用文字或符号表示。对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"定性数据本身不承载可运算的度量。"},
+      {stem:"6. 下列说法正确的是：定量数据可以直接用于数学计算与统计分析。对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"定量数据可用于求均值、方差、回归等分析。"},
+      {stem:"7. 下列哪项属于结构化数据？", opts:["A. 表格数据","B. 图像数据","C. 音频数据","D. 视频数据"], ans:"A",
+       exp:"表格具行列字段，可存储于关系型数据库。"},
+      {stem:"8. 下列哪项属于非结构化数据？", opts:["A. 数字数据","B. 符号数据","C. 图像数据","D. 视频数据"], ans:"C",
+       exp:"图像文件缺乏固定字段与模式。"},
+      {stem:"9. 处理结构化数据常用的基础技术是", opts:["A. 数据挖掘","B. 机器学习","C. 数据分析","D. 关系数据库"], ans:"D",
+       exp:"SQL/RDBMS依赖显式模式，常用于结构化数据。"},
+      {stem:"10. 处理非结构化数据（如文本、图像）时，以下哪种技术最为常见？", opts:["A. 数据挖掘","B. 机器学习","C. 数据分析","D. 文件系统"], ans:"B",
+       exp:"深度学习、NLP、CV均属于此范畴。"},
+      {stem:"11. 具有固定格式和字段、适合存储在关系型数据库中的数据被称为", opts:["A. 结构化数据","B. 非结构化数据","C. 半结构化数据","D. 任意类型数据"], ans:"A",
+       exp:"关系型数据库要求严格表结构，故为结构化数据。"},
+      {stem:"12. “所有数据都可分为结构化与非结构化”这一说法是否正确？", opts:["A. 对","B. 错"], ans:"B",
+       exp:"还存在XML/JSON等半结构化数据，需要单独分类。【纠正】"},
+      {stem:"13. 结构化数据与非结构化数据的处理方式完全一致。该说法：", opts:["A. 对","B. 错"], ans:"B",
+       exp:"存储模型、检索与分析技术迥异。"},
+      {stem:"14. 数据清理的主要目的在于", opts:["A. 增加数据量","B. 减少垃圾数据","C. 提高数据质量","D. 增加种类"], ans:"C",
+       exp:"去噪、补缺、去重以保障后续分析质量。"},
+      {stem:"15. 数据质量通常由哪些方面构成？", opts:["A. 准确性","B. 可靠性","C. 完整性和时效性","D. 以上都是"], ans:"D",
+       exp:"质量评价是多维度综合，包括准确性、完整性、时效性等。"},
+      {stem:"16. 数据挖掘的核心目标是", opts:["A. 提高数据质量","B. 发现数据中的模式与关系","C. 提高可解释性","D. 以上都是"], ans:"B",
+       exp:"如关联规则、聚类、预测模型等，用于发现内在模式。"},
+      {stem:"17. 数据由符号元素、数据项、数据结构、数据类型等组成。对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"这是经典的数据定义。"},
+      {stem:"18. 在DIKW模型中，字母D代表什么？", opts:["A. Data","B. Information","C. Knowledge","D. Wisdom"], ans:"A",
+       exp:"模型顺序：Data→Information→Knowledge→Wisdom。"},
+      {stem:"19. 在DIKW模型中，字母W代表什么？", opts:["A. Data","B. Information","C. Knowledge","D. Wisdom"], ans:"D",
+       exp:"最高层次为Wisdom（智慧/洞见）。"},
+      {stem:"20. DIKW模型最常被归类为哪一类模型？", opts:["A. 信息系统模型","B. 知识管理模型","C. 数据处理模型","D. 商业智能模型"], ans:"B",
+       exp:"用于阐释知识价值递增过程，属于知识管理模型。"},
+      {stem:"21. “DIKW被视为从数据到智慧的线性升级模型。”对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"尽管现实中可有迭代反馈，但模型常以线性形式呈现。"},
+      {stem:"22. 在大数据5V特性中，哪个词描述数据的真实性/不确定性？", opts:["A. Volume","B. Variety","C. Velocity","D. Veracity"], ans:"D",
+       exp:"Veracity关注数据噪声与可信度。"},
+      {stem:"23. 下列工具中，哪一个主要解决大规模数据容量（Volume）存储问题？", opts:["A. Hive","B. Kafka","C. Hadoop","D. Elasticsearch"], ans:"C",
+       exp:"HDFS与MapReduce框架专为海量数据存储与处理设计。"},
+      {stem:"24. 5V中，体现系统可扩展/规模特性的仍是", opts:["A. Volume","B. Variety","C. Velocity","D. Veracity"], ans:"A",
+       exp:"Volume本身指“大规模”，也是可扩展性的衡量。"},
+      {stem:"25. 处理Velocity（实时/高速）数据时常用的技术是", opts:["A. 数据仓库","B. 数据挖掘","C. 实时分析/流处理","D. 数据可视化"], ans:"C",
+       exp:"如Spark Streaming、Flink、Kafka Streams等流处理框架。"},
+      {stem:"26. 大数据技术框架通常包括数据存储、数据处理与数据挖掘三个层面。对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"ETL&存储→计算&分析→挖掘&应用，三层结构。"},
+      {stem:"27. 5V特性由Volume、Variety、Velocity、Value、Veracity五部分构成。对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"Value强调商业/决策价值。"},
+      {stem:"28. 下列说法中，哪一项关于“数据组成部分”最恰当？", opts:["A. 信息","B. 知识","C. 数字","D. 图像"], ans:"C",
+       exp:"数据的基本表示单元是数字/符号，而非信息。"}
+    ];
+
+    const quizDiv = document.getElementById('quiz');
+    const scoreBtn = document.getElementById('showScore');
+    const resultDiv = document.getElementById('result');
+    let answered = 0, correct = 0;
+
+    questions.forEach((q, i) => {
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+      qDiv.innerHTML = `<h3>${q.stem}</h3>`;
+      const optsDiv = document.createElement('div');
+      optsDiv.className = 'options';
+      q.opts.forEach(opt => {
+        const val = opt.charAt(0);
+        const lbl = document.createElement('label');
+        lbl.innerHTML = `<input type="radio" name="q${i}" value="${val}"> ${opt}`;
+        optsDiv.appendChild(lbl);
+      });
+      const fb = document.createElement('div');
+      fb.className = 'feedback';
+      qDiv.appendChild(optsDiv);
+      qDiv.appendChild(fb);
+      quizDiv.appendChild(qDiv);
+
+      optsDiv.addEventListener('change', e => {
+        if (!e.target.checked) return;
+        answered++;
+        const choice = e.target.value;
+        if (choice === q.ans) {
+          correct++;
+          fb.innerHTML = `✔ 回答正确！<br>解析：${q.exp}`;
+          fb.className = 'feedback correct';
+        } else {
+          fb.innerHTML = `✘ 回答错误。正确答案：${q.ans}.<br>解析：${q.exp}`;
+          fb.className = 'feedback incorrect';
+        }
+        Array.from(optsDiv.querySelectorAll('input')).forEach(inp => inp.disabled = true);
+        if (answered === questions.length) {
+          scoreBtn.disabled = false;
+        }
+      });
+    });
+
+    scoreBtn.onclick = () => {
+      resultDiv.textContent = `测验结束，您共答对 ${correct} / ${questions.length} 题。`;
+      scoreBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>
