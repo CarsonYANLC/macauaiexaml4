@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>机器学习范式互动刷题</title>
+  <style>
+    html, body { margin:0; padding:0; background:#fff; color:#333; font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif; line-height:1.6; }
+    .container { max-width:800px; margin:0 auto; padding:20px; }
+    h1 { font-size:2rem; margin-bottom:10px; text-align:center; }
+    .summary { background:#f9f9f9; border-left:4px solid #007ACC; padding:15px; margin-bottom:25px; }
+    .summary p { margin:5px 0; }
+    .question { border:1px solid #e0e0e0; border-radius:6px; padding:15px; margin-bottom:20px; }
+    .question h3 { margin:0 0 8px; font-size:1rem; }
+    .options label { display:block; margin:6px 0; cursor:pointer; }
+    .feedback { margin-top:8px; font-weight:600; }
+    .correct { color:#007ACC; }
+    .incorrect { color:#D32F2F; }
+    button { background:#007ACC; color:#fff; border:none; border-radius:4px; padding:8px 16px; font-size:1rem; cursor:pointer; }
+    button:disabled { background:#9e9e9e; cursor:not-allowed; }
+    #result { font-size:1.1rem; margin-top:20px; font-weight:700; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>机器学习范式互动刷题</h1>
+    <div class="summary">
+      <p><strong>监督学习</strong>：分类→SVM；回归→MSE；不平衡→过采样；序列→RNN；特征选择→过滤式；标签与参数调整。</p>
+      <p><strong>无监督学习</strong>：聚类→K‑均值；评估→轮廓系数；降维→PCA；结构→关联规则；生成→VAE；标签缺失与似然。</p>
+      <p><strong>半监督学习</strong>：分类→SVM；场景→标签稀缺；未标记→生成模型；回归→SVR；不平衡→过采样；利用未标记数据。</p>
+    </div>
+    <div id="quiz"></div>
+    <button id="showScore" disabled>查看成绩</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      { stem: "在监督学习中，（   ）方式最常用于分类问题。", opts:["A. 决策树","B. K-均值聚类","C. 支持向量机","D. 关联规则"], ans:"C", exp:"SVM擅长处理高维、线性与非线性分类任务。" },
+      { stem: "在监督学习中，下列（   ）损失函数最常用于回归问题。", opts:["A. 均方误差","B. 对数损失","C. 绝对误差","D. 0-1损失"], ans:"A", exp:"MSE对连续误差有平方惩罚，适合回归。" },
+      { stem: "在监督学习中，（   ）策略最常用于处理不平衡的类别分布。", opts:["A. 随机抽样","B. 过采样","C. 欠采样","D. 集成方法"], ans:"B", exp:"SMOTE等过采样能增加少数类样本，常用不平衡处理。" },
+      { stem: "在监督学习中，（   ）模型最常用于处理序列数据。", opts:["A. 支持向量机","B. 决策树","C. 循环神经网络","D. 贝叶斯网络"], ans:"C", exp:"RNN对时序依赖建模较好，如LSTM、GRU。" },
+      { stem: "在监督学习中，（   ）方式最常用于特征选择。", opts:["A. 基于模型的方法","B. 过滤式方法","C. 包裹式方法","D. 嵌入式方法"], ans:"B", exp:"过滤式通过统计指标（相关系数、卡方）快速筛选。" },
+      { stem: "在监督学习中，所有的数据都有对应的标签。（   ）", opts:["A. 正确","B. 错误"], ans:"A", exp:"监督学习要求训练集全是带标签数据。" },
+      { stem: "在监督学习中，可以通过调整模型的参数来优化模型的性能。（   ）", opts:["A. 正确","B. 错误"], ans:"A", exp:"超参数调优（Grid/Random Search）是常见方法。" },
+      { stem: "在无监督学习中，（   ）方法最常用于聚类任务。", opts:["A. 线性回归","B. 支持向量机","C. K-均值聚类","D. 决策树"], ans:"C", exp:"K-Means因简单高效，是聚类首选。" },
+      { stem: "在无监督学习中，下列（   ）损失函数最常用于评估聚类算法的准确性。", opts:["A. 均方误差","B. 对数损失","C. 平方损失","D. 轮廓系数"], ans:"D", exp:"Silhouette可同时考虑簇内紧密度和簇间分离度。" },
+      { stem: "在无监督学习中，（   ）技术最常用于降维。", opts:["A. 主成分分析","B. 线性回归","C. 支持向量机","D. 决策树"], ans:"A", exp:"PCA通过线性变换保留最大方差。" },
+      { stem: "在无监督学习中，（   ）学习方式最常用于发现隐藏的结构和模式。", opts:["A. 神经网络","B. 关联规则","C. 支持向量机","D. 决策树"], ans:"B", exp:"Apriori等关联规则发现项集间有趣模式。" },
+      { stem: "在无监督学习中，（   ）策略最常用于生成新的数据。", opts:["A. 强化学习","B. 深度学习","C. 变分自编码器","D. 贝叶斯网络"], ans:"C", exp:"VAE可通过潜空间采样生成样本。" },
+      { stem: "在无监督学习中，所有的数据都没有对应的标签。（   ）", opts:["A. 正确","B. 错误"], ans:"A", exp:"无监督学习利用无标签数据进行建模。" },
+      { stem: "在无监督学习中，学习算法的目标是最大化训练数据的似然性。（   ）", opts:["A. 正确","B. 错误"], ans:"B", exp:"有些方法侧重结构发现，不专注于似然最大化。" },
+      { stem: "在半监督学习中，（   ）方式最常用于分类问题。", opts:["A. 最大似然法","B. K-最近邻分类","C. 支持向量机","D. 决策树"], ans:"C", exp:"Semi‑SVM可利用少量标签与大量无标签共同训练。" },
+      { stem: "半监督学习通常用于哪种情况，以减少对大量标记数据的依赖（ ）。", opts:["A. 数据量极小的情况","B. 数据完全无噪声的情况","C. 标签数据稀缺但未标记数据丰富的情况","D. 仅用于文本分类任务"], ans:"C", exp:"常见场景：标签稀缺，未标记多时使用半监督。" },
+      { stem: "在半监督学习中，（   ）策略最常用于处理未标记的数据。", opts:["A. 聚类","B. 集成方法","C. 生成模型","D. 强化学习"], ans:"C", exp:"GAN/VAE可生成伪标签，辅助模型训练。" },
+      { stem: "在半监督学习中，（   ）方式最常用于回归问题。", opts:["A. 支持向量回归","B. K-均值聚类","C. 决策树回归","D. 线性回归"], ans:"A", exp:"SVR适应少量标签情形，保持模型泛化。" },
+      { stem: "在半监督学习中，（   ）技术可以有效地处理不平衡的类别分布。", opts:["A. 过采样","B. 欠采样","C. 随机抽样","D. SVM"], ans:"A", exp:"过采样（SMOTE）可在半监督框架中使用。" },
+      { stem: "在半监督学习中，可以利用未标记的数据来提高学习算法的性能。（   ）", opts:["A. 正确","B. 错误"], ans:"A", exp:"无标签可通过伪标签、生成模型辅助训练。" },
+      { stem: "在半监督学习中，所有的未标记数据都可以被视为无用的。（   ）", opts:["A. 正确","B. 错误"], ans:"B", exp:"未标记数据往往蕴含潜在信息，可提高性能。" }
+    ];
+
+    const quizDiv = document.getElementById('quiz');
+    const scoreBtn = document.getElementById('showScore');
+    const resultDiv = document.getElementById('result');
+    let answered = 0, correct = 0;
+
+    questions.forEach((q, i) => {
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+      qDiv.innerHTML = `<h3>${i+1}. ${q.stem}</h3>`;
+      const optsDiv = document.createElement('div');
+      optsDiv.className = 'options';
+      q.opts.forEach(opt => {
+        const val = opt.charAt(0);
+        const lbl = document.createElement('label');
+        lbl.innerHTML = `<input type="radio" name="q${i}" value="${val}"> ${opt}`;
+        optsDiv.appendChild(lbl);
+      });
+      const fb = document.createElement('div');
+      fb.className = 'feedback';
+      qDiv.appendChild(optsDiv);
+      qDiv.appendChild(fb);
+      quizDiv.appendChild(qDiv);
+
+      optsDiv.addEventListener('change', e => {
+        if (!e.target.checked) return;
+        answered++;
+        const choice = e.target.value;
+        if (choice === q.ans) {
+          correct++;
+          fb.innerHTML = `✔ 回答正确！<br>解析：${q.exp}`;
+          fb.className = 'feedback correct';
+        } else {
+          fb.innerHTML = `✘ 回答错误。正确答案：${q.ans}.<br>解析：${q.exp}`;
+          fb.className = 'feedback incorrect';
+        }
+        Array.from(optsDiv.querySelectorAll('input')).forEach(inp=>inp.disabled=true);
+        if (answered === questions.length) scoreBtn.disabled = false;
+      });
+    });
+
+    scoreBtn.onclick = () => {
+      resultDiv.textContent = `测验结束，您共答对 ${correct} / ${questions.length} 题。`;
+      scoreBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>
