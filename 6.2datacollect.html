@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>数据采集核心要点与互动刷题</title>
+  <style>
+    html, body { margin:0; padding:0; background:#fff; color:#333; font-family:"Microsoft YaHei", Arial, Helvetica, sans-serif; line-height:1.6; }
+    .container { max-width:960px; margin:0 auto; padding:24px; }
+    h1 { font-size:2rem; margin-top:0; }
+    .summary { background:#f9f9f9; border-left:4px solid #4caf50; padding:16px 20px; margin-bottom:32px; }
+    .question { border:1px solid #e0e0e0; border-radius:8px; padding:16px; margin-bottom:24px; }
+    .question h3 { margin:0 0 8px; font-size:1rem; }
+    .options label { display:block; margin:6px 0; cursor:pointer; }
+    .feedback { margin-top:8px; font-weight:600; }
+    .correct { color:#4caf50; }
+    .incorrect { color:#f44336; }
+    button { background:#4caf50; color:#fff; border:none; border-radius:4px; padding:10px 18px; font-size:1rem; cursor:pointer; }
+    button:disabled { background:#9e9e9e; cursor:not-allowed; }
+    #result { font-size:1.2rem; margin-top:24px; font-weight:700; }
+    @media(max-width:600px) { .container{padding:16px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>数据采集核心要点与互动刷题</h1>
+    <div class="summary">
+      <h2>核心要点速览</h2>
+      <p><strong>数据采集全流程：</strong>硬件选型 → 数据格式 → 预处理与清洗 → 采集协议与工具 → 合规与质量保障 → 合作与分发模式。</p>
+      <p><strong>关键方法：</strong>时序数据选 CSV、语音选 WAV、文本用网络爬虫与 SimHash 判重、停用词去除、异常值插补。</p>
+      <p><strong>合规要求：</strong>隐私加密/脱敏、robots.txt、法律法规、奖励惩罚与人工复核并重。</p>
+    </div>
+
+    <div id="quiz"></div>
+    <button id="showScore" disabled>查看成绩</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+// -------- 数据采集模块试题 --------
+    const questions = [
+      { stem: "在车辆数据采集中，（ ）数据对分析动力性能最重要。", options: ["A. 制造商","B. 型号","C. 车速","D. 油耗"], answer: "C", explanation: "车速直接反映加速、制动与驾驶行为，是性能分析核心指标。" },
+      { stem: "下列传感器中，通常用来测量车辆振动的是（ ）。", options: ["A. 温度","B. 加速度","C. 速度","D. 光照"], answer: "B", explanation: "加速度计基于压电/MEMS原理，可捕捉频域振动特征。" },
+      { stem: "采集到异常点后，正确做法应是（ ）。", options: ["A. 忽略","B. 修正或插补","C. 只记录数量","D. 立即删除"], answer: "B", explanation: "检测后需修复或插补以免模型偏差。" },
+      { stem: "车辆数据中最具代表性的时间段是（ ）。", options: ["A. 启动","B. 行驶中","C. 停车","D. 维修后"], answer: "B", explanation: "稳定工况与载荷状态可在行驶阶段完整呈现。" },
+      { stem: "存储车载时序数据最常用的结构化格式为（ ）。", options: ["A. CSV","B. XML","C. JSON","D. SQLite"], answer: "A", explanation: "CSV易于与分析工具衔接且体积小。" },
+      { stem: "车辆数据应先分类、标注后再建模。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "标签可绑定工况、驾驶员与路况信息，提高下游模型可解释性。" },
+      { stem: "语音采集中最常用的前端硬件是（ ）。", options: ["A. 电脑","B. 手机","C. 录音笔","D. 外置麦克风"], answer: "D", explanation: "专业麦克风信噪比高、频响宽。" },
+      { stem: "影响语音质量最大的是（ ）。", options: ["A. 设备价格","B. 环境噪声","C. 口型清晰度","D. 文件格式"], answer: "B", explanation: "背景噪声直接降低可懂度。" },
+      { stem: "降噪首选方案是（ ）。", options: ["A. 提高音量","B. 软件降噪/滤波","C. 让说话人喊话","D. 关闭降噪"], answer: "B", explanation: "后处理滤波或自适应降噪可显著提升SNR。" },
+      { stem: "长期语音语料的无损首选格式为（ ）。", options: ["A. WAV","B. MP3","C. FLAC","D. OGG"], answer: "A", explanation: "WAV/LPCM为无压缩容器，便于后期处理。" },
+      { stem: "采集语音前需采取隐私措施（加密、脱敏、征得同意）。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "多重措施共同降低泄露风险；原题仅列“同意”过窄。" },
+      { stem: "语音采集可在嘈杂环境随意进行。", options: ["A. 正确","B. 错误"], answer: "B", explanation: "标准要求背景噪声<30dBA。" },
+      { stem: "从网页批量提取文本最常用方法是（ ）。", options: ["A. SQL","B. 网络爬虫","C. 直连DB","D. 文件导入"], answer: "B", explanation: "爬虫框架（Scrapy、BeautifulSoup）可解析HTML并抓取。" },
+      { stem: "原始文本常用存储格式为（ ）。", options: ["A. TXT","B. XML","C. JSON","D. SQLite"], answer: "A", explanation: "纯文本便于快速读写与版本控制。" },
+      { stem: "清洗时最重要的预处理之一是（ ）。", options: ["A. 分词","B. 词性标注","C. 停用词去除","D. 词干化"], answer: "C", explanation: "停用词不含语义信息，可降低维度。" },
+      { stem: "检测海量文本重复通常用（ ）。", options: ["A. 哈希/SimHash","B. 加密","C. 随机化","D. 人工抽检"], answer: "A", explanation: "SimHash比较哈希距离即可判重。" },
+      { stem: "情感分析依赖的关键NLP任务是（ ）。", options: ["A. 词性标注","B. 句法分析","C. 分类","D. 情感极性判断"], answer: "D", explanation: "极性判定直接输出正/负/中立标签。" },
+      { stem: "获取结构化网页表格最常用技术是（ ）。", options: ["A. 网络爬虫","B. 传感器","C. 公开数据源","D. 文本分析"], answer: "A", explanation: "爬虫可解析HTML/DOM树并输出表格。" },
+      { stem: "编写爬虫最常用语言之一是（ ）。", options: ["A. Python","B. Java","C. JS","D. C++"], answer: "A", explanation: "Python拥有Scrapy、Requests等生态。" },
+      { stem: "整个流程中最耗时资源的是（ ）。", options: ["A. 数据清洗","B. 存储","C. 预处理","D. 采集"], answer: "C", explanation: "解析、去噪、结构化转换通常占整体>60%时间。" },
+      { stem: "拉取HTML内容的主流协议为（ ）。", options: ["A. FTP","B. SMTP","C. HTTP/HTTPS"], answer: "C", explanation: "HTTP是万维网基础协议。" },
+      { stem: "采集非结构化资源（图片、PDF）仍可采用爬虫。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "爬虫通过URL模式或正则亦可下载文件。" },
+      { stem: "互联网采集须遵守法律、robots.txt及道德准则。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "合规采集是行业底线。" },
+      { stem: "众包平台快速收集大规模样本常用方式是（ ）。", options: ["A. 在线问卷","B. 焦点小组","C. 访谈","D. 观察"], answer: "A", explanation: "问卷可并行分发，回收量大。" },
+      { stem: "分布式爬虫在众包场景提效机制是（ ）。", options: ["A. 增带宽","B. 提单机性能","C. 增加爬虫并行度","D. 升级硬件"], answer: "C", explanation: "水平扩展显著提升吞吐。" },
+      { stem: "众包调查通常针对（ ）数据。", options: ["A. 定量","B. 定性","C. 探索","D. 预测"], answer: "A", explanation: "选择题或标注任务便于统计。" },
+      { stem: "最关键的清洗环节是（ ）。", options: ["A. 筛选可疑/低质样本","B. 合并","C. 转换","D. 丢弃"], answer: "A", explanation: "低质量样本会拉低整体置信度。" },
+      { stem: "质量保障可通过奖励、惩罚、人工复核等多方式并举。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "综合机制可提高准确率≈20%。" },
+      { stem: "共享资源、降低成本的最佳模式是（ ）。", options: ["A. 独家","B. 深度","C. 广泛","D. 战略合作"], answer: "D", explanation: "长期战略伙伴利于统筹投入与收益。" },
+      { stem: "最能实时解决问题的沟通方式是（ ）。", options: ["A. 邮件","B. 电话","C. 视频","D. 面对面"], answer: "D", explanation: "面对面沟通反馈延迟最小。" },
+      { stem: "长期合作的基石是（ ）。", options: ["A. 合同","B. 分享核心数据","C. 共同目标","D. 频繁沟通"], answer: "C", explanation: "共同KPI驱动双方投入资源。" },
+      { stem: "跨领域创新以（ ）合作最有效。", options: ["A. 横向","B. 纵向","C. 跨领域","D. 行业内"], answer: "C", explanation: "多学科融合产生新产品。" },
+      { stem: "实现数据共享整合最常见的技术形式是（ ）。", options: ["A. 协议","B. 数据交换平台","C. 集成工具","D. 所有权分割"], answer: "B", explanation: "平台支持API、格式转换与权限控制。" },
+      { stem: "充分考虑利益分配是合作成功关键。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "激励不均易导致合作失败。" },
+      { stem: "测温常用（ ）传感器。", options: ["A. 气压","B. 湿度","C. 温度","D. 加速度"], answer: "C", explanation: "如DS18B20数字温度计。" },
+      { stem: "常用信号处理步骤之一是（ ）。", options: ["A. 放大","B. 滤波","C. 调制","D. 解调"], answer: "B", explanation: "数字/模拟滤波可去噪。" },
+      { stem: "将模拟量变数字量的器件是（ ）。", options: ["A. 处理器","B. 采集卡","C. A/D转换器","D. D/A转换器"], answer: "C", explanation: "ADC将连续电压离散化。" },
+      { stem: "监测环境湿度常用（ ）传感器。", options: ["A. 温度","B. 压力","C. 湿度","D. 运动"], answer: "C", explanation: "如DHT22。" },
+      { stem: "最难消除的是（ ）误差。", options: ["A. 系统","B. 随机","C. 量程","D. 迟滞"], answer: "B", explanation: "随机波动难以预测，只能统计平均。" },
+      { stem: "信号处理可显著提升数据质量。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "滤波/校准提高信噪比。" },
+      { stem: "高质量数据最常通过（ ）方式售卖。", options: ["A. 数据集市/数据市场","B. 转售他人数据","C. 数据竞赛","D. 硬盘邮寄"], answer: "A", explanation: "Marketplace提供检索、计费、交付一体化。" },
+      { stem: "购买商业数据最常用平台之一是（ ）。", options: ["A. Amazon AWS Data Exchange","B. eBay","C. Upwork","D. Kaggle"], answer: "A", explanation: "AWS DE汇聚上千付费数据产品。" },
+      { stem: "最受欢迎的通用文本/表格格式是（ ）。", options: ["A. CSV","B. JSON","C. XML","D. Excel"], answer: "A", explanation: "CSV与BI/ML工具兼容度最高。" },
+      { stem: "保障准确性常见手段是（ ）。", options: ["A. 筛选","B. 合并","C. 数据审计/验证","D. 随机抽检"], answer: "C", explanation: "审计流程检测缺失、异常、版本差异。" },
+      { stem: "常用定价策略为（ ）。", options: ["A. 市场/竞争定价","B. 固定价","C. 拍卖","D. 协商"], answer: "A", explanation: "Marketplace产品多采用按行、按主题等市场价。" },
+      { stem: "数据质量越高，价格通常越高。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "高置信度、更新频率、覆盖度决定溢价。" },
+      { stem: "随意转售他人数据属违法行为。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "侵犯数据所有权及隐私法规。" },
+      { stem: "开放平台最常公开的类型是（ ）。", options: ["A. 图像","B. 文本","C. 音频","D. 视频"], answer: "B", explanation: "多数政府/学术公开数据以CSV/文本形式发布。" },
+      { stem: "下列哪一标注数据集常用于视觉分类基准？", options: ["A. CIFAR","B. COCO","C. ImageNet","D. Open Images"], answer: "C", explanation: "ImageNet 1400万张，推动深度学习突破。" },
+      { stem: "最常用的匿名化技术之一是（ ）。", options: ["A. k-匿名","B. 泛化","C. 加密","D. 哈希"], answer: "A", explanation: "k-anonymity通过泛化/抑制保护隐私。" },
+      { stem: "自然语言建模常用公开语料是（ ）。", options: ["A. MNIST","B. ImageNet","C. AudioSet","D. WikiText"], answer: "D", explanation: "WikiText-2/103含>1亿词。" },
+      { stem: "发布原始数据前应进行（ ）。", options: ["A. 清洗","B. 合并","C. 抽象","D. 匿名化"], answer: "D", explanation: "脱敏是开放数据行业规范。" },
+      { stem: "公开数据集的准确性与完整性并非绝对保证。", options: ["A. 正确","B. 错误"], answer: "A", explanation: "大量依赖社区维护与声明。" },
+      { stem: "所有数据都可以公开共享。", options: ["A. 正确","B. 错误"], answer: "B", explanation: "敏感/受限数据需脱敏或禁止公开。" }
+    ];
+
+    const quizDiv = document.getElementById('quiz');
+    const scoreBtn = document.getElementById('showScore');
+    const resultDiv = document.getElementById('result');
+    let answered = 0, correct = 0;
+
+    questions.forEach((q, idx) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'question';
+      wrapper.innerHTML = `<h3>${idx + 1}. ${q.stem}</h3>`;
+
+      const optDiv = document.createElement('div');
+      optDiv.className = 'options';
+      q.options.forEach(opt => {
+        const letter = opt.charAt(0);
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="radio" name="q${idx}" value="${letter}"> ${opt}`;
+        optDiv.appendChild(label);
+      });
+
+      const feedback = document.createElement('div');
+      feedback.className = 'feedback';
+
+      wrapper.appendChild(optDiv);
+      wrapper.appendChild(feedback);
+      quizDiv.appendChild(wrapper);
+
+      optDiv.addEventListener('change', e => {
+        if (!e.target.checked) return;
+        const choice = e.target.value;
+        answered++;
+        if (choice === q.answer) {
+          correct++;
+          // 正确时也显示解析
+          feedback.innerHTML = `✔ 回答正确！<br>解析：${q.explanation}`;
+          feedback.className = 'feedback correct';
+        } else {
+          feedback.innerHTML = `✘ 回答错误。正确答案：${q.answer}.<br>解析：${q.explanation}`;
+          feedback.className = 'feedback incorrect';
+        }
+        // 锁定当前题所有选项
+        Array.from(optDiv.querySelectorAll('input')).forEach(i => i.disabled = true);
+        if (answered === questions.length) {
+          scoreBtn.disabled = false;
+        }
+      });
+    });
+
+    scoreBtn.onclick = () => {
+      resultDiv.textContent = `您共答对 ${correct} 题，答错 ${questions.length - correct} 题。`;
+      scoreBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>
