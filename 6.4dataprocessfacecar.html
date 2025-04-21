@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>人脸与车辆数据处理互动刷题</title>
+  <style>
+    html, body { margin:0; padding:0; background:#fff; color:#333;
+      font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif; line-height:1.6; }
+    .container { max-width:900px; margin:0 auto; padding:24px; }
+    h1 { font-size:2rem; margin-bottom:10px; text-align:center; }
+    .summary { background:#f9f9f9; border-left:4px solid #007ACC;
+      padding:15px; margin-bottom:25px; }
+    .summary p { margin:6px 0; }
+    .question { border:1px solid #e0e0e0; border-radius:6px;
+      padding:15px; margin-bottom:20px; }
+    .question h3 { margin:0 0 8px; font-size:1rem; }
+    .options label { display:block; margin:6px 0; cursor:pointer; }
+    .feedback { margin-top:8px; font-weight:600; }
+    .correct { color:#007ACC; }
+    .incorrect { color:#D32F2F; }
+    button { background:#007ACC; color:#fff; border:none;
+      border-radius:4px; padding:8px 16px; font-size:1rem; cursor:pointer; }
+    button:disabled { background:#9e9e9e; cursor:not-allowed; }
+    #result { font-size:1.1rem; margin-top:20px;
+      font-weight:700; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>人脸与车辆数据处理互动刷题</h1>
+    <div class="summary">
+      <p><strong>模块：</strong>人脸预处理/标注/分类/安全与隐私；车辆预处理/标注/分类。</p>
+      <p><strong>重点：</strong>质量评估、增强与对齐；关键点、边界框与多标注校验；分类维度与规范；隐私合规；异常处理与标准化；标注准确性与统一标准。</p>
+    </div>
+    <div id="quiz"></div>
+    <button id="showScore" disabled>查看成绩</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      // 人脸数据预处理 (1-8)
+      {stem:"1. 下列哪一项不是人脸图像常用质量评估指标？", opts:["A. 模糊度","B. 光照","C. 遮挡","D. 色彩"], ans:"D",
+       exp:"色彩饱和度对识别影响有限，常见指标为清晰度、光照均衡、遮挡比例等。"},
+      {stem:"2. 在灰度人脸图像上做直方图均衡化的主要目的是（）。", opts:["A. 改变亮度","B. 均衡灰度分布，增强对比","C. 去噪声"], ans:"B",
+       exp:"直方图均衡化通过重分布灰度使对比度增强。"},
+      {stem:"3. 经典人脸检测+对齐流水线最早广泛使用的算法是（）。", opts:["A. 中值滤波","B. Haar 级联/Viola‑Jones","C. 直方图均衡"], ans:"B",
+       exp:"Viola‑Jones提出Haar级联检测框架，广泛用于早期人脸检测。"},
+      {stem:"4. 数据增强（旋转、翻转、色彩扰动等）的核心价值在于（）。", opts:["A. 提高图像质量","B. 减少样本","C. 提升模型泛化能力"], ans:"C",
+       exp:"增强样本多样性，有助于提升模型对未见数据的泛化。"},
+      {stem:"5. 预处理完毕后通常要做的下一步是（）。", opts:["A. 压缩","B. 加密","C. 再次清洗/筛选异常"], ans:"C",
+       exp:"预处理后应进行异常值筛选以保证数据质量。"},
+      {stem:"6. 可以无限制地对人脸样本做增强以提升准确率。（判断）", opts:["A. 正确","B. 错误"], ans:"B",
+       exp:"过度增强会引入失真、分布漂移，反而降低性能。"},
+      {stem:"7. 质量评估有助于过滤低质图像，从而提高后续识别效果。（判断）", opts:["A. 正确","B. 错误"], ans:"A",
+       exp:"低质样本常导致误检、误识。"},
+      {stem:"8. 以下哪一步不属于预处理常见流程？", opts:["A. 分辨率统一","B. 几何对齐","C. 颜色归一化"], ans:"C",
+       exp:"颜色归一化通常属于后处理步骤，不是预处理常见环节。"},
+
+      // 人脸数据标注 (9-15)
+      {stem:"9. 以下哪类不属于人脸标注类型？", opts:["A. 关键点","B. 属性","C. 情感"], ans:"C",
+       exp:"情感标注不属于常见的人脸标注类型。"},
+      {stem:"10. 主流关键点标注协议一次性标注点数为（）。", opts:["A. 5","B. 10","C. 68","D. 100"], ans:"C",
+       exp:"68‑point来源于iBUG/300‑W数据集，最常见。"},
+      {stem:"11. 属性标注一般不包括（）。", opts:["A. 性别","B. 年龄","C. 表情"], ans:"C",
+       exp:"表情属于情绪识别，不是属性标注常见项。"},
+      {stem:"12. 边界框标注的首要目的为（）。", opts:["A. 定位人脸ROI","B. 识别表情","C. 标注关键点"], ans:"A",
+       exp:"Bounding box用于定位人脸区域。"},
+      {stem:"13. 提高标注准确性的常用流程是（）。", opts:["A. 工具全自动","B. 单人标注","C. 多标注员交叉核验"], ans:"C",
+       exp:"多标注员交叉可减少个体偏差。"},
+      {stem:"14. 精准关键点对识别性能的影响微乎其微。（判断）", opts:["A. 正确","B. 错误"], ans:"B",
+       exp:"关键点误差会传递给对齐/特征裁剪，性能显著下降。"},
+      {stem:"15. 人脸标注可为监督学习模型提供Ground‑Truth，是训练不可或缺环节。（判断）", opts:["A. 正确","B. 错误"], ans:"A",
+       exp:"无标签数据无法进行监督训练。"},
+
+      // 人脸数据分类 (16-21)
+      {stem:"16. 下列哪一维度不常用于人脸分类？", opts:["A. 年龄","B. 性别","C. 表情"], ans:"C",
+       exp:"表情属于情绪分析，不是常见分类维度。"},
+      {stem:"17. 业界常见年龄分段写法是（）。", opts:["A. 0‑10,11‑20…","B. 成人/未成年人","C. 婴儿、儿童、青少年、成人、老年"], ans:"C",
+       exp:"细分年龄阶段时常用婴儿、儿童、青少年、成人、老年。"},
+      {stem:"18. 分类规范要求输入图像应（）。", opts:["A. 彩色","B. 来自同一人种","C. 清晰无遮挡"], ans:"C",
+       exp:"清晰无遮挡是保证分类准确的基本要求。"},
+      {stem:"19. 表情分类的直接目标是（）。", opts:["A. 测性格","B. 识别情绪/表情状态","C. 测年龄"], ans:"B",
+       exp:"表情分类用于识别情绪状态。"},
+      {stem:"20. 遵守分类规范的主要目的是（）。", opts:["A. 保障隐私","B. 便于存储","C. 提升准确率与效率"], ans:"C",
+       exp:"规范可统一样本，提高模型性能与效率。"},
+      {stem:"21. 规范要求对所有细微面部特征逐一分类。（判断）", opts:["A. 正确","B. 错误"], ans:"B",
+       exp:"过细粒度会导致样本稀疏、成本过高。"},
+
+      // 人脸数据安全与隐私 (22-27)
+      {stem:"22. 收集/使用人脸数据须遵循的首要原则是（）。", opts:["A. 自愿/告知同意","B. 强制","C. 随意"], ans:"A",
+       exp:"隐私法规要求自愿并告知同意。"},
+      {stem:"23. 下列哪项不必要于人脸安全存储？", opts:["A. 加密","B. 访问控制","C. 完全公开"], ans:"C",
+       exp:"公开违反隐私原则。"},
+      {stem:"24. 防止泄露的有效做法是（）。", opts:["A. 弱化加密","B. 公开共享","C. 限制访问权限"], ans:"C",
+       exp:"限制访问可防止泄露。"},
+      {stem:"25. 人脸数据传输推荐做法是（）。", opts:["A. 明文","B. 加密传输 (TLS/VPN)","C. 压缩即可"], ans:"B",
+       exp:"TLS/VPN等加密传输保障安全。"},
+      {stem:"26. 销毁人脸数据应（）。", opts:["A. 随意丢弃","B. 物理/逻辑彻底销毁","C. 转卖"], ans:"B",
+       exp:"彻底销毁可防止泄露。"},
+      {stem:"27. 未经用户同意收集面部数据是被允许的。（判断）", opts:["A. 正确","B. 错误"], ans:"B",
+       exp:"违反隐私法规，可致行政/刑责。"},
+
+      // 车辆数据预处理 (28-33)
+      {stem:"28. 车辆数据预处理的核心目标是（）。", opts:["A. 增量","B. 省空间","C. 提升质量与准确性"], ans:"C",
+       exp:"预处理为了提高数据质量与准确性。"},
+      {stem:"29. 发现异常值通常采取（）。", opts:["A. 保留","B. 忽略","C. 校正/插补/剔除"], ans:"C",
+       exp:"校正或剔除异常值可保证数据可靠。"},
+      {stem:"30. 重采样的作用是（）。", opts:["A. 增维","B. 减量","C. 统一时间步长"], ans:"C",
+       exp:"重采样统一采样频率/时间步长。"},
+      {stem:"31. 标准化意在（）。", opts:["A. 降维","B. 增复杂","C. 调整尺度使可比"], ans:"C",
+       exp:"标准化将特征尺度统一，便于比较。"},
+      {stem:"32. 下列哪项不是常见预处理步骤？", opts:["A. 清洗","B. 压缩","C. 重采样"], ans:"B",
+       exp:"压缩是存储优化，不属于典型预处理。"},
+      {stem:"33. 缺失值需填充或删除以保持完整性。（判断）", opts:["A. 正确","B. 错误"], ans:"A",
+       exp:"缺失值会影响统计分析与模型输入。"},
+
+      // 车辆数据标注 (34-39)
+      {stem:"34. 车辆类型标注通常含（）。", opts:["A. 品牌色重","B. 车型、尺寸、载重","C. 驾驶员信息"], ans:"B",
+       exp:"标注车型、尺寸、载重等关键信息。"},
+      {stem:"35. 保证标注准确性最好方法是（）。", opts:["A. 自动工具","B. 单人","C. 多标注员交叉验证"], ans:"C",
+       exp:"多标注员交叉可减少误差。"},
+      {stem:"36. 位置信息应标注（）。", opts:["A. 中心点","B. 角点","C. 完整轮廓 (polygon / bbox)"], ans:"C",
+       exp:"完整轮廓或bbox可精确描述目标位置。"},
+      {stem:"37. 车辆朝向常用下列哪种方式？", opts:["A. 文字","B. 箭头","C. 角度值 (yaw)"], ans:"C",
+       exp:"角度值可精确表示朝向。"},
+      {stem:"38. 遮挡车辆应（）。", opts:["A. 不标注","B. 标可见部分","C. 整体轮廓+遮挡 flag"], ans:"B",
+       exp:"常标注可见部分以保证训练质量。"},
+      {stem:"39. 标注可随意忽略非关键实例以提效。（判断）", opts:["A. 正确","B. 错误"], ans:"B",
+       exp:"遗漏会导致采样偏差。"},
+
+      // 车辆数据分类 (40-45)
+      {stem:"40. 车辆分类最常依据（）。", opts:["A. 颜色","B. 品牌","C. 车辆类型/用途"], ans:"C",
+       exp:"分类常按车辆类型与用途。"},
+      {stem:"41. 以下哪一维度不常用于车辆分类？", opts:["A. 尺寸","B. 燃料类型","C. 生产日期"], ans:"C",
+       exp:"生产日期与分类无关。"},
+      {stem:"42. 新能源汽车通常按（ ）分类。", opts:["A. 品牌","B. 尺寸","C. 动力能源/燃料"], ans:"C",
+       exp:"动力来源是新能源汽车分类关键。"},
+      {stem:"43. 分类的目的在于（）。", opts:["A. 美观","B. 存储","C. 管理与分析"], ans:"C",
+       exp:"分类有助于管理与数据分析。"},
+      {stem:"44. 不同车辆场景可能需定制分类标准。（判断）", opts:["A. 正确","B. 错误"], ans:"A",
+       exp:"不同应用场景标准需灵活调整。"},
+      {stem:"45. 同类型车辆的分类标准应保持一致，避免歧义。（判断）", opts:["A. 正确","B. 错误"], ans:"A",
+       exp:"统一口径提高数据可比性。"}
+    ];
+
+    const quizDiv = document.getElementById('quiz');
+    const scoreBtn = document.getElementById('showScore');
+    const resultDiv = document.getElementById('result');
+    let answered=0, correct=0;
+
+    questions.forEach((q,i)=>{
+      const qw = document.createElement('div');
+      qw.className='question';
+      qw.innerHTML=`<h3>${q.stem}</h3>`;
+      const od = document.createElement('div'); od.className='options';
+      q.opts.forEach(opt=>{
+        const val=opt.charAt(0);
+        const lbl=document.createElement('label');
+        lbl.innerHTML=`<input type="radio" name="q${i}" value="${val}"> ${opt}`;
+        od.appendChild(lbl);
+      });
+      const fb=document.createElement('div'); fb.className='feedback';
+      qw.appendChild(od); qw.appendChild(fb);
+      quizDiv.appendChild(qw);
+
+      od.addEventListener('change',e=>{
+        if(!e.target.checked) return;
+        answered++;
+        const choice=e.target.value;
+        if(choice===q.ans){
+          correct++;
+          fb.innerHTML=`✔ 回答正确！<br>解析：${q.exp}`;
+          fb.className='feedback correct';
+        }else{
+          fb.innerHTML=`✘ 回答错误。正确答案：${q.ans}.<br>解析：${q.exp}`;
+          fb.className='feedback incorrect';
+        }
+        Array.from(od.querySelectorAll('input')).forEach(inp=>inp.disabled=true);
+        if(answered===questions.length) scoreBtn.disabled=false;
+      });
+    });
+
+    scoreBtn.onclick=()=>{
+      resultDiv.textContent=`测验结束，您共答对 ${correct} / ${questions.length} 题。`;
+      scoreBtn.disabled=true;
+    };
+  </script>
+</body>
+</html>

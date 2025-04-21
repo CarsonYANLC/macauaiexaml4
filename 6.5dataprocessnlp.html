@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>语音与文本数据处理互动刷题</title>
+  <style>
+    html, body { margin:0; padding:0; background:#fff; color:#333;
+      font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif; line-height:1.6; }
+    .container { max-width:900px; margin:0 auto; padding:24px; }
+    h1 { font-size:2rem; margin-bottom:10px; text-align:center; }
+    .summary { background:#f9f9f9; border-left:4px solid #007ACC;
+      padding:15px; margin-bottom:25px; }
+    .summary p { margin:6px 0; }
+    .question { border:1px solid #e0e0e0; border-radius:6px;
+      padding:15px; margin-bottom:20px; }
+    .question h3 { margin:0 0 8px; font-size:1rem; }
+    .options label { display:block; margin:6px 0; cursor:pointer; }
+    .feedback { margin-top:8px; font-weight:600; }
+    .correct { color:#007ACC; }
+    .incorrect { color:#D32F2F; }
+    button { background:#007ACC; color:#fff; border:none;
+      border-radius:4px; padding:8px 16px; font-size:1rem; cursor:pointer; }
+    button:disabled { background:#9e9e9e; cursor:not-allowed; }
+    #result { font-size:1.1rem; margin-top:20px;
+      font-weight:700; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>语音与文本数据处理互动刷题</h1>
+    <div class="summary">
+      <p>本测验涵盖 <strong>语音数据预处理、标注、分类与安全隐私</strong> 以及 <strong>文本数据预处理、标注、分类与安全隐私</strong> 八大模块。</p>
+      <p>重点理解：预处理步骤与目的（分帧、加窗、去噪、停用词等），标注方式与流程（起止时间、实体/情感/实体关系等），分类目标与常用方法（情感、主题、NER、分类平衡等），以及数据存储、传输与访问控制的合规原则。</p>
+    </div>
+    <div id="quiz"></div>
+    <button id="showScore" disabled>查看成绩</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      // 语音预处理(1-5)
+      {stem:"1. 语音数据预处理的主要目的是什么？", opts:["A. 减少数据存储空间","B. 增加语音信号带宽","C. 提高语音识别准确性","D. 改变语音信号频率"], ans:"C",
+       exp:"预处理为声学/语言模型提供更干净、稳定的特征，从而提高识别或下游任务性能。"},
+      {stem:"2. 对语音信号进行分帧处理的核心作用是", opts:["A. 延长信号","B. 保持完整性","C. 将非平稳语音转化为近似平稳短段，便于分析","D. 改变波形"], ans:"C",
+       exp:"人声是非平稳信号，分帧可在短时内近似平稳，方便提取MFCC等特征。"},
+      {stem:"3. 加窗处理的目的与副作用描述正确的是", opts:["A. 完全消除频谱泄漏","B. 减少栅栏效应但可能造成少量能量损失（“泄露”）","C. 增强高频","D. 改善带宽"], ans:"B",
+       exp:"合适的窗（汉明、汉宁）可抑制谱泄漏，但窗沿衰减会引起能量轻微衰减。"},
+      {stem:"4. 语音信号数字化（A/D转换）的直接目的是", opts:["A. 将模拟波形转为数字序列，方便计算机处理","B. 提高频率","C. 降噪","D. 改变带宽"], ans:"A",
+       exp:"量化采样后才能做数字滤波、特征提取等计算。"},
+      {stem:"5. 下列哪项不是语音预处理常见步骤？", opts:["A. 分帧","B. 增益控制","C. 随意裁剪","D. 加窗"], ans:"C",
+       exp:"无控制的裁剪会破坏上下文与语义。"},
+      // 语音标注(6-11)
+      {stem:"6. 标注语音时，起始点与结束点应", opts:["A. 仅标注中心","B. 无需标注","C. 明确标注起止时间","D. 标注波形特征"], ans:"C",
+       exp:"起止时间决定分割与对齐精度，是切分、VAD的基础。"},
+      {stem:"7. 对不同发音人的语音数据，正确做法是", opts:["A. 忽略身份","B. 仅标注文本","C. 标注发音人身份并关联内容","D. 任意标注"], ans:"C",
+       exp:"说话人信息常用于分布式训练、声纹分析、多说话人识别等。"},
+      {stem:"8. 对背景噪声应如何处理？", opts:["A. 忽略噪声","B. 标注噪声类型及时间","C. 先去噪再标","D. 只标文本"], ans:"B",
+       exp:"噪声标签帮助噪声鲁棒训练与后处理。"},
+      {stem:"9. 多音节词的标注应", opts:["A. 只标首音节","B. 标注每个音节对齐信息","C. 不标音节","D. 整体发音"], ans:"B",
+       exp:"精准对齐用于强制对齐、韵律建模。"},
+      {stem:"10. 情感/意图标注通常依赖", opts:["A. 个人理解","B. 波形特征","C. 文本内容","D. 预定义标签集"], ans:"D",
+       exp:"统一标签集保证跨样本、一致性。"},
+      {stem:"11. “语音标注只需关注文本内容，发音质量可忽略。” 对吗？", opts:["A. 对","B. 错"], ans:"B",
+       exp:"发音含糊、高低偏差会影响识别与情感分析，必须记录或标注。"},
+      // 语音分类(12-16)
+      {stem:"12. 语音数据分类的主要目标是", opts:["A. 扩充数据量","B. 方便存储","C. 提高后续处理效率","D. 改变波形"], ans:"C",
+       exp:"有组织的数据让训练/检索/评估按需选样，降低复杂度。"},
+      {stem:"13. 下列因素不常作为分类依据的是", opts:["A. 内容","B. 时长","C. 发音人","D. 采样率"], ans:"D",
+       exp:"采样率通常在预处理阶段统一，而非分类维度。"},
+      {stem:"14. 情感识别任务中常按下列哪类标签分类？", opts:["A. 音量","B. 语速","C. 情感类别（高兴等）","D. 波形"], ans:"C",
+       exp:"情绪标签是常见上层语义。"},
+      {stem:"15. 若分类标签过多且重叠，会", opts:["A. 提高准确率","B. 降低复杂度","C. 增加歧义与混淆","D. 无影响"], ans:"C",
+       exp:"过细标签导致样本稀疏与边界模糊。"},
+      {stem:"16. 对同一类别语音数据，应满足怎样的特征一致性？", opts:["A. 可以完全不同","B. 完全相同","C. 在可控范围内相似","D. 无要求"], ans:"C",
+       exp:"允许自然差异，但需保持核心声学/语义特征一致。"},
+      // 语音安全(17-21)
+      {stem:"17. 合规存储语音数据的推荐措施", opts:["A. 公共服务器无加密","B. 本地无备份","C. 安全服务器+加密","D. 任意存储"], ans:"C",
+       exp:"加密+访问控制是行业通行做法。"},
+      {stem:"18. 对语音数据进行脱敏的首要目的", opts:["A. 便于分析","B. 减小文件","C. 保护用户隐私","D. 提升可用性"], ans:"C",
+       exp:"人声中可能包含身份敏感信息，需保护隐私。"},
+      {stem:"19. 数据传输应采用", opts:["A. 明文","B. 加密传输（TLS、VPN 等）","C. 任意","D. 不传输"], ans:"B",
+       exp:"加密链路防止窃听与中间人攻击。"},
+      {stem:"20. 以下哪项不必要/违规？", opts:["A. 更新补丁","B. 随意分享数据给第三方","C. 员工安全培训","D. 访问控制"], ans:"B",
+       exp:"未经授权分享违反隐私合规。"},
+      {stem:"21. 访问权限管理的原则是", opts:["A. 全员开放","B. 最小权限，仅授权特定人员","C. 不管理","D. 仅内部任意访问"], ans:"B",
+       exp:"“最小权限”是信息安全基本原则。"},
+      // 文本预处理(22-27)
+      {stem:"22. 去除停用词的主要目的", opts:["A. 增加长度","B. 降低维度、减少噪声","C. 改变语义","D. 任意删词"], ans:"B",
+       exp:"高频无意义词会稀释重要特征。"},
+      {stem:"23. 分词在中文NLP中的作用是", opts:["A. 将连续文本切分成词/词组","B. 改变格式","C. 去标点","D. 增语义"], ans:"A",
+       exp:"多数模型以词/子词为基本单位。"},
+      {stem:"24. 对大小写敏感任务，文本应", opts:["A. 全小写","B. 全大写","C. 视任务决定，必要时保持原样","D. 随意转换"], ans:"C",
+       exp:"情感分析、NER等场景下大小写承担语义。"},
+      {stem:"25. 去除标点符号通常是为了", opts:["A. 可读性","B. 减少噪声，提升处理准确率","C. 改变格式","D. 增长度"], ans:"B",
+       exp:"对多数模型标点无贡献，会增加噪声。"},
+      {stem:"26. 去除文本重复项的好处", opts:["A. 增多样性","B. 减少冗余，节省存储与计算","C. 改语义","D. 加长度"], ans:"B",
+       exp:"重复样本导致模型过拟合或偏斜。"},
+      {stem:"27. “去除停用词不会影响文本语义。” 对吗？", opts:["A. 对","B. 错"], ans:"B",
+       exp:"高频停用词仍承载语法或语气信息。【纠正】"},
+      // 文本标注(28-33)
+      {stem:"28. 命名实体识别（NER）的目标", opts:["A. 关键词","B. 句法","C. 识别人名、地名等特定实体","D. 语法错误"], ans:"C",
+       exp:"NER是信息抽取核心任务之一。"},
+      {stem:"29. 标注多义词应", opts:["A. 忽略多义性","B. 随意标注","C. 结合上下文确定具体含义","D. 仅标1个意义"], ans:"C",
+       exp:"语境消歧显著提升下游性能。"},
+      {stem:"30. 情感分析常用标签", opts:["A. 积极、消极（可含中立）","B. 词性","C. 主客体","D. 句/段"], ans:"A",
+       exp:"二/三分类是常见方案。"},
+      {stem:"31. 文本分段标注应", opts:["A. 随意分段","B. 依据自然段或语义边界","C. 每字成段","D. 不分段"], ans:"B",
+       exp:"确保标注与语义连贯，利于段级模型。"},
+      {stem:"32. 关系抽取的任务是", opts:["A. 抽关键词","B. 句法","C. 抽取实体间关系","D. 情感倾向"], ans:"C",
+       exp:"如三元组(实体1,关系,实体2)。"},
+      {stem:"33. “标注准确性与一致性非常重要。” 对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"标注偏差直接决定监督信号质量。"},
+      // 文本分类(34-39)
+      {stem:"34. 文本分类的核心目的", opts:["A. 抽关键词","B. 按主题/任务组织文本","C. 语法分析","D. 扩充数据"], ans:"B",
+       exp:"如新闻分类、情感分析等。"},
+      {stem:"35. 确定文本类别的常用方法", opts:["A. 手工","B. 机器学习/深度学习","C. 随机","D. 按长度"], ans:"B",
+       exp:"TF-IDF+SVM、BERT已成主流。"},
+      {stem:"36. 处理类别不平衡时，应", opts:["A. 直接分类","B. 下采样多数类","C. 过采样少数类或合成样本","D. 忽略少数类"], ans:"C",
+       exp:"SMOTE、Focal Loss等缓解偏斜。"},
+      {stem:"37. 特征选择的目的", opts:["A. 增特征","B. 减计算量","C. 提升准确率 & 效率","D. 改格式"], ans:"C",
+       exp:"保留判别性强特征，提高效率与精度。"},
+      {stem:"38. 下列哪项不是评估文本分类常用指标？", opts:["A. 准确率","B. 召回率","C. F1","D. 文本长度"], ans:"D",
+       exp:"长度不是性能度量指标。"},
+      {stem:"39. “自动分类通常比手工更准确高效。” 对吗？", opts:["A. 对","B. 错"], ans:"A",
+       exp:"大规模语料中，训练充分的模型更精准且成本低。"},
+      // 文本安全(40-45)
+      {stem:"40. 处理敏感文本应遵循的原则", opts:["A. 随意分享","B. 严格保密、限制访问","C. 无处理","D. 内部随意"], ans:"B",
+       exp:"需满足GDPR等法规。"},
+      {stem:"41. 脱敏处理文本的直接目的", opts:["A. 完全保留信息","B. 改格式","C. 删除/替换敏感字段","D. 增可读性"], ans:"C",
+       exp:"如掩码姓名、联系方式等。"},
+      {stem:"42. 对敏感文本的存储与传输应", opts:["A. 明文","B. 加密","C. 不加密","D. 部分"], ans:"B",
+       exp:"TLS、AES、数据库TDE等加密机制。"},
+      {stem:"43. 访问控制的主要目标", opts:["A. 提高效率","B. 开放访问","C. 防止非法访问与滥用","D. 改存储"], ans:"C",
+       exp:"角色/权限/日志是关键机制。"},
+      {stem:"44. 下列措施中不必要/违规的是", opts:["A. 更新安全补丁","B. 备份敏感数据","C. 随意向第三方分享文本","D. 员工安全培训"], ans:"C",
+       exp:"未经授权分享违反合规。"},
+      {stem:"45. “仅依赖技术手段即可处理敏感信息，无需考虑法规。” 对吗？", opts:["A. 对","B. 错"], ans:"B",
+       exp:"合规需同时满足法律、合同与行业监管要求。"}
+    ];
+
+    const quizDiv = document.getElementById('quiz');
+    const scoreBtn = document.getElementById('showScore');
+    const resultDiv = document.getElementById('result');
+    let answered=0, correct=0;
+
+    questions.forEach((q, i) => {
+      const qw = document.createElement('div');
+      qw.className='question';
+      qw.innerHTML=`<h3>${q.stem}</h3>`;
+      const od = document.createElement('div'); od.className='options';
+      q.opts.forEach(opt => {
+        const val = opt.charAt(0);
+        const lbl = document.createElement('label');
+        lbl.innerHTML=`<input type="radio" name="q${i}" value="${val}"> ${opt}`;
+        od.appendChild(lbl);
+      });
+      const fb = document.createElement('div'); fb.className='feedback';
+      qw.appendChild(od); qw.appendChild(fb);
+      quizDiv.appendChild(qw);
+
+      od.addEventListener('change', e => {
+        if (!e.target.checked) return;
+        answered++;
+        const choice = e.target.value;
+        if (choice === q.ans) {
+          correct++;
+          fb.innerHTML = `✔ 回答正确！<br>解析：${q.exp}`;
+          fb.className='feedback correct';
+        } else {
+          fb.innerHTML = `✘ 回答错误。正确答案：${q.ans}.<br>解析：${q.exp}`;
+          fb.className='feedback incorrect';
+        }
+        Array.from(od.querySelectorAll('input')).forEach(inp=>inp.disabled=true);
+        if (answered === questions.length) scoreBtn.disabled = false;
+      });
+    });
+
+    scoreBtn.onclick = () => {
+      resultDiv.textContent = `测验结束，您共答对 ${correct} / ${questions.length} 题。`;
+      scoreBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>
