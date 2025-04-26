@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>数据质量与异常处理 · 交互式练习</title>
+<style>
+    body{font-family:Segoe UI,Arial,sans-serif;background:#ffffff;color:#222;margin:0;padding:1.5rem;line-height:1.6}
+    h1,h2{margin-top:0;color:#0a3d62}
+    .summary{max-width:900px;margin-bottom:2rem;padding:1rem 1.5rem;background:#f8f9fa;border-left:4px solid #0a3d62;border-radius:6px}
+    .question{max-width:900px;margin-bottom:1.5rem;padding:1rem 1.5rem;border:1px solid #dee2e6;border-radius:6px}
+    .options{margin:.5rem 0 0 0;padding:0;list-style:none}
+    .options li{margin:.3rem 0}
+    .explanation{margin-top:.7rem;font-size:.9rem;color:#6c757d;display:none}
+    .correct{color:#28a745;font-weight:bold}
+    .incorrect{color:#dc3545;font-weight:bold}
+    #scoreboard{position:fixed;right:1rem;top:1rem;background:#0a3d62;color:#fff;padding:.5rem 1rem;border-radius:4px;font-size:.9rem}
+    #finishBtn{display:block;margin:2rem auto;font-size:1rem;padding:.6rem 1.4rem;background:#0a3d62;color:#fff;border:none;border-radius:4px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="scoreboard">已答对 0 / 0 题</div>
+<h1>数据质量与异常处理 · 交互式刷题</h1>
+<div class="summary">
+  <h2>知识点概览</h2>
+  <p>本练习围绕<strong>数据类型与文件格式</strong>、<strong>异常分类（语法、语义、覆盖）</strong>、<strong>数据质量问题（缺失、重复、噪声、异常值）</strong>以及<strong>数据清洗流程</strong>展开，覆盖 Python / pandas、Excel 常用清洗接口与验证回流方法。通过完成题目，你将能够：</p>
+  <ul>
+    <li>辨析文本、音频、图像与视频等多媒体数据格式的特点和典型存储方式；</li>
+    <li>区分 <code>TypeError</code>、<code>IOException</code>、<code>NullPointerException</code> 等常见运行时异常的触发场景；</li>
+    <li>掌握缺失值填充、重复数据去重、噪声平滑、异常值检测等核心数据清洗策略；</li>
+    <li>熟练使用 Excel 与 pandas 的高频接口（<code>NA()</code>、<code>drop_duplicates</code>、<code>fillna</code> 等）处理数据质量问题；</li>
+    <li>理解数据验证与“回流”机制的重要性，将清洗结果同步回源并进行二次核验。</li>
+  </ul>
+  <p>立即开始答题，检验并巩固你的数据处理与异常分析能力！</p>
+</div>
+<div id="quiz"></div>
+<button id="finishBtn">查看最终得分</button>
+<script>
+const quizData=[
+// 1‑10
+{q:'以下（ ）数据类型可以存储文本数据。',o:['二进制','整数','字符串','布尔值'],a:2,e:'字符串以字符序列形式保存可读文本，是最常用的文本数据类型。'},
+{q:'“text” 数据类型通常用于存储（ ）类型的数据。',o:['日期','数字','文本','图片'],a:2,e:'数据库中的 TEXT 列面向可变长度字符数据，如文章、备注等。'},
+{q:'在 Python 中，文本数据类型是（ ）。',o:['integer','float','string','boolean'],a:2,e:'Python 用 str 对象表示字符序列。'},
+{q:'下列（ ）是字符串数据类型的典型字面量。',o:['FALSE','\'abc\'','0','TRUE'],a:1,e:'用引号括起来的字符序列即字符串。'},
+{q:'在 SQL 中，用于从数据库中检索数据的语句是（ ）。',o:['SELECT','WHERE','ORDER BY','UPDATE'],a:0,e:'SELECT 语句负责查询并返回结果集。'},
+{q:'文本数据类型通常用于存储可读字符数据，如标题、消息等。',o:['正确','错误'],a:0,e:'文本列的设计目标就是保存人类可直接阅读的字符内容。'},
+{q:'文本数据类型可以存储任何类型的数据，包括数字和布尔值。',o:['正确','错误'],a:1,e:'虽然可将数字/布尔值转换为字符串保存，但会失去数值语义。'},
+{q:'下列（ ）数据类型通常用于存储语音信息。',o:['图像','视频','音频','文本'],a:2,e:'语音属于声波信号，多以 WAV、MP3 等音频格式保存。'},
+{q:'“jpg” 格式的文件通常用于存储（ ）数据类型。',o:['音频','视频','图像','文本'],a:2,e:'JPEG 是一种有损压缩静态图像格式。'},
+{q:'以下（ ）数据类型可以同时存储颜色和像素位置信息。',o:['音频','图像','视频','文本'],a:1,e:'像素矩阵天然包含位置信息和颜色（RGB 或其他色彩空间）信息。'},
+// 11‑20
+{q:'WAV 文件通常用于存储（ ）数据类型。',o:['音频','视频','图像','文本'],a:0,e:'WAV 是一种无损脉冲编码音频容器格式。'},
+{q:'下列（ ）数据类型可以用于存储连续的图像序列。',o:['音频','视频','图像','文本'],a:1,e:'视频是按照帧率顺序播放的静态图像序列。'},
+{q:'视频是由一系列连续图像帧组成，因此其数据量通常很大。',o:['正确','错误'],a:0,e:'帧数 × 分辨率 × 色深决定文件体积，远大于单张图片。'},
+{q:'所有的图像都是以 RGB 模式存储的。',o:['正确','错误'],a:1,e:'图像亦可使用 CMYK、YCbCr、灰度、索引颜色等多种色彩空间。'},
+{q:'当出现“类型错误”提示时，最可能表示（ ）语法类异常。',o:['类型异常','空指针异常','数组越界异常','I/O 异常'],a:0,e:'TypeError 属典型语法层面的类型不匹配错误。'},
+{q:'在 Java 中，尝试除以零会引发（ ）异常。',o:['ArithmeticException','NullPointerException','ArrayIndexOutOfBoundsException','FileNotFoundException'],a:0,e:'Java 遇 /0 抛 ArithmeticException。'},
+{q:'下列（ ）异常通常在文件读取过程中出现。',o:['IOException','SQLException','NullPointerException','NumberFormatException'],a:0,e:'I/O 操作失败（文件不存在/权限不足等）会抛 IOException。'},
+{q:'在 Python 中，访问未定义变量会引发（ ）异常。',o:['NameError','ZeroDivisionError','FileNotFoundError','SyntaxError'],a:0,e:'解释器找不到名称绑定时抛 NameError。'},
+{q:'当系统内存不足时，最可能抛出的异常是（ ）。',o:['OutOfMemoryError','StackOverflowError','NullPointerException','FileNotFoundException'],a:0,e:'JVM / OS 无法再分配堆内存时抛 OutOfMemoryError。'},
+{q:'语法类数据异常都直接或间接继承自 Exception 基类。',o:['正确','错误'],a:0,e:'主流语言的运行时错误体系以 Exception （或同义）为根。'},
+// 21‑30
+{q:'处理语义类数据时，以下（ ）异常最常出现。',o:['文件不存在','数组越界','类型错误异常','空指针'],a:2,e:'当数据含义与预期语义不符，常表现为类型/值非法。'},
+{q:'当语义类数据不满足预期结构或规范时，会抛出（ ）异常。',o:['格式异常','算术异常','数组越界','空指针'],a:0,e:'例如 JSON 格式错误，解析器抛 FormatException。'},
+{q:'在自然语言处理(NLP)中，以下（ ）异常最常出现。',o:['语法错误异常','类型错误','数组越界','文件不存在'],a:0,e:'解析器无法构造合法语法树时产生。'},
+{q:'当语义分析器无法理解输入语句时，会抛出（ ）异常。',o:['语义异常','语法异常','类型错误','文件不存在'],a:0,e:'语义阶段检查标识符/作用域/类型推断等不一致。'},
+{q:'检测并处理语义类异常最有效的方法是（ ）。',o:['使用 try‑catch 语句','重写父类函数','使用断言','忽略异常'],a:0,e:'捕获→记录→回退或替换数据是常用策略。'},
+{q:'语义类数据异常对程序运行效率不会有明显影响。',o:['正确','错误'],a:1,e:'异常频繁抛掷/捕获会带来栈展开与日志开销。'},
+{q:'程序试图使用未分配内存地址时，会引发（ ）异常。',o:['空指针异常','数组越界','类型错误','堆栈溢出'],a:0,e:'访问 null/野指针触发 NullPointerException 或 Segmentation Fault。'},
+{q:'在 C++ 中使用未初始化指针变量将导致（ ）。',o:['NullPointerException','IndexOutOfBoundsException','StackOverflowException','未定义行为'],a:3,e:'C++ 标准未规定结果，可能崩溃或输出随机值。'},
+{q:'数据库查询无结果时，常触发（ ）异常。',o:['数据格式','数据访问','数据不存在','数据存储'],a:2,e:'DAO 层通常封装为 NoSuchDataException 或返回空。'},
+{q:'下列（ ）异常与文件输入操作关系最密切。',o:['NullPointerException','FileNotFoundException','IndexOutOfBoundsException','StackOverflowException'],a:1,e:'打开文件路径无效或权限不足时抛出 FileNotFoundException。'},
+// 31‑40
+{q:'当数据被意外覆盖或损坏时，可能引发（ ）异常。',o:['数组越界','空指针','DataCorruptionException','UnsupportedOperationException'],a:2,e:'数据块校验失败会抛出数据损坏类型异常。'},
+{q:'覆盖类数据异常全部继承自 Exception 基类。',o:['正确','错误'],a:1,e:'部分语言将严重错误（Error）与可处理异常区分。'},
+{q:'覆盖类数据异常对程序运行没有影响。',o:['正确','错误'],a:1,e:'数据损坏或缺失将直接导致逻辑错误或崩溃。'},
+{q:'当数据集中存在缺失值时，最常采取的总体策略是（ ）。',o:['异常检测','数据清洗','数据转换','数据可视化'],a:1,e:'清洗步骤专门解决缺失、重复、噪声等质量问题。'},
+{q:'在 Python 中，处理缺失值最常用的库是（ ）。',o:['pandas','numpy','scikit‑learn','matplotlib'],a:0,e:'pandas 提供 isna、fillna、dropna 等强大接口。'},
+{q:'处理缺失数据的常见方法是（ ）。',o:['删除记录','填充缺失值','可视化','随机替换'],a:1,e:'填充值保持样本量，常用均值、中位数、模型预测。'},
+{q:'若缺失值是用户有意留空的信息，可选择不做处理。',o:['正确','错误'],a:0,e:'例如可选备注字段，空值本身即有效语义。'},
+{q:'对时间序列数据，以下方法最适合补齐缺失值（ ）。',o:['删除记录','插值法','均值填充','中位数填充'],a:1,e:'根据相邻时间点趋势做线性/样条插值能保留序列连续性。'},
+{q:'使用中位数填充缺失值一定优于均值填充。',o:['正确','错误'],a:1,e:'是否优于取决于分布形态和业务容忍度。'},
+{q:'可以直接删除含缺失值的所有样本记录。',o:['正确','错误'],a:1,e:'粗暴删除会损失信息并可能引入偏差，仅在缺失极少时可行。'},
+// 41‑50
+{q:'数据库出现重复数据时，首选策略为（ ）。',o:['异常检测','数据清洗','数据转换','可视化'],a:1,e:'清洗阶段可通过去重、聚合、标记等操作处理冗余。'},
+{q:'Python 处理中/大规模重复数据最常用的库是（ ）。',o:['pandas','numpy','sqlite3','matplotlib'],a:0,e:'drop_duplicates、duplicated API 简洁高效。'},
+{q:'处理重复数据时常见做法是（ ）。',o:['删除所有重复','保留随机记录','标记重复记录','随机删除部分记录'],a:2,e:'用标记保留信息，方便后续人工复核或业务逻辑决策。'},
+{q:'若重复记录是用户故意提交的，可选择不做去重。',o:['正确','错误'],a:0,e:'例如投票系统允许多次点赞则不应删除。'},
+{q:'对于（ ）数据类型，重复数据的处理尤为重要。',o:['文本数据','图像','音频','数值'],a:0,e:'文本去重能显著减少语料冗余，提升模型泛化。'},
+{q:'使用随机化方法删除重复记录是可靠的处理方式。',o:['正确','错误'],a:1,e:'随机删除无业务规则支撑，可能误删关键样本。'},
+{q:'数据集中出现噪声时，最常用的处理策略是（ ）。',o:['异常检测','数据清洗','数据转换','可视化'],a:1,e:'清洗阶段可用平滑、滤波等方式降低噪声。'},
+{q:'Python 中处理噪声数据常用的库是（ ）。',o:['pandas','numpy','scipy','matplotlib'],a:0,e:'pandas 配合 rolling/expanding + numpy/scipy 可快速平滑。'},
+{q:'下列方法可有效减少连续型数据中的随机噪声（ ）。',o:['删除样本','滤波技术','随机替换','手动修改'],a:1,e:'滤波（移动平均、中值滤波等）专为平滑波动设计。'},
+{q:'若噪声数据由用户故意添加，可选择不处理。',o:['正确','错误'],a:0,e:'部分安全测试或对抗样本需保留原貌作研究。'},
+// 51‑60
+{q:'对于（ ）数据类型，噪声处理尤为重要。',o:['文本','图像','音频','数值'],a:2,e:'背景噪声直接影响语音识别/合成效果。'},
+{q:'发现噪声后可直接忽略，不影响分析结论。',o:['正确','错误'],a:1,e:'噪声会拉低信噪比、增加模型方差。'},
+{q:'数据清洗过程中最常见的错误类型是（ ）。',o:['缺失值','重复值','异常值','噪声'],a:0,e:'在真实业务数据中，字段缺失最普遍。'},
+{q:'数据清洗的主要目标是（ ）。',o:['提高数据质量','标准化','去噪','异常检测'],a:0,e:'增加后续分析/建模的可信度与准确性。'},
+{q:'数据清洗流程中不可或缺的步骤是（ ）。',o:['数据筛选','预处理','错误类型识别','可视化'],a:2,e:'只有先识别问题，才能选择合适的修复策略。'},
+{q:'数值数据异常值可用 3σ 原则识别。',o:['正确','错误'],a:0,e:'正态近似时，99.7% 样本落在均值±3σ 区间。'},
+{q:'在图像清洗过程中可以直接忽略噪声像素。',o:['正确','错误'],a:1,e:'噪声会影响特征提取与视觉质量，需要滤波或降噪。'},
+{q:'以下错误类型通常最难识别与处理（ ）。',o:['缺失值','重复值','异常值','噪声'],a:2,e:'异常值往往与业务上下文相关，单纯统计方法难以完全区分。'},
+{q:'常见的异常值处理方法是（ ）。',o:['删除','均值替换','中位数替换','使用异常检测算法'],a:3,e:'基于模型/规则检测并替换或标记异常更稳健。'},
+{q:'统计方法可用于识别错误实例。',o:['正确','错误'],a:0,e:'箱线图、z-score 等统计量能反映离群程度。'},
+// 61‑70
+{q:'错误实例识别对数据清洗并不重要。',o:['正确','错误'],a:1,e:'误差源头未消除会使数据修复流于表面。'},
+{q:'在数据清洗过程中，需要重点纠正的错误类型通常是（ ）。',o:['缺失值','重复值','异常值','噪声'],a:2,e:'异常值对统计模型影响最大，亦难以自动忽略。'},
+{q:'删除所有缺失记录不是最常用的填充策略。',o:['正确','错误'],a:0,e:'在缺失较多或样本珍贵时，填充优于删除。'},
+{q:'完成清洗后，保证数据质量最常用的做法是（ ）。',o:['数据验证','数据回流','可视化','导出'],a:0,e:'验证环节通过统计检验/抽样复核发现残留问题。'},
+{q:'以下步骤属于数据回流流程（ ）。',o:['验证清洗后数据是否准确','导入数据库','可视化','导出报表'],a:1,e:'回流强调将修正结果返回原系统并再次比对。'},
+{q:'验证清洗结果时，可使用 Python pandas 进行核查。',o:['正确','错误'],a:0,e:'assert_frame_equal、描述统计对比等工具方便快捷。'},
+{q:'下列数据库中，（ ）最常被用于数据回流演示示例。',o:['MySQL','Oracle','SQL Server','PostgreSQL'],a:0,e:'MySQL 开源、易部署，在教学环境中普及率高。'},
+{q:'在数据清洗过程中，最需要“回流”核对的错误类型是（ ）。',o:['缺失值','重复值','异常值','噪声'],a:0,e:'补值正确性直接决定数据可用性。'},
+{q:'数据回流可以确保数据的准确性和质量。',o:['正确','错误'],a:0,e:'二次校验可避免因清洗脚本错误引入新问题。'},
+{q:'数据清洗完成后，可以不做数据回流。',o:['正确','错误'],a:1,e:'没有回流验证，难以保证修复效果和落库一致。'},
+// 71‑80
+{q:'在 Excel 中，处理缺失值常用的函数是（ ）。',o:['IF','COUNTIF','VLOOKUP','NA'],a:3,e:'=NA() 可显式标注缺失，再配合过滤/图表识别。'},
+{q:'删除 Excel 表中重复行可使用（ ）功能。',o:['筛选','排序','删除重复项','数据透视表'],a:2,e:'“数据”→“删除重复项”可按列快速去重。'},
+{q:'下列 Excel 选项可用于标识或着色异常值（ ）。',o:['条件格式','数据分析工具','图表','排序'],a:0,e:'设定大于/小于阈值等规则自动高亮离群点。'},
+{q:'将一列文本按分隔符拆分成多列应使用 Excel 中的（ ）操作。',o:['删除','替换','分列','复制'],a:2,e:'“数据”→“分列”向导按固定宽度或分隔符拆分字段。'},
+{q:'统一 Excel 列格式（如日期/货币）最便捷的工具是（ ）。',o:['格式刷','数据验证','排序','筛选'],a:0,e:'双击格式刷可批量复制单元格样式。'},
+{q:'Python 中最常用的数据清洗库是（ ）。',o:['NumPy','Pandas','Scikit‑learn','Matplotlib'],a:1,e:'Pandas 提供丰富的表格数据处理与 I/O 功能。'},
+{q:'删除 pandas DataFrame 中的列应使用（ ）方法。',o:['drop()','delete()','reset_index()','loc[]'],a:0,e:'df.drop(columns=[...]) 或 df.drop("col", axis=1)。'},
+{q:'填充 pandas 缺失值的常用函数是（ ）。',o:['fillna()','replace()','dropna()','merge()'],a:0,e:'支持常数、统计量、向前/向后填充等多模式。'},
+{q:'删除 pandas 中重复行用到的 API 是（ ）。',o:['drop_duplicates()','unique()','sort_values()','groupby()'],a:0,e:'默认保留首行，亦可指定子集列或保留最后一条。'},
+{q:'Python 不是专门的数据清洗工具，但配合 pandas 可轻松完成清洗任务。',o:['正确','错误'],a:0,e:'Python 生态（pandas + numpy + scipy）让通用语言兼具数据工程能力。'}
+];
+// ===== 页面渲染 =====
+const quizContainer=document.getElementById('quiz');
+let correctCount=0;let answeredCount=0;
+quizData.forEach((item,idx)=>{
+  const qDiv=document.createElement('div');qDiv.className='question';
+  const qTitle=document.createElement('p');qTitle.innerHTML=`<strong>${idx+1}. </strong>${item.q}`;
+  const ul=document.createElement('ul');ul.className='options';
+  item.o.forEach((opt,optIdx)=>{
+    const li=document.createElement('li');
+    li.innerHTML=`<label><input type="radio" name="q${idx}" value="${optIdx}"> ${String.fromCharCode(65+optIdx)}. ${opt}</label>`;
+    ul.appendChild(li);
+  });
+  const exp=document.createElement('div');exp.className='explanation';exp.textContent=item.e;
+  qDiv.appendChild(qTitle);qDiv.appendChild(ul);qDiv.appendChild(exp);
+  quizContainer.appendChild(qDiv);
+  ul.addEventListener('change',e=>{
+    if(e.target&&e.target.matches('input[type="radio"]')){
+      const selected=parseInt(e.target.value);
+      if(!qDiv.dataset.answered){answeredCount++;qDiv.dataset.answered='true';}
+      if(selected===item.a){
+        if(!qDiv.dataset.correct){correctCount++;qDiv.dataset.correct='true';}
+        exp.classList.add('correct');exp.textContent='✅ 回答正确！ '+item.e;
+      }else{
+        if(qDiv.dataset.correct!=='true'&&qDiv.dataset.answeredOnce!=='true'&&qDiv.dataset.answered==='true'){
+          // no decrement on second wrong change
+        }
+        exp.classList.add('incorrect');exp.textContent='❌ 回答错误；正确答案是 '+String.fromCharCode(65+item.a)+'. '+item.e;
+      }
+      qDiv.dataset.answeredOnce='true';
+      exp.style.display='block';
+      document.getElementById('scoreboard').textContent=`已答对 ${correctCount} / ${answeredCount} 题`;
+    }
+  });
+});
+// 结果按钮
+const finishBtn=document.getElementById('finishBtn');
+finishBtn.addEventListener('click',()=>{
+  alert(`你共回答 ${answeredCount} 题，正确 ${correctCount} 题，得分 ${(correctCount/quizData.length*100).toFixed(1)}%。`);
+});
+</script>
+</body>
+</html>

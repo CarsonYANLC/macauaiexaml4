@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>交互式刷题：数据处理与多媒体工具</title>
+<style>
+  body {font-family: "Segoe UI", "PingFang SC", Arial, sans-serif; background:#ffffff; color:#333; line-height:1.6; margin:0; padding:0 20px;}
+  h1{font-size:1.8rem; margin:20px 0 10px;}
+  h2{font-size:1.4rem; margin:18px 0 8px;}
+  .summary{border-left:4px solid #1976d2; padding-left:12px; background:#f5f5f5; margin-bottom:30px;}
+  .question{margin:25px 0; padding:15px 18px; border:1px solid #e0e0e0; border-radius:8px; transition:box-shadow .2s ease;}
+  .question:hover{box-shadow:0 2px 6px rgba(0,0,0,.1);}  
+  .options{margin:12px 0 0;}
+  .options label{display:block; margin-bottom:6px; cursor:pointer;}
+  .explanation{margin-top:10px; padding:10px 14px; background:#f0f7ff; border-left:3px solid #1976d2; border-radius:4px; display:none;}
+  .correct{color:#1b5e20; font-weight:600;}
+  .incorrect{color:#c62828; font-weight:600;}
+  #scoreBox{position:fixed; right:20px; bottom:20px; background:#1976d2; color:#fff; padding:10px 16px; border-radius:50px; font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,.2);}  
+</style>
+</head>
+<body>
+<h1>交互式刷题：MapReduce·文本/语音/图像标注·多媒体编辑</h1>
+<section class="summary">
+  <p>本套题围绕七大主题展开：<strong>① MapReduce 与数据清洗&nbsp;② Notepad++ 高效编辑&nbsp;③ Adobe Audition 语音标注&nbsp;④ LabelImg 图像标注&nbsp;⑤ “爱剪辑” 视频编辑&nbsp;⑥ 会声会影 Corel VideoStudio&nbsp;⑦ Adobe Premiere Pro</strong>。这些主题涵盖了从<strong>大数据处理、文本/音频/图像标注</strong>到<strong>视频剪辑调色</strong>的完整流程，旨在帮助学习者：</p>
+  <ul>
+    <li>理解 <em>MapReduce</em> 中各阶段在清洗、去重、缺失值处理中的角色；</li>
+    <li>掌握 Notepad++ 的快捷操作与批量转换技巧，提高代码与文本处理效率；</li>
+    <li>熟悉 Audition 的瞬态标记与标记面板，加快语音分割与标注流程；</li>
+    <li>使用 LabelImg 进行 Pascal VOC / YOLO 标注，快速切换标签与批量标注图片；</li>
+    <li>掌握主流视频编辑软件的常用特效、变速、调色与输出设置，实现高效剪辑；</li>
+    <li>理解各软件快捷键与插件生态，在跨工具协作中保持统一工作流。</li>
+  </ul>
+  <p>刷题时请关注每个选项背后的<strong>核心概念</strong>与<strong>场景应用</strong>：例如“Map 阶段为何适合行级清洗”，“Reduce 如何天然去重”，或“瞬态标记为何能自动定位语音能量突变”等。点击答案可立即查看解析与得分统计，帮助你查漏补缺。</p>
+</section>
+
+<div id="quiz"></div>
+<div id="scoreBox">得分：0 / 0</div>
+
+<script>
+const quizData=[
+// Ⅰ MapReduce 与数据清洗
+{q:"在 MapReduce 流程中，最常承担初步数据清洗的是（ ）。",o:["Map 阶段","Reduce 阶段","Combine 阶段","Shuffle 阶段"],a:0,e:"Map 任务遍历原始块并可直接过滤、规约字段，是清洗入口。"},
+{q:"MapReduce 清洗流程中，用来去除重复记录的典型环节是（ ）。",o:["Map","Reduce","Combine","Shuffle"],a:1,e:"Reduce 端按 key 聚合，可自然消除键值重复。"},
+{q:"在 MapReduce 清洗脚本里，map() 函数与下列哪类操作最匹配（ ）。",o:["行级过滤/字段标准化","结果汇总","分区路由","网络排序"],a:0,e:"map() 逐条处理记录，常做正则替换、空值剔除等行级清洗。"},
+{q:"使用 MapReduce 清洗日志时，最难自动处理的错误类型通常是（ ）。",o:["缺失值","重复数据","异常值","噪声数据"],a:1,e:"重复行可能跨分片出现，需全局去重与业务规则配合。"},
+{q:"Reduce 阶段可以对缺失字段进行填充或统计处理。（ ）",o:["正确","错误"],a:0,e:"Reduce 拿到同一 key 的所有记录，可计算均值/众数回填缺失项。"},
+{q:"\“MapReduce 不适合做数据清洗\”这一说法正确吗？（ ）",o:["正确","错误"],a:1,e:"MapReduce 本质是并行转换框架，只要任务可拆分，就能高效清洗。"},
+// Ⅱ Notepad++
+{q:"在 Notepad++ 中，能“一键注释/取消注释”当前行或选区的快捷键是（ ）。",o:["Ctrl + Shift + A","Ctrl + /","Ctrl + Shift + /","Ctrl + Space"],a:1,e:"默认键位可根据语言注释标记快速开关。"},
+{q:"快速跳转到指定行号可使用（ ）。",o:["Ctrl + G","F3","搜索对话框","滚动鼠标"],a:0,e:"Ctrl + G 会弹出 Go To Line 输入框。"},
+{q:"需要一键统一“全部改小写”时，可在菜单“编辑 → 转换大小写”里选择（ ）。",o:["UPPER CASE","Proper Case","lower case","Sentence case"],a:2,e:"该功能也能配置为自定义快捷键。"},
+{q:"将 Windows(DOS) 换行批量改为 UNIX 格式，最快方法是（ ）。",o:["插件 TextFX","菜单“编辑 → EOL 转换 → UNIX/OS X”","查找替换 \\r\\n","宏录制"],a:1,e:"EOL 转换直接修改存储标志，避免正则误替换。"},
+{q:"Notepad++ 支持通过插件扩展语言高亮、代码格式化等功能。（ ）",o:["正确","错误"],a:0,e:"可通过 Plugin Admin 或第三方源一键安装。"},
+{q:"常见的自动代码格式化插件可以为多语言统一缩进与括号风格。（ ）",o:["正确","错误"],a:0,e:"插件解析语法树后重新排版代码。"},
+// Ⅲ Audition
+{q:"Audition 中可用于标记音节、重音的工具是（ ）。",o:["瞬态标记器","音乐符号标记器","文本时间线标记器","节拍标记器"],a:0,e:"瞬态 = 自动检测波形能量突变点，适合语音分割。"},
+{q:"创建瞬态标记的默认快捷键是（ ）。",o:["T","M","L","P"],a:0,e:"按 T 即在光标处生成瞬态标记。"},
+{q:"要快速跳到下一个/上一个标记，可使用键盘组合（ ）。",o:["↑↓","Page Up/Page Down","Alt + ← / Alt + →","Home/End"],a:2,e:"Alt + 方向键在标记之间循环跳转。"},
+{q:"Audition 查看与批量编辑标注的最佳界面是（ ）。",o:["波形视图","多轨视图","时间轴/标记面板","频谱视图"],a:2,e:"标记列表可排序、重命名并导出 CSV。"},
+{q:"通过“调整麦克风设置 + ASR + 分析参数”组合，可显著提高标注效率。（ ）",o:["正确","错误"],a:0,e:"高质量采集 + 自动初标 + 细粒度分析三步闭环。"},
+// Ⅳ LabelImg
+{q:"LabelImg 默认使用的标注文件格式是（ ）。",o:["Pascal VOC XML","CSV","YOLO TXT","COCO JSON"],a:0,e:"软件亦可切换为 YOLO/COCO 格式。"},
+{q:"新建标注框的快捷键为（ ）。",o:["Ctrl + N","Ctrl + O","Ctrl + S","Ctrl + W"],a:3,e:"快捷键触发 Create RectBox。"},
+{q:"设置边界框可通过“拖拽鼠标”或“手动输入坐标”。这说明 LabelImg 支持（ ）。",o:["仅鼠标绘制","仅坐标输入","多方式混合","导入外部 CSV"],a:2,e:"精细标注时常用手输像素坐标修正。"},
+{q:"修改已选框的类别标签，可直接键入新名或在标签列表选择。（ ）",o:["正确","错误"],a:0,e:"软件提供键盘映射提升效率。"},
+{q:"LabelImg 可一次加载整个文件夹中的多幅图像进行顺序标注。（ ）",o:["正确","错误"],a:0,e:"Open Dir 会生成待标注队列并可快捷切换。"},
+// Ⅴ 爱剪辑
+{q:"制作慢动作效果应选用（ ）速度特效。",o:["加速","减速","正常速度","逆向"],a:1,e:"减速 = <1× 帧率重采样。"},
+{q:"往视频添加文字标题的常用路径是（ ）。",o:["导入时附加","字幕/文字功能","滤镜","叠加轨道"],a:1,e:"字幕模块支持入出场动画与样式。"},
+{q:"两片段间最常见的平滑衔接效果是（ ）。",o:["淡入淡出","溶解","滑动","缩放"],a:0,e:"交叉淡化视觉自然、不突兀。"},
+{q:"调整音轨音量可通过“拖动包络线”“属性对话框”“↑↓快捷键”任一方法。（ ）",o:["正确","错误"],a:0,e:"软件针对不同习惯提供多入口。"},
+{q:"旋转视频画面应使用（ ）。",o:["重新编码文件","旋转滤镜","调整画面方向选项","外部编辑器"],a:1,e:"大多数软件内置 90°/180°/任意角度旋转滤镜。"},
+{q:"爱剪辑 支持导入 MP3 / WAV / OGG 等多种音频格式。（ ）",o:["正确","错误"],a:0,e:"常见有损/无损格式均可直接拖入时间线。"},
+// Ⅵ 会声会影
+{q:"快速删除片段中不需要的音频可使用（ ）工具。",o:["剪辑","修整","淡化","调整音量"],a:0,e:"剪切并删除选区，剩余自动贴合。"},
+{q:"提升视频饱和度应当调用（ ）调色选项。",o:["色彩平衡","饱和度","亮度","对比度"],a:1,e:"饱和度提高 = 色彩更鲜艳。"},
+{q:"不同分辨率片段衔接时，常用的平滑放大/缩小过渡是（ ）。",o:["溶解","淡入淡出","滑动","缩放"],a:3,e:"缩放可逐帧调整画面大小匹配。"},
+{q:"给文字标题加特殊效果可直接套用（ ）滤镜。",o:["模糊","发光","阴影","文字特效滤镜"],a:3,e:"内置大量滚动、打字机等动画。"},
+{q:"调快或放慢整段音频需在属性里修改（ ）。",o:["播放速度","音量","淡化","均衡器"],a:0,e:"数字百分比或时间重映射滑块。"},
+{q:"会声会影支持将多轨视频混剪并一次性渲染输出。（ ）",o:["正确","错误"],a:0,e:"可叠加轨道、画中画、关键帧混合后导出。"},
+// Ⅶ Premiere Pro
+{q:"Premiere 中最常用的剪辑刀具图标名称是（ ）。",o:["切割工具","剃刀工具","滑动工具","速率拉伸"],a:1,e:"剃刀 (C) 在光标处断开片段。"},
+{q:"想快速增强对比度，可拖入 Lumetri 色彩面板里的（ ）效果。",o:["色彩平衡/对比度","饱和度","亮度","曲线"],a:0,e:"Basic Correction 里有 Contrast 滑块。"},
+{q:"放大时间线视图的快捷键是（ ）。",o:["+","-","0","1"],a:0,e:"“=” 亦可，视键位布局而定。"},
+{q:"想让某条音轨静音，可在轨道首部单击扬声器图标或将音量调至 0 dB。（ ）",o:["正确","错误"],a:0,e:"两方法效果等价，前者更直观。"},
+{q:"导出最终成片为 MP4 (H.264) 的常规路线包括：文件 → 导出 → 媒体 → 格式选 H.264。（ ）",o:["正确","错误"],a:0,e:"也可用 Ctrl + M 呼出导出面板。"},
+{q:"Premiere Pro 仅提供少量官方滤镜，无法安装第三方插件。（ ）",o:["正确","错误"],a:1,e:"支持 BorisFX、Red Giant 等丰富插件生态。"}
+];
+
+const quizContainer=document.getElementById("quiz");
+let score=0;const total=quizData.length;
+
+quizData.forEach((item,idx)=>{
+  const qDiv=document.createElement("div");
+  qDiv.className="question";
+  const qTitle=document.createElement("h2");
+  qTitle.textContent=`${idx+1}. ${item.q}`;
+  const optDiv=document.createElement("div");
+  optDiv.className="options";
+  item.o.forEach((opt,optIdx)=>{
+    const id=`q${idx}_opt${optIdx}`;
+    const label=document.createElement("label");
+    const radio=document.createElement("input");
+    radio.type="radio";radio.name=`q${idx}`;radio.id=id;radio.dataset.correct=(optIdx===item.a);
+    label.appendChild(radio);
+    label.insertAdjacentText("beforeend",` ${opt}`);
+    optDiv.appendChild(label);
+  });
+  const exp=document.createElement("div");exp.className="explanation";
+  qDiv.appendChild(qTitle);
+  qDiv.appendChild(optDiv);
+  qDiv.appendChild(exp);
+  quizContainer.appendChild(qDiv);
+});
+
+document.querySelectorAll('input[type="radio"]').forEach(radio=>{
+  radio.addEventListener('change',e=>{
+    const parentQ=e.target.closest('.question');
+    if(parentQ.dataset.done)return; // already answered
+    parentQ.dataset.done=true;
+    const isCorrect=e.target.dataset.correct==='true';
+    const expDiv=parentQ.querySelector('.explanation');
+    expDiv.style.display='block';
+    const qIndex=[...quizContainer.children].indexOf(parentQ);
+    expDiv.innerHTML=`<span class="${isCorrect?"correct":"incorrect"}">${isCorrect?"回答正确":"回答错误"}</span>：${quizData[qIndex].e}`;
+    if(isCorrect)score++;
+    updateScore();
+    // 禁用同题其他选项
+    parentQ.querySelectorAll('input[type="radio"]').forEach(r=>r.disabled=true);
+  });
+});
+
+function updateScore(){
+  document.getElementById('scoreBox').textContent=`得分：${score} / ${total}`;
+}
+// 初始化总数
+updateScore();
+</script>
+</body>
+</html>

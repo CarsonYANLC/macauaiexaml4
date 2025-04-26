@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>数据定义与分类——交互式刷题</title>
+<style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fff;color:#222}
+    h1{margin:20px;text-align:center}
+    #intro{max-width:900px;margin:10px auto 30px;line-height:1.6}
+    .question{border:1px solid #ddd;border-radius:8px;padding:15px;margin:15px auto;max-width:900px}
+    .question.correct{border-color:#4caf50;background:#f1f8e9}
+    .question.wrong{border-color:#f44336;background:#ffebee}
+    .question h3{margin:0 0 10px}
+    .options label{display:block;cursor:pointer;margin:6px 0}
+    .explanation{margin-top:8px;font-size:0.9em;display:none}
+    #scoreBox{position:fixed;bottom:0;left:0;right:0;background:#f5f5f5;
+              border-top:1px solid #ccc;padding:10px;text-align:center;font-size:1.1em}
+</style>
+</head>
+<body>
+<h1>数据定义与分类 交互式练习</h1>
+
+<section id="intro">
+  <p>本套题共 <strong>65</strong> 题，覆盖数据定义原则与规则、定义文档方法、特征工程、
+  行业应用、分类层级、数据类型约束、数据清理与验证、SQL 分类查询、深度学习归类等九大模块。
+  点击选项即可即时判分并查看解析；全部作答完毕可查看总成绩。</p>
+</section>
+
+<div id="quiz"></div>
+
+<div id="scoreBox">已答 0 / 65 | 正确 0 | 准确率 0%</div>
+
+<script>
+const questions=[
+{q:"在定义数据时，下列哪条原则要求信息必须真实反映业务？",
+ opts:["完整性","唯一性","规范性","有效性"],answer:0,
+ exp:"完整性原则强调数据应“无缺无漏”，准确呈现业务全貌。"},
+{q:"确保同一字段不会出现重复值所遵循的规则是（ ）。",
+ opts:["完整性","唯一性","规范性","可靠性"],answer:1,
+ exp:"唯一性（Uniqueness）强调键值或标识符不可重复。"},
+{q:"数据定义必须遵循统一格式与命名标准，这体现了（ ）原则。",
+ opts:["完整性","可预测性","规范性","可量化性"],answer:2,
+ exp:"规范性确保数据结构一致、类型可解析。"},
+{q:"以下哪条原则主要用于衡量数据能否被度量和比较？",
+ opts:["可重复性","可量化性","可比较性","可预测性"],answer:1,
+ exp:"可量化性表示数据可转换为数值或可排序的符号体系。"},
+{q:"“数据必须满足业务校验、格式校验等条件”强调的是（ ）。",
+ opts:["有效性","精确性","完整性","唯一性"],answer:0,
+ exp:"有效性（Validity）关注值域、类型和业务逻辑合法性。"},
+{q:"关于“数据的规范性比完整性更重要”这一说法，正确与否？",
+ opts:["正确","错误"],answer:1,
+ exp:"两者同等关键，缺一不可；完整性是规范性的前提。"},
+{q:"“只要数据准确即可，不必遵循定义规则”——此观点（ ）。",
+ opts:["正确","错误"],answer:1,
+ exp:"无规则无法保证后续兼容性与可维护性。"},
+{q:"唯一性原则要求数据在（ ）情况下保持唯一。",
+ opts:["同一表内部","同一数据库","跨系统","具体场景下的主键约束"],answer:3,
+ exp:"实务中通常限定在主键或业务键约束范围内。"},
+{q:"完整性、唯一性、规范性共同目标是提高数据的（ ）。",
+ opts:["可视化","可靠性","存储效率","数据量"],answer:1,
+ exp:"三原则旨在确保数据可信可用。"},
+{q:"数据定义的“可重复性”指（ ）。",
+ opts:["可多次采集","多人可独立得到同结果","易复制文件","备份方便"],answer:1,
+ exp:"相同方法、同样输入应得到一致输出。"},
+{q:"哪种方法最适合描述半结构化或灵活格式的数据？",
+ opts:["表格定义","流程图","文本（说明书）","结构化模型"],answer:2,
+ exp:"文本可自由记录字段含义、示例与注意事项。"},
+{q:"若需呈现数据项、类型、默认值等详细元信息，应使用（ ）。",
+ opts:["数据字典","数据模型","流程图","代码注释"],answer:0,
+ exp:"数据字典是字段级文档，最能体现元数据描述。"},
+{q:"想快速了解实体之间的关系与层次，可查看（ ）。",
+ opts:["数据字典","概念/逻辑数据模型","流程图","API 手册"],answer:1,
+ exp:"ER 模型展示表、字段与关联。"},
+{q:"数据流程图侧重说明（ ）。",
+ opts:["字段约束","存储介质","处理过程","可视化样式"],answer:2,
+ exp:"它描绘数据从输入到输出的流向与加工步骤。"},
+{q:"“表格定义法＋数据字典＋ER 模型”是否覆盖了全部定义手段？",
+ opts:["正确","错误"],answer:1,
+ exp:"仍可补充接口说明、采集协议等。"},
+{q:"结构化定义法的主要优势是（ ）。",
+ opts:["最易懂","兼容多数据源","能自动生成数据库脚本","不需维护"],answer:2,
+ exp:"UML/DDL 工具可直接生成建表语句。"},
+{q:"下列哪种文档能同时反映“来源、用途、质量指标”？",
+ opts:["数据字典","ER 图","元数据登记表","任务流水线脚本"],answer:2,
+ exp:"元数据登记/血缘登记往往含这些维度。"},
+{q:"“数据定义方法只有三种”这一说法是否正确？",
+ opts:["正确","错误"],answer:1,
+ exp:"实务中方法多样，可灵活组合。"},
+{q:"特征选择优先考虑的维度通常不包括（ ）。",
+ opts:["物理含义","计算复杂度","维数","数据库索引"],answer:3,
+ exp:"索引是存取层面，不是选择维度核心。"},
+{q:"进行特征提取的主要目的之一是（ ）。",
+ opts:["降低维度","扩充噪声","改变存储格式","增加采样率"],answer:0,
+ exp:"提取抽象特征以简化模型、抑制冗余。"},
+{q:"文本分类时最常用的信息特征是（ ）。",
+ opts:["文档长度","关键词出现频率","字体样式","文字颜色"],answer:1,
+ exp:"词频/TF-IDF 与主题强相关。"},
+{q:"减少特征冗余常用的线性降维技术是（ ）。",
+ opts:["PCA","One-Hot","归一化","对数变换"],answer:0,
+ exp:"PCA 去相关、保留主成分。"},
+{q:"避免过拟合选择特征的主要动机是（ ）。",
+ opts:["提升泛化","增加复杂度","缩短训练时间","提高训练集准确率"],answer:0,
+ exp:"减少无关特征可防止模型记忆噪声。"},
+{q:"“特征提取与特征选择是同一过程”这一说法（ ）。",
+ opts:["正确","错误"],answer:1,
+ exp:"提取强调构造新特征，选择强调筛掉冗余。"},
+{q:"执行特征选择后，模型训练时间通常会（ ）。",
+ opts:["增加","减少","不变","无法预测"],answer:1,
+ exp:"特征变少，计算量下降。"},
+{q:"数据定义在（ ）行业对准确性和一致性要求最严。",
+ opts:["科学研究","电子商务","网络安全","教育管理"],answer:0,
+ exp:"科研数据误差会直接影响学术结论。"},
+{q:"金融交易系统特别强调数据的（ ）。",
+ opts:["完整性与规范性","可预测性","多媒体格式","匿名性"],answer:0,
+ exp:"金融需无损同步，且符合法规格式。"},
+{q:"市场调研场景应重点考虑数据的（ ）。",
+ opts:["来源可靠性与时效","媒体类型","压缩比例","GPU 算力"],answer:0,
+ exp:"时效与来源直接影响分析结论。"},
+{q:"学术研究对数据唯一性和准确性要求高，这是因为（ ）。",
+ opts:["可复现性","存储成本","可压缩性","合规审计"],answer:0,
+ exp:"结论需他人验证，数据不能矛盾或遗漏。"},
+{q:"“并非所有领域都必须建立数据模型”这一说法是否成立？",
+ opts:["正确","错误"],answer:0,
+ exp:"某些一次性脚本或小规模临时数据可省模型。"},
+{q:"数据定义在绝大多数领域都重要，此说法（ ）。",
+ opts:["正确","错误"],answer:0,
+ exp:"数据治理已成通用底座。"},
+{q:"下列哪一行业最早大规模使用层次分类法？",
+ opts:["图书馆学","游戏开发","视频制作","音乐创作"],answer:0,
+ exp:"图书十进制分类系统是典型案例。"},
+{q:"在进行数据归类时，“第一级分类”通常代表（ ）。",
+ opts:["最粗粒度","中等粒度","细粒度","最细粒度"],answer:0,
+ exp:"第一级→主题大类。"},
+{q:"“第四级分类”往往适用于（ ）。",
+ opts:["超细分领域","粗略汇总","高维概览","地理分区"],answer:0,
+ exp:"数字越大粒度越细。"},
+{q:"如果业务只需大类统计，应选择（ ）级别。",
+ opts:["第一级","第二级","第三级","第四级"],answer:0,
+ exp:"无需细分时用顶层分类即可。"},
+{q:"级别设置越高（数字越大），分类粒度通常（ ）。",
+ opts:["越细","越粗","不变","不确定"],answer:0,
+ exp:"层级深化，粒度细化。"},
+{q:"“分类级别固定不可调整”的说法（ ）。",
+ opts:["正确","错误"],answer:1,
+ exp:"应根据业务变化灵活增减。"},
+{q:"以下哪项规则主要保障“数据统一处理”？",
+ opts:["规范性","唯一性","可预测性","完整性"],answer:0,
+ exp:"统一格式、命名、类型是前提。"},
+{q:"对于半结构化日志，最关键的归类规则是（ ）。",
+ opts:["规范性","唯一性","可预测性","完整性"],answer:2,
+ exp:"日志格式变化大，需能提前预见字段结构。"},
+{q:"制定字符串字段规则时，必须显式规定（ ）。",
+ opts:["长度","精度","取值范围","默认编码"],answer:0,
+ exp:"可防止溢出与截断。"},
+{q:"对整数字段首先应考虑的约束是（ ）。",
+ opts:["长度","范围","精度","排序方式"],answer:1,
+ exp:"范围决定存储类型与边界检查。"},
+{q:"浮点数规则与整数相比，多出的关键点是（ ）。",
+ opts:["长度","精度","唯一索引","字符集"],answer:1,
+ exp:"需限定小数位数。"},
+{q:"元组最适合存储（ ）。",
+ opts:["固定、已知数量的值","可变列表","键-值对","无序去重集"],answer:0,
+ exp:"元组不可变，结构固定。"},
+{q:"集合（set）最突出的特性是（ ）。",
+ opts:["可变数量且去重","可变数量且保持顺序","键-值映射","只读"],answer:0,
+ exp:"天然去重、不保序。"},
+{q:"“布尔字段需要考虑取值范围”是否正确？",
+ opts:["正确","错误"],answer:1,
+ exp:"范围固定为 True/False。"},
+{q:"创建数据规则时，同时考虑精度与长度的说法（ ）。",
+ opts:["正确","错误"],answer:0,
+ exp:"二者共同决定存储与校验。"},
+{q:"Excel 用户想筛选“介于 100 和 200”应使用（ ）。",
+ opts:["IF","数字筛选“介于”","排序","自定义列表"],answer:1,
+ exp:"数字筛选支持区间过滤。"},
+{q:"以下哪项 Excel 功能可批量设置复杂多条件筛选？",
+ opts:["高级筛选","基本筛选","Top 10","切片器"],answer:0,
+ exp:"高级筛选可写条件区。"},
+{q:"Python pandas 进行自定义过滤的常用接口是（ ）。",
+ opts:["df.query()","df.plot()","df.shape","df.to_excel()"],answer:0,
+ exp:"query 允许以表达式方式过滤。"},
+{q:"确认文件已成功写盘最可靠的第一步是（ ）。",
+ opts:["看文件大小/时间戳","重启电脑","打开别的程序","清理磁盘"],answer:0,
+ exp:"时间戳/大小可快速验证写入。"},
+{q:"清除临时文件的最常见益处是（ ）。",
+ opts:["释放空间","提高网络速度","升级系统","修改权限"],answer:0,
+ exp:"可直接回收磁盘容量。"},
+{q:"要快速定位电子表格中空值，可使用（ ）。",
+ opts:["筛选空白","阅读模式","打印预览","拼写检查"],answer:0,
+ exp:"筛选 → 空白行可见。"},
+{q:"多条件分类查询常用的 SQL 子句是（ ）。",
+ opts:["WHERE","HAVING","CASE","LIMIT"],answer:2,
+ exp:"CASE 可在同一行内按条件返回不同标签。"},
+{q:"大型数据集联表效率最高的一般是（ ）操作。",
+ opts:["INNER JOIN","FULL JOIN","CROSS JOIN","RIGHT JOIN"],answer:0,
+ exp:"最常见且可用索引优化。"},
+{q:"想根据一个表的类别去筛选另一表相关数据，应使用（ ）。",
+ opts:["JOIN","子查询","UNION","别名"],answer:0,
+ exp:"联表后可直接按类别筛选。"},
+{q:"EXISTS/ALL/ANY 子查询在分类查询中（ ）。",
+ opts:["都可使用","仅 EXISTS","仅 ANY","均不可"],answer:0,
+ exp:"三者均可根据需求使用。"},
+{q:"“无论数据量大小，所有 SQL 查询速度相同”这一说法（ ）。",
+ opts:["正确","错误"],answer:1,
+ exp:"统计/索引/数据量都会影响性能。"},
+{q:"CASE 语句在查询中主要用于（ ）。",
+ opts:["动态分类标签","建索引","创建视图","批量删除"],answer:0,
+ exp:"可根据条件返回不同分类结果。"},
+{q:"传统图像分类中效果最好的经典算法是（ ）。",
+ opts:["线性分类器","SVM","决策树","KNN"],answer:1,
+ exp:"SVM 在小样本高维场景表现突出。"},
+{q:"卷积神经网络训练常用的基础优化器是（ ）。",
+ opts:["SGD/BP","牛顿法","拟牛顿","共轭梯度"],answer:0,
+ exp:"随机梯度下降 + 反向传播是入门首选。"},
+{q:"图像任务中最常用的防过拟合技术是（ ）。",
+ opts:["L1","L2","Dropout","数据漂移"],answer:2,
+ exp:"随机失活可减少共适应。"},
+{q:"图像数据增强最典型的操作是（ ）。",
+ opts:["旋转／翻转","加强光照","更换相机","数据压缩"],answer:0,
+ exp:"几何变换简单有效。"},
+{q:"语音分类最常用的声学特征是（ ）。",
+ opts:["FFT","LPC","小波","MFCC"],answer:3,
+ exp:"MFCC 模拟人耳听觉特性。"},
+{q:"长短期记忆网络（LSTM）常用于语音归类的原因是（ ）。",
+ opts:["捕捉时序依赖","计算快","参数少","不需正则"],answer:0,
+ exp:"LSTM 擅长处理长距离依赖。"},
+{q:"文本分类深度模型训练中最常用损失函数是（ ）。",
+ opts:["MSE","交叉熵","Hinge","MAE"],answer:1,
+ exp:"交叉熵衡量概率分布差异。"}
+];
+
+let correct=0,attempted=0;
+const quizDiv=document.getElementById("quiz");
+const scoreBox=document.getElementById("scoreBox");
+
+questions.forEach((item,idx)=>{
+  const qDiv=document.createElement("div");
+  qDiv.className="question";
+  const h3=document.createElement("h3");
+  h3.textContent=`${idx+1}. ${item.q}`;
+  qDiv.appendChild(h3);
+
+  const optsDiv=document.createElement("div");
+  optsDiv.className="options";
+
+  item.opts.forEach((opt,optIdx)=>{
+    const id=`q${idx}_o${optIdx}`;
+    const label=document.createElement("label");
+    const radio=document.createElement("input");
+    radio.type="radio";
+    radio.name=`q${idx}`;
+    radio.value=optIdx;
+    radio.id=id;
+    label.appendChild(radio);
+    label.append(` ${String.fromCharCode(65+optIdx)}. ${opt}`);
+    label.htmlFor=id;
+    label.addEventListener("change",()=>checkAnswer(idx,qDiv,item,radio));
+    optsDiv.appendChild(label);
+  });
+  qDiv.appendChild(optsDiv);
+
+  const expP=document.createElement("p");
+  expP.className="explanation";
+  expP.textContent=`解析：${item.exp}`;
+  qDiv.appendChild(expP);
+
+  quizDiv.appendChild(qDiv);
+});
+
+function checkAnswer(idx,qDiv,item,radio){
+  if(qDiv.dataset.done) return; // 避免重复评分
+  qDiv.dataset.done=true;
+  attempted++;
+  const chosen=parseInt(radio.value,10);
+  const isCorrect=chosen===item.answer;
+  if(isCorrect){correct++;qDiv.classList.add("correct");}
+  else{qDiv.classList.add("wrong");}
+  qDiv.querySelector(".explanation").style.display="block";
+  updateScore();
+}
+function updateScore(){
+  const acc=attempted?((correct/attempted)*100).toFixed(1):0;
+  scoreBox.textContent=`已答 ${attempted} / 65 | 正确 ${correct} | 准确率 ${acc}%`;
+}
+</script>
+</body>
+</html>

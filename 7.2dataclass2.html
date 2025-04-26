@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>数据归类与前期处理 · 互动学习</title>
+<style>
+ body{margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#333}
+ .container{max-width:960px;padding:24px;margin:0 auto}
+ h1{font-size:28px;margin-top:0;text-align:center}
+ h2{font-size:22px;margin:24px 0 12px}
+ .question-card{border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:20px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+ .option{display:block;margin:8px 0}
+ button{padding:6px 14px;border:none;border-radius:4px;background:#1976d2;color:#fff;cursor:pointer;font-size:14px}
+ button:disabled{opacity:.6;cursor:default}
+ .correct{color:#2e7d32;font-weight:700}
+ .incorrect{color:#d32f2f;font-weight:700}
+ .explanation{margin-top:10px;padding:10px;border-left:4px solid #1976d2;background:#f5f5f5}
+ #result{margin-top:32px;text-align:center;font-size:18px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>数据归类与前期处理 · 互动学习</h1>
+  <section id="overview">
+    <h2>概念梳理与导学</h2>
+    <p><strong>数据归类 (Data Classification)</strong> 是将样本根据<strong>属性特征</strong>映射到离散类别标签的过程。它与<strong>聚类 (Clustering)</strong> 的主要区别在于是否存在<strong>已知标签</strong>：前者属于<strong>监督学习</strong>，后者则为<strong>无监督学习</strong>。</p>
+    <p>高质量模型的前提是<strong>可靠数据</strong>。因此，在进入建模阶段前，需完成 <em>数据收集 → 数据理解 → 数据清洗 / 预处理</em> 等步骤。常见的预处理操作包括：<br>• 处理缺失值（均值/中位数插补、回归插补等）<br>• 处理异常值（箱线图、Z‑score 检验等）<br>• 特征缩放与标准化（z‑score、min‑max）<br>• 类别编码（独热编码、目标编码）<br>• 降维（PCA、LDA）与抽样 (SMOTE、欠采样)</p>
+    <p>归类模型从 <strong>简单规则</strong>（KNN、朴素贝叶斯）到 <strong>复杂集成</strong>（随机森林、梯度提升）不等。模型评估需综合 <em>混淆矩阵</em> 派生的 <strong>精确率</strong>、<strong>召回率</strong>、<strong>F1</strong> 以及与阈值无关的 <strong>ROC‑AUC</strong>，并关注训练效率、可解释性与部署环境。</p>
+    <p>在生产环境中，数据归类是一个<strong>闭环流程</strong>：<em>训练 → 评估 → 部署 → 监控 → 更新</em>。持续监控数据漂移并回流新标注，可确保模型长期保持性能。</p>
+  </section>
+
+  <section id="quiz"></section>
+  <div id="result"></div>
+</div>
+<script>
+const quizData=[
+ {id:1,type:"mc",question:`在数据归类中，（ ）方法通常用于将连续数据转换为离散数据。`,options:['分位数法','聚类分析','决策树分析','主成分分析'],answer:0,explanation:`分位数(等频)分箱把连续变量按百分位点切分，是最常见的离散化手段。`},
+ {id:2,type:"mc",question:`在数据归类中，（ ）图形通常用于展示分类结果。`,options:['散点图','条形图','饼图','箱线图'],answer:2,explanation:`饼图能直观显示各类别所占比例，常用来呈现分类结果分布。`},
+ {id:3,type:"mc",question:`在数据归类中，K-近邻算法通常用于（ ）分类问题。`,options:['线性可分','线性不可分','类别不均衡','多分类'],answer:3,explanation:`KNN 可自然扩展到多类别场景；对线性可分性没有硬性要求。`},
+ {id:4,type:"mc",question:`在数据归类中，（ ）算法可以直接处理少量缺失值。`,options:['K-近邻算法','支持向量机','决策树算法','逻辑回归'],answer:2,explanation:`决策树可通过“分支代理”等机制在训练时绕过缺失属性。`},
+ {id:5,type:"mc",question:`在数据归类中，（ ）评估方法最常用于快速查看分类准确性。`,options:['混淆矩阵','ROC 曲线','互信息','皮尔逊相关系数'],answer:0,explanation:`混淆矩阵列出 TP/FP/FN/TN，可直接计算精确度、召回率等指标。`},
+ {id:6,type:"mc",question:`在数据前期处理中，（ ）方法常用于处理异常值。`,options:['中位数法','均值法','箱线图法','正态分布法'],answer:2,explanation:`箱线图利用 IQR 判断异常点，简单直观并与分布形态无关。`},
+ {id:7,type:"mc",question:`在数据前期处理中，（ ）方法可以用于处理缺失值。`,options:['均值插补','中位数插补','回归插补','随机插补'],answer:0,explanation:`均值插补实现简单，是最常用的连续变量缺失处理方式。`},
+ {id:8,type:"mc",question:`在数据前期处理中，（ ）方法可以用于降低噪声对模型的影响。`,options:['离散化','标准化','小波变换','傅里叶变换'],answer:1,explanation:`标准化（z-score）将特征缩放到同一量纲，能弱化极端值噪声。`},
+ {id:9,type:"mc",question:`在数据前期处理中，（ ）操作常用于将类别文本特征转为数值。`,options:['标准化','归一化','主成分分析','独热编码'],answer:3,explanation:`One‑Hot Encoding 把类别变量拆成 0/1 向量，便于模型处理。`},
+ {id:10,type:"mc",question:`在数据预识别中，（ ）统计检验常用于判定分类变量关联性。`,options:['卡方检验','T 检验','方差分析','回归分析'],answer:0,explanation:`卡方检验衡量列联表中观察频数与期望频数差异，判断类别关系。`},
+ {id:11,type:"mc",question:`在数据预识别中，（ ）方法可用于检测连续变量的异常值。`,options:['Z 值检验','T 检验','方差分析','回归分析'],answer:0,explanation:`Z‑score 检验通过标准差距离识别异常样本。`},
+ {id:12,type:"mc",question:`在数据预识别中，（ ）图形最常用来观察变量分布形态。`,options:['散点图','条形图','直方图','箱线图'],answer:2,explanation:`直方图能显示频数随区间变化的分布，便于判断偏态、峰态等特征。`},
+ {id:13,type:"mc",question:`在数据预识别中，（ ）分析可初步衡量多变量间聚合关系。`,options:['主成分分析','因子分析','聚类分析','判别分析'],answer:2,explanation:`聚类基于距离/相似度衡量样本之间结构，帮助发现潜在分组。`},
+ {id:14,type:"mc",question:`在数据标注中，（ ）方法常用于将数据分为多个类别。`,options:['K-means 聚类','决策树分类','人工标注','支持向量机分类'],answer:2,explanation:`大规模训练集仍需人工根据领域知识给定“金标准”类别。`},
+ {id:15,type:"mc",question:`在数据标注中，（ ）策略能显著提高标注一致性。`,options:['过度标注','欠标注','监督学习','非监督学习'],answer:0,explanation:`多人重叠标注+仲裁可度量一致性 (κ) 并修正歧义。`},
+ {id:16,type:"mc",question:`在数据标注中，（ ）技术可显著减少纯人工工作量。`,options:['自动标注','监督学习','非监督学习','以上都是'],answer:0,explanation:`典型做法是用预训练模型或规则预填标签，再人工校正。`},
+ {id:17,type:"mc",question:`在数据标注中，（ ）方法可处理非结构化文本的多粒度信息。`,options:['分词标注','实体识别','关系抽取','以上都是'],answer:3,explanation:`以上技术层层递进，涵盖从词到实体再到实体间关系的标注场景。`},
+ {id:18,type:"mc",question:`在数据归类中，（ ）方法常用于根据多个特征进行分类。`,options:['决策树分类','K-means 聚类','人工标注','主成分分析'],answer:0,explanation:`决策树能处理高维混合特征并给出可解释的划分规则。`},
+ {id:19,type:"mc",question:`在数据归类中，（ ）技术组合可有效处理类别极度不均衡。`,options:['SVM','随机森林','过采样和欠采样','以上都可以'],answer:2,explanation:`SMOTE/随机欠采样等重新配比类别样本后再训练模型。`},
+ {id:20,type:"mc",question:`在数据归类中，（ ）指标集合综合反映模型在正负样本上的表现。`,options:['F1 分数','ROC 曲线','精确度 + 召回率','以上都可以'],answer:3,explanation:`F1 是精准-召回调和，ROC 给出阈值无关曲线；常多指标联用。`},
+ {id:21,type:"mc",question:`在数据归类中，（ ）方法可以有效处理高维稀疏特征。`,options:['PCA','LDA','K-means 聚类','以上都可以'],answer:3,explanation:`PCA/LDA 降维；K-means 在 TF-IDF 等高维空间亦常用 (余弦距离)。`},
+ {id:22,type:"mc",question:`在数据归类中，聚类分析通常基于（ ）对数据分组。`,options:['数据随机性','标签信息','数据相似性','数据顺序'],answer:2,explanation:`无监督聚类依赖样本间距离/相似度函数而非现成标签。`},
+ {id:23,type:"mc",question:`在数据归类中，将新样本分配到已有类别的过程称为（ ）。`,options:['聚类','分类','回归','标注'],answer:1,explanation:`分类是监督学习任务，目标是预测离散标签。`},
+ {id:24,type:"mc",question:`在监督学习的数据归类中，训练数据必须包含（ ）。`,options:['已标记类别','未标记数据','结构化特征','非结构化文本'],answer:0,explanation:`监督训练依赖输入-输出对，输出即已知标签。`},
+ {id:25,type:"mc",question:`在数据归类中，（ ）方法属于典型无监督学习。`,options:['回归分析','决策树分类','聚类分析','逻辑回归'],answer:2,explanation:`聚类不使用标签，自行发现数据结构。`},
+ {id:26,type:"mc",question:`在评估数据归类模型的效果时，需要综合考虑（ ）。`,options:['训练时间','预测精度','解释性','以上都是'],answer:3,explanation:`工程场景需平衡效率、性能与可解释安全性。`},
+ {id:27,type:"mc",question:`下列（ ）算法常用于对连续变量进行离散量化编码。`,options:['K-means 聚类','决策树分类','人工标注','量化编码'],answer:3,explanation:`等宽/等频或基于误差的量化，可转为有限码字。`},
+ {id:28,type:"mc",question:`下列（ ）算法更适合处理严重不平衡数据集。`,options:['K-近邻','支持向量机','随机森林','线性回归'],answer:2,explanation:`随机森林内置 Bootstrap 采样、可产出类别概率并抗不平衡。`},
+ {id:29,type:"mc",question:`随机森林模型的核心弱学习器是（ ）。`,options:['决策树','支持向量','K-means 簇','主成分'],answer:0,explanation:`随机森林通过 Bagging 训练大量决策树并投票。`},
+ {id:30,type:"mc",question:`下列（ ）聚类算法属于密度-基方法。`,options:['K-近邻','支持向量机','决策树','DBSCAN'],answer:3,explanation:`DBSCAN 通过区域密度阈值自动发现任意形状簇并标记噪声。`},
+ {id:31,type:"mc",question:`下列（ ）技术首选用于降维并缓解“维度灾难”。`,options:['K-means','决策树','SVM','主成分分析'],answer:3,explanation:`PCA 保留最大方差方向的线性组合，常作高维数据预处理。`},
+ {id:32,type:"mc",question:`在数据归类中，第一步通常应做（ ）。`,options:['收集数据','理解数据','清洗数据','选择算法'],answer:1,explanation:`了解业务背景、数据结构与质量后才能制定后续方案。`},
+ {id:33,type:"mc",question:`数据归类工作流中，确定特征并训练模型的阶段是（ ）。`,options:['数据收集','数据理解','数据清洗','模型训练'],answer:3,explanation:`该阶段完成特征工程、算法拟合与超参调优。`},
+ {id:34,type:"mc",question:`数据归类工作流中，对模型进行验证与测试的步骤是（ ）。`,options:['数据收集','数据理解','数据清洗','模型评估'],answer:3,explanation:`评估阶段计算各类指标并对比基线或业务要求。`},
+ {id:35,type:"mc",question:`数据归类工作流中，需要长期执行并反馈新样本的环节是（ ）。`,options:['数据收集','数据理解','数据清洗','监控与更新'],answer:3,explanation:`监控漂移、重新训练或微调模型以保持性能。`},
+ {id:36,type:"mc",question:`将训练好的模型上线预测新数据属于（ ）步骤。`,options:['数据收集','数据理解','数据清洗','模型部署'],answer:3,explanation:`部署可能包括离线批处理、在线服务或嵌入式推理等形态。`},
+ {id:37,type:"mc",question:`在数据归类中，（ ）组合最能系统性处理类别极少出现的问题。`,options:['过采样 + 欠采样','L1 正则','早停法','Dropout'],answer:0,explanation:`重采样改善类别比例，随后再训练模型更易学习少数类边界。`},
+ {id:38,type:"mc",question:`在进行数据归类前，主要执行数据预处理是因为（ ）。`,options:['算法通常仅接受特定数据类型','预处理耗费计算资源','结果会损失信息','以上都是'],answer:0,explanation:`缺失/类别/尺度问题若不解决，大多数算法无法正常训练。`},
+ {id:39,type:"mc",question:`数据归类对特征量纲的一致性有（ ）要求。`,options:['必须正态分布','须可解释','量纲一致','特征显著'],answer:2,explanation:`不同量纲会导致距离度量失真，常用标准化、归一化。`},
+ {id:40,type:"mc",question:`选择分类器时，需要优先考虑其（ ）。`,options:['处理连续数据能力','泛化性能','大规模数据适应性','以上都是'],answer:3,explanation:`工业级系统往往同时要求高精度、可扩展与任务适配性。`},
+ // 判断题
+ {id:41,type:"tf",question:`数据归类的数据获取方式可以是各种各样的。`,options:['正确','错误'],answer:0,explanation:`可以来自传感器、日志、第三方接口等多源异构数据。`},
+ {id:42,type:"tf",question:`应用数据归类所获取的数据必须具有定性特点。`,options:['正确','错误'],answer:1,explanation:`归类既可处理定性也可处理定量数据。`},
+ {id:43,type:"tf",question:`数据前期处理的归类操作对所有类型的数据都非常重要。`,options:['正确','错误'],answer:0,explanation:`清洗、标准化能显著提升后续模型表现。`},
+ {id:44,type:"tf",question:`数据预识别可以帮助发现潜在问题并提高分析准确性。`,options:['正确','错误'],answer:0,explanation:`通过异常检测、分布分析确保数据质量。`},
+ {id:45,type:"tf",question:`数据归类操作中，数据预识别一定发生在数据收集之后。`,options:['正确','错误'],answer:1,explanation:`预识别往往与收集并行或迭代进行。`},
+ {id:46,type:"tf",question:`数据标注是机器学习流程中不可或缺的关键步骤。`,options:['正确','错误'],answer:0,explanation:`没有高质量标签，监督模型难以达到预期性能。`},
+ {id:47,type:"tf",question:`数据标注通常完全依赖自动化工具，无需人工参与。`,options:['正确','错误'],answer:1,explanation:`自动标注需人工校验，尤其在复杂任务中。`},
+ {id:48,type:"tf",question:`数据归类既可输入连续或离散数据，也可输出连续或离散结果。`,options:['正确','错误'],answer:0,explanation:`典型如离散化分类或概率分数。`},
+ {id:49,type:"tf",question:`在数据归类前不需要对数据进行清洗。`,options:['正确','错误'],answer:1,explanation:`噪声、缺失、重复记录都会影响模型训练。`},
+ {id:50,type:"tf",question:`所有数据归类算法都同时适用于分类与回归问题。`,options:['正确','错误'],answer:1,explanation:`如 K-means 仅能做聚类，逻辑回归仅做分类。`}
+];
+let score=0,answered=0;
+function buildQuiz(){
+ const quizEl=document.getElementById('quiz');
+ quizData.forEach((q,idx)=>{
+  const card=document.createElement('div');
+  card.className='question-card';
+  const qTitle=document.createElement('p');
+  qTitle.innerHTML=`${idx+1}. ${q.question}`;
+  card.appendChild(qTitle);
+  q.options.forEach((opt,i)=>{
+    const label=document.createElement('label');
+    label.className='option';
+    const radio=document.createElement('input');
+    radio.type='radio';
+    radio.name='q'+idx;
+    radio.value=i;
+    label.appendChild(radio);
+    label.appendChild(document.createTextNode(' '+opt));
+    card.appendChild(label);
+  });
+  const btn=document.createElement('button');
+  btn.textContent='提交';
+  btn.addEventListener('click',()=>{
+    const selected=[...card.querySelectorAll('input')].find(r=>r.checked);
+    if(!selected){alert('请选择一个选项');return;}
+    if(btn.disabled)return; // 已提交
+    const correct=Number(selected.value)===q.answer;
+    const optsArray=[...card.querySelectorAll('input')];
+    optsArray[q.answer].parentElement.classList.add('correct');
+    if(!correct){selected.parentElement.classList.add('incorrect');}
+    const expl=document.createElement('div');
+    expl.className='explanation';
+    expl.innerHTML=`<strong>${correct?'回答正确！':'回答错误。'}</strong> 解析：${q.explanation}`;
+    card.appendChild(expl);
+    btn.disabled=true;
+    answered++;
+    if(correct)score++;
+    if(answered===quizData.length){
+      document.getElementById('result').innerHTML=`完成！您共答对 <strong>${score}</strong> / ${quizData.length} 题，正确率 ${(score/quizData.length*100).toFixed(1)}%。`;
+    }
+  });
+  card.appendChild(btn);
+  quizEl.appendChild(card);
+ });
+}
+buildQuiz();
+</script>
+</body>
+</html>
