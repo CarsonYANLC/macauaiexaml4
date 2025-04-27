@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>数据标注质量与评估交互练习</title>
+  <style>
+    body{margin:0;padding:2rem;font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;line-height:1.6;}
+    h1,h2{color:#111;margin-top:0;}
+    .question{border:1px solid #e0e0e0;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border .3s ease;}
+    .question.correct{border-color:#4caf50;}
+    .question.incorrect{border-color:#f44336;}
+    .options label{display:block;margin:.3rem 0;cursor:pointer;}
+    .options input{margin-right:.4rem;}
+    .explanation{display:none;margin-top:.5rem;font-size:.9rem;background:#f9f9f9;padding:.5rem .75rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+    #scoreBox{position:fixed;top:0;right:0;background:#2196f3;color:#fff;padding:.5rem 1rem;border-radius:0 0 0 8px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+  </style>
+</head>
+<body>
+  <div id="scoreBox">得分: 0 / 35</div>
+  <h1>数据标注质量与评估 — 交互式自测</h1>
+  <section id="overview">
+    <h2>总体讲解</h2>
+    <p>本练习涵盖 <strong>文本与多音字标注</strong>、<strong>语音标注</strong>、<strong>图像标框</strong>、<strong>图像分割</strong> 四大场景，共 <strong>35 题</strong>。核心概念包括：</p>
+    <ul>
+      <li><strong>质量决定因素：</strong>除标注者专业外，还受 <em>数据多样性、工具链、审核机制</em> 等综合影响。</li>
+      <li><strong>效率提升途径：</strong>自动/半自动预标注、主动学习、可视化工具与样本扩充互补。</li>
+      <li><strong>评估指标体系：</strong>准确率 (Accuracy)、召回率 (Recall)、精准率 (Precision) 及其调和平均 <strong>F1</strong>；定位类任务常用 <strong>IoU / mAP</strong>；混淆矩阵辅助拆解错误类型。</li>
+      <li><strong>不平衡数据应对：</strong>宏平均、类别粒度指标、Dice‑IoU 等对小类别更敏感。</li>
+      <li><strong>场景差异：</strong>
+        <ul>
+          <li>多音字标注难点在于<span style="white-space:nowrap">“正确读音判定”</span>；人工仍是主流。</li>
+          <li>语音标注对 <em>音素/韵律</em> 识别敏感，需要复听抽检。</li>
+          <li>图像标框侧重 <em>框位置与尺度</em>，分割则关注 <em>像素级边缘</em>；二者皆以 IoU 为核心度量。</li>
+        </ul>
+      </li>
+    </ul>
+    <p>刷题提示：留意题目中对 <em>“单一指标足够”</em> 的质疑与对 <em>F1 适用场景</em> 的强调，可帮助识别易混概念。</p>
+  </section>
+
+  <div id="quiz"></div>
+
+  <script>
+    const questions=[
+      {q:"文本语义标注的质量只取决于标注者的专业水平。",o:["正确","错误"],a:1,e:"还受数据多样性、标注规范、审核流程等多因素影响。"},
+      {q:"在评估文本语义标注时，准确率、召回率、F1 分数任何一个都可单独充分代表整体性能。",o:["正确","错误"],a:1,e:"单一指标各有盲区，需结合任务综合评估。"},
+
+      {q:"多音字标注任务中，影响质量最关键的因素是（ ）。",o:["标注者专业","样本数量","数据多样性","标注数据的准确性"],a:3,e:"读音正确与否直接决定标注可用性。"},
+      {q:"目前多音字标注最普遍的方式是（ ）。",o:["手动标注","自动标注","规则标注","机器学习标注"],a:0,e:"对细粒度发音差异仍需人工判断与校对。"},
+      {q:"评估多音字标注质量最常用的单一指标是（ ）。",o:["准确率","召回率","F1 分数","以上都常用"],a:2,e:"F1 兼顾正确标注与漏标，适合类别不均衡情况。"},
+      {q:"多音字标注流程中最具挑战的环节是（ ）。",o:["确定正确读音","加标签","质量评估","以上同样困难"],a:0,e:"需结合上下文和语义，自动工具尚难完全胜任。"},
+      {q:"提升多音字标注效率的有效做法是（ ）。",o:["更多样本","语音识别辅助","自动标注工具","以上都是"],a:3,e:"样本、工具与语音提示相辅相成可显著加速流程。"},
+      {q:"所有多音字都能通过机器学习实现全自动准确标注。",o:["正确","错误"],a:1,e:"长尾读音和罕见语境仍需人工介入。"},
+
+      {q:"计算文本标注准确率时常用的计算结构是（ ）。",o:["混淆矩阵","决策树","SVM","KNN"],a:0,e:"Confusion Matrix 量化 TP/FP/FN，并派生多指标。"},
+      {q:"针对类别极度不平衡的数据集，下列何种指标最能替代简单准确率？",o:["粗粒度准确率","粒度准确率","F1 分数","以上都行"],a:2,e:"F1 更能反映少数类别表现。"},
+      {q:"下列哪项指标在计算时显式考虑了各类别样本数量差异？",o:["准确率","F1 分数","类召回率","都不考虑"],a:1,e:"F1 是 Precision 与 Recall 的调和平均，避免多数类别主导。"},
+      {q:"F1 分数是所有文本标注任务的最佳单一性能指标。",o:["正确","错误"],a:1,e:"有时需偏重 Precision 或 Recall；AUC 等指标亦常用。"},
+      {q:"任何文本标注任务都可以只用准确率来评价。",o:["正确","错误"],a:1,e:"准确率在类别失衡或多标签任务中可能误导。"},
+      {q:"对于不平衡数据，改进召回率评估的首选做法是使用（ ）。",o:["粗粒度召回率","粒度召回率（逐类平均）","F1 分数","以上都可"],a:1,e:"宏平均 Recall 能避免主频类别掩盖小类别表现。"},
+      {q:"召回率是评估文本标注任务性能的最佳单一指标。",o:["正确","错误"],a:1,e:"若误标成本高，Precision 反而更关键。"},
+
+      {q:"影响语音标注质量最大的因素通常是（ ）。",o:["语言水平","对语音特征的敏感度","工具熟练度","工作经验"],a:1,e:"能否正确区分音素、停顿、重音直接关系标签准确性。"},
+      {q:"在规模化语音标注中，效率最高的方法是（ ）。",o:["手动","自动","基于规则","基于机器学习"],a:3,e:"结合声学模型与主动学习可大幅减少人工量。"},
+      {q:"下列哪组指标一起最能全面反映语音识别系统对标注数据的适配度？",o:["准确率","召回率","F1 分数","以上都是"],a:3,e:"三指标从不同侧面刻画识别错误情况。"},
+      {q:"语音标注项目中最耗费人力的难点是（ ）。",o:["数据清理","模型训练","质量评估","上传存储"],a:2,e:"需复听抽检、纠正并统计误差。"},
+      {q:"提升语音标注效率的综合策略是（ ）。",o:["更多样本","语音识别辅助","自动标注工具","以上都是"],a:3,e:"结合主动学习、预标注与工具链最为有效。"},
+      {q:"所有语音标注任务都可以只用准确率评估。",o:["正确","错误"],a:1,e:"音素级或韵律级任务更需 Precision/Recall 或 PER、CER。"},
+      {q:"语音标注质量仅依赖标注者专业水平。",o:["正确","错误"],a:1,e:"还受录音品质、协议设计、审核策略等影响。"},
+
+      {q:"影响图像标框标注质量最大的因素是（ ）。",o:["标注者专业水平","数据量","数据多样性","数据准确性"],a:0,e:"熟练度决定框位置与尺度偏差。"},
+      {q:"评估图像标框准确性最常用的单一指标是（ ）。",o:["准确率","召回率","F1 / mAP@IoU","以上都常用"],a:2,e:"需同时衡量漏框与错框，IoU‑based F1 或 mAP 更全面。"},
+      {q:"图像标框项目中最难处理的阶段是（ ）。",o:["数据清理","模型训练","质量评估与复审","全都一样"],a:2,e:"需人工核实 IoU、类别与一致性，对效率要求高。"},
+      {q:"当前图像标框最可靠的生产方式是（ ）。",o:["手动标注","自动标注","规则标注","机器学习标注"],a:0,e:"高精度场景（自动驾驶等）仍依赖人工精细框选。"},
+      {q:"提升标框标注效率的有效措施是（ ）。",o:["更多样本","可视化工具","自动预标注 + 人工校正","以上都是"],a:2,e:"模型粗框+人工微调可节省 50% 以上工时。"},
+      {q:"所有图像标框项目都可用准确率评价。",o:["正确","错误"],a:1,e:"需用 IoU、mAP、Recall 等综合指标反映定位误差。"},
+      {q:"图像标框质量只与标注者水平相关。",o:["正确","错误"],a:1,e:"任务指南、分辨率、审核和平台亦关键。"},
+
+      {q:"下列哪种方法结合使用最常见，用于评估图像区域(分割) 标注质量？",o:["手动抽检","与基准集比较","计算像素级 Precision/Recall","以上都是"],a:3,e:"多手段交叉验证以确保边界与类别准确。"},
+      {q:"评估分割标注时最重要的因素是（ ）。",o:["边界/像素准确性","区域内部完整性","时间效率","成本"],a:0,e:"IoU / Mask‑IoU 直接衡量边缘与类别匹配。"},
+      {q:"目前提升分割标注效率最有效的方法是（ ）。",o:["手动","自动","规则","机器学习（交互式分割）"],a:3,e:"如 SAM、智能剪刀等模型实现一键生成 mask。"},
+      {q:"在像素级分割评估中最能反映综合表现的单一指标是（ ）",o:["准确率","召回率","F1 / Dice‑IoU","以上都行"],a:2,e:"Dice = F1, IoU = TP/(TP+FP+FN) 综合像素错漏。"},
+      {q:"针对对象类别极度不平衡的分割数据，首选的评估指标是（ ）",o:["粗粒准确率","粒度准确率","F1 / Dice","以上都可以"],a:2,e:"Dice 对少数类别更敏感，避免背景居多时准确率虚高。"},
+      {q:"图像分割标注质量只与标注者专业水平相关。",o:["正确","错误"],a:1,e:"分辨率、放缩策略、半自动工具与审核标准同样关键。"}
+    ];
+
+    let score=0;
+    const buildQuiz=()=>{
+      const container=document.getElementById('quiz');
+      questions.forEach((item,idx)=>{
+        const qDiv=document.createElement('div');qDiv.className='question';
+        let html=`<strong>${idx+1}. ${item.q}</strong><div class="options">`;
+        item.o.forEach((opt,i)=>{html+=`<label><input type=\"radio\" name=\"q${idx}\" value=\"${i}\" onclick=\"checkAnswer(${idx},${i},this)\"> ${opt}</label>`});
+        html+='</div><div class="explanation" id="exp-'+idx+'"></div>';
+        qDiv.innerHTML=html;container.appendChild(qDiv);
+      });
+    };
+
+    window.checkAnswer=(idx,opt,el)=>{
+      const q=questions[idx];if(q.done)return;q.done=true;
+      const parent=el.closest('.question');
+      const exp=document.getElementById('exp-'+idx);
+      if(opt===q.a){score++;parent.classList.add('correct');exp.innerHTML='✅ <strong>回答正确！</strong> '+q.e;}
+      else{parent.classList.add('incorrect');exp.innerHTML='❌ <strong>回答错误。</strong> 正确答案：'+q.o[q.a]+'。 '+q.e;}
+      exp.style.display='block';
+      document.getElementById('scoreBox').innerText=`得分: ${score} / ${questions.length}`;
+    };
+
+    buildQuiz();
+  </script>
+</body>
+</html>

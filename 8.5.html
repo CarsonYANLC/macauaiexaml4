@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>图像 / 视频标注质量与评估 – 互动刷题</title>
+<style>
+  body{font-family:Helvetica,Arial,sans-serif;background:#ffffff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+  h1,h2{color:#111;}
+  .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border-color .3s ease;}
+  .question.correct{border-color:#4caf50;}
+  .question.incorrect{border-color:#f44336;}
+  .options label{display:block;margin:0.35rem 0;cursor:pointer;}
+  .options input{margin-right:0.45rem;}
+  .explanation{display:none;margin-top:0.5rem;font-size:0.9rem;background:#f9f9f9;padding:0.5rem 0.75rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+  #scoreBox{position:fixed;top:0;right:0;background:#2196f3;color:#fff;padding:0.5rem 1rem;border-radius:0 0 0 8px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.2);z-index:99;}
+</style>
+</head>
+<body>
+<div id="scoreBox">得分: 0 / 28</div>
+
+<h1>图像 / 视频标注质量与评估 – 互动刷题</h1>
+
+<section id="overview">
+  <h2>总体讲解</h2>
+  <p>题库共 <strong>28 题</strong>，围绕图像 / 视频标注 <em>质量维度</em> 与 <em>评估方法</em> 四大场景：<br>
+    <strong>A&nbsp;离线精标</strong>、<strong>B&nbsp;实时流式</strong>、<strong>C&nbsp;全量数据</strong>、<strong>D&nbsp;抽样审核</strong>，并补充 <strong>像素级分割</strong> 的专用度量。<br>
+    核心概念可归纳为 5 类：
+    <ol>
+      <li><strong>准确率 / 召回率 / F1‑Score</strong>：分类型标签最通用，F1 兼顾插漏两误，对类别不平衡更稳健。</li>
+      <li><strong>IoU / mIoU / Dice</strong>：定位 & 分割专用，直接度量 <em>边缘 & 区域</em> 的重叠程度。</li>
+      <li><strong>完整性 (Completeness)</strong> 与 <strong>一致性 (Consistency)</strong>：衡量是否遗漏目标、标注者之间是否统一。</li>
+      <li><strong>实时 vs. 离线</strong>：实时场景强调<strong>准确性 + 时延</strong>；离线精标强调<strong>精确 + 零漏标</strong>。</li>
+      <li><strong>人工‑机器协同</strong>：半自动工具（SAM、智能剪刀等）显著提升效率，但仍需人工审核把关。</li>
+    </ol>
+    建议策略：<em>先选场景 → 再配指标 → 结合工具与流程</em>，多维度监控才能真正保证数据质量。
+  </p>
+</section>
+
+<div id="quiz"></div>
+
+<script>
+const questions=[
+// —— 分割专项 ——
+{q:"评估分割标注时最重要的因素是（ ）。",opts:["边界框/像素准确性","区域内部像素完整性","时间效率","成本"],ans:0,expl:"IoU / Mask‑IoU 直接衡量预测边缘与真值的匹配程度。"},
+{q:"目前提升分割标注效率最有效的方法是（ ）。",opts:["手动","自动","规则","机器学习（交互式分割）"],ans:3,expl:"如 SAM、智能剪刀等交互式模型可一键生成初步 mask，显著提速。"},
+{q:"在像素级分割评估中最能反映综合表现的单一指标是（ ）。",opts:["准确率","召回率","F1 分数 / Dice‑IoU","以上都行"],ans:2,expl:"Dice=F1，IoU=TP/(TP+FP+FN)，能综合反映错漏像素。"},
+{q:"针对对象类别极度不平衡的分割数据，首选的评估指标是（ ）。",opts:["粗粒准确率","粒度准确率","F1 / Dice","以上都可以"],ans:2,expl:"Dice/F1 对少数类别更敏感，可避免背景居多时准确率虚高。"},
+{q:"\u201C图像分割标注质量只与标注者专业水平相关\u201D。（ ）",opts:["正确","错误"],ans:1,expl:"分辨率、缩放策略、半自动工具与审核标准同样关键。"},
+// —— A. 图像标注质量 ——
+{q:"图像标注任务常用的综合评估指标是（ ）。",opts:["准确率","召回率","F1 分数","以上都是"],ans:3,expl:"准确率衡量精确，召回率衡量覆盖，F1 综合两者。"},
+{q:"\u201C标注结果应覆盖所有需要标注的信息\u201D 对应的质量标准是（ ）。",opts:["一致性","完整性","可靠性","可扩展性"],ans:1,expl:"完整性关注是否遗漏目标或属性。"},
+{q:"在边界框检测任务中，最常用的误差度量是（ ）。",opts:["准确率","边界框误差","交并比（IoU）","以上都是"],ans:2,expl:"IoU 直接衡量预测框与真值框的重叠程度。"},
+{q:"语义分割评估中最具代表性的指标是（ ）。",opts:["像素准确率","边界框误差","IoU / mIoU","全部"],ans:2,expl:"IoU 对像素级重叠更敏感，比纯像素准确率更可靠。"},
+{q:"深度图 / 实例分割等复合任务常同时使用 像素准确率 + IoU + 边界框误差。（ ）",opts:["正确","错误"],ans:0,expl:"多维指标共同反映深度、位置与面积误差。"},
+{q:"\u201C所有图像标注任务都可以只用准确率来评估\u201D。（ ）",opts:["正确","错误"],ans:1,expl:"类别不均衡或定位任务需 IoU、mAP、F1 等补充。"},
+{q:"\u201C图像标注质量仅由标注者专业水平决定\u201D。（ ）",opts:["正确","错误"],ans:1,expl:"还受分辨率、指南、审核流程与工具链影响。"},
+// —— B. 实时数据标注 ——
+{q:"实时数据标注质量在线检验常用的方法包括（ ）。",opts:["手动抽检","基准集比对","计算实时 P/R","以上都是"],ans:3,expl:"三种手段结合可兼顾速度与准确度。"},
+{q:"实时标注质量首要关注的因素是（ ）。",opts:["数据准确性","时间效率","成本","安全性"],ans:0,expl:"错误标签会即时影响下游决策。"},
+{q:"实时大流量场景下，最有效的生产方式是（ ）。",opts:["手动","半自动","规则","基于机器学习的自动/预标注"],ans:3,expl:"在线模型推理 + 人机协同满足时延与规模需求。"},
+{q:"实时标注评估最能综合刻画性能的指标是（ ）。",opts:["准确率","召回率","F1 分数","三者都能"],ans:2,expl:"F1 兼顾精度与召回，适合流式不平衡数据。"},
+{q:"针对类别失衡的实时流式数据，优先采用（ ）评估。",opts:["粗粒度准确率","粒度准确率","F1 分数","均可"],ans:2,expl:"F1 对少数类别敏感，不被大类淹没。"},
+{q:"\u201C实时标注质量只与标注者水平有关\u201D。（ ）",opts:["正确","错误"],ans:1,expl:"模型预标注、网络延迟、监控策略等都会影响。"},
+// —— C. 全样 (Full) 数据标注 ——
+{q:"全样标注通常选用的综合评估指标是（ ）。",opts:["准确率","召回率","F1 分数","以上都是"],ans:3,expl:"仍需在准确率与召回率之间做好平衡。"},
+{q:"全样标注最核心的质量维度是（ ）。",opts:["准确性","时间效率","成本","安全性"],ans:0,expl:"100% 采样比例使错一个就是 100% 错误。"},
+{q:"全样标注仍以（ ）方式最可靠。",opts:["人工精标","端到端自动","规则","机器学习"],ans:0,expl:"对关键业务全量数据需人工确保零漏标。"},
+{q:"对极度不平衡的全样数据，推荐指标为（ ）。",opts:["粗粒度准确率","粒度准确率","F1 分数","任意"],ans:2,expl:"F1 对罕见类别更敏感。"},
+{q:"\u201C所有全样标注都能只用准确率衡量质量\u201D。（ ）",opts:["正确","错误"],ans:1,expl:"罕见类别易被忽视，需 Recall/F1 监控。"},
+// —— D. 抽样 (Sample) 数据标注 ——
+{q:"抽样标注项目的常用评估指标仍是（ ）。",opts:["准确率","召回率","F1 分数","以上都是"],ans:3,expl:"分类任务三指标缺一不可。"},
+{q:"在抽样标注中，最重要的质量因素为（ ）。",opts:["抽样数据的准确性","时间效率","成本","安全性"],ans:0,expl:"小样本往往用于推断总体，容错更低。"},
+{q:"抽样标注通常优先采用（ ）方法。",opts:["人工精标","纯自动","规则","机器学习"],ans:0,expl:"样本量可控，人工更易确保高品质。"},
+{q:"对不平衡抽样数据，首选评估方法是（ ）。",opts:["粗粒准确率","粒度准确率","F1 / Macro‑F1","以上均可"],ans:2,expl:"Macro‑F1 对每个类别平均，避免大类主导。"},
+{q:"\u201C抽样标注质量完全取决于标注者水平\u201D。（ ）",opts:["正确","错误"],ans:1,expl:"还受抽样策略、指南、一致性审核影响。"}
+];
+
+let score=0;
+function buildQuiz(){
+  const container=document.getElementById('quiz');
+  questions.forEach((item,idx)=>{
+    const qDiv=document.createElement('div');
+    qDiv.className='question';
+    let html=`<strong>${idx+1}. ${item.q}</strong><div class="options">`;
+    item.opts.forEach((opt,optIdx)=>{
+      html+=`<label><input type="radio" name="q${idx}" value="${optIdx}" onclick="checkAnswer(${idx},${optIdx},this)"> ${String.fromCharCode(65+optIdx)}. ${opt}</label>`;
+    });
+    html+=`</div><div class="explanation" id="exp-${idx}"></div>`;
+    qDiv.innerHTML=html;
+    container.appendChild(qDiv);
+  });
+}
+
+function checkAnswer(qIdx,optIdx,inputEl){
+  const q=questions[qIdx];
+  if(q.done){return;}
+  q.done=true;
+  const qDiv=inputEl.closest('.question');
+  const exp=document.getElementById(`exp-${qIdx}`);
+  if(optIdx===q.ans){
+    score++;
+    qDiv.classList.add('correct');
+    exp.innerHTML=`✅ <strong>回答正确！</strong> ${q.expl}`;
+  }else{
+    qDiv.classList.add('incorrect');
+    exp.innerHTML=`❌ <strong>回答错误。</strong> 正确答案：${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]}。 ${q.expl}`;
+  }
+  exp.style.display='block';
+  document.getElementById('scoreBox').innerText=`得分: ${score} / ${questions.length}`;
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

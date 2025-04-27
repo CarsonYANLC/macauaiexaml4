@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>语音 & 图像标注 · 互动刷题</title>
+<style>
+    body{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+    h1,h2{color:#111;margin-top:0}
+    #scoreBox{position:fixed;top:12px;right:18px;background:#f5f5f5;padding:.4rem .8rem;border-radius:6px;font-size:.9rem;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+    .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border-color .3s ease;}
+    .question.correct{border-color:#4caf50;}
+    .question.incorrect{border-color:#f44336;}
+    .options label{display:block;margin:.35rem 0;cursor:pointer;}
+    .options input{margin-right:.5rem;}
+    .explanation{display:none;margin-top:.5rem;font-size:.9rem;background:#f9f9f9;padding:.6rem .9rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+    .explanation strong{color:#2196f3;}
+</style>
+</head>
+<body>
+
+<h1>语音 & 图像标注核心概念·练习题</h1>
+
+<section id="overview">
+  <h2>学习导语</h2>
+  <p><strong>语音标注</strong>关注三大维度：①<span style="color:#2196f3">任务目标</span>（ASR 转录、说话人分离/性别/口音检测等）；②<span style="color:#2196f3">工具选型</span>（Kaldi、PocketSphinx、DeepSpeech 对应不同算力与精度场景）；③<span style="color:#2196f3">质量评估与改进</span>（<em>F1-score</em> 是不均衡分类的首选，全流程可通过硬件升级、复杂模型及多标注员交叉验证提升一致性）。优质标签可显著降低串音、提升声学模型适配度。</p>
+  <p><strong>图像标注</strong>区分 <em>Bounding-Box</em> 框注与 <em>Segmentation</em> 区域注：前者关注位置+尺寸，后者关注位置+形状。LabelMe 是最常见工具。标注误差（框偏移、边界走样）会直接拖低检测/分割 IoU 与下游模型精度。医学影像与自动驾驶场景通常仍依赖人工细描以确保像素级准确。</p>
+  <p>下面的 32 道练习题涵盖<strong>工具选型→特征要点→指标评估→质量改进→下游影响</strong>完整链条，做完即可掌握数据标注环节的关键知识。</p>
+</section>
+
+<div id="scoreBox">已答 0 / 0 正确</div>
+
+<div id="quizContainer"></div>
+
+<script>
+/* ---------- 题库数据 ---------- */
+const questions = [
+/* --- 语音标注 1-20 --- */
+{q:'在需要处理大规模语音识别任务时，以下哪款开源工具更为合适？',opts:['A PocketSphinx','B Kaldi','C Mozilla DeepSpeech','D 第三方语音 API'],ans:1,exp:'Kaldi 具备高度可扩展的解码图和分布式训练/推理方案，是业界大规模 ASR 的常见首选。'},
+{q:'若需在资源受限（低算力/离线）设备上完成语音识别，首选哪款工具？',opts:['A DeepSpeech','B Kaldi','C wav2vec','D HTK'],ans:0,exp:'DeepSpeech 基于轻量 RNN-CTC，模型体量小且易在移动端部署，离线场景友好。'},
+{q:'在判定语音中说话人数时，以下因素对结果最关键：',opts:['A 语音的音量','B 语音的音调(基频)','C 语音文本内容','D 三者同等重要'],ans:1,exp:'说话人分离核心依赖声学特征（如基频、共振峰），基频差异常用于聚类或嵌入计算。'},
+{q:'下列工具中，哪款最适合说话人分离/数量检测？',opts:['A Audacity','B PocketSphinx','C Kaldi','D 以上都不适用'],ans:2,exp:'Kaldi 内置 x-vector/PLDA diarization 流水线，支持说话人数量估计。'},
+{q:'评估说话人人数标注质量时，最常用的综合指标是：',opts:['A 准确率','B 召回率','C F1-score','D 三者均必需'],ans:2,exp:'F1 兼顾精确率与召回率，在人数类别不均衡时更稳健。'},
+{q:'为提升多人语音数据的说话人标注准确度，下列做法最有效的是：',opts:['A 提升采集设备','B 采用更复杂模型','C 增加标注者','D 以上皆可'],ans:3,exp:'硬件降噪、模型升级与多标注交叉验证可从不同环节提升质量，组合最优。'},
+{q:'语音标注规范的完善对于提高说话人标注准确性至关重要。',opts:['对','错'],ans:0,exp:'规范包含切分尺度、冲突处理等，可显著降低主观差异。'},
+{q:'「分析说话人数与 ASR 结果无关」这一说法是否正确？',opts:['对','错'],ans:1,exp:'说话人分离可减少串音，阶段性转录质量直接影响整体 ASR 准确率。'},
+{q:'判定语音中说话人性别时，最关键的声学特征是？',opts:['A 音调(基频)','B 音量','C 语音内容','D 同等重要'],ans:0,exp:'男低女高的基频差异是区分性别的首要依据（传统与深度方法均一致）。'},
+{q:'针对性别检测，哪款工具流程现成、社区资料最丰富？',opts:['A Audacity','B PocketSphinx','C Kaldi','D 以上皆非'],ans:2,exp:'Kaldi 提供 GMM-UBM / DNN-embeddings 示例，可直接训练性别分类器。'},
+{q:'性别标注常用的整体性能指标是：',opts:['A Accuracy','B Recall','C F1-score','D 三者均可'],ans:2,exp:'与人数检测同理，类别不平衡时 F1 更客观。'},
+{q:'提升多人语音数据性别标注准确度的可行手段包括：',opts:['A 硬件升级','B 复杂模型','C 增加标注者','D 以上皆可'],ans:3,exp:'从采集→算法→人工多层协同效果最佳。'},
+{q:'「分析说话人性别对 ASR 准确率无影响」是否正确？',opts:['对','错'],ans:1,exp:'性别标签有助自适应声学模型，减少特定性别误差偏差。'},
+{q:'对口音检测任务，下列哪一因素影响最大？',opts:['A 语音清晰度','B 音量','C 内容','D 同等'],ans:0,exp:'高信噪比可最大化呈现发音部位差异，是口音特征提取基础。'},
+{q:'最适合进行口音检测/分类的框架是？',opts:['A Audacity','B PocketSphinx','C Kaldi','D 以上皆非'],ans:2,exp:'Kaldi 提供 i-vector 与 DNN 口音分类示例。'},
+{q:'口音检测结果通常用哪项指标评估？',opts:['A Accuracy','B Recall','C F1-score','D 三者均可'],ans:2,exp:'与前述不均衡分类场景一致。'},
+{q:'对于多口音语料，提高标注质量的综合措施？',opts:['A 硬件','B 复杂模型','C 多标注','D 以上皆可'],ans:3,exp:'多维手段综合最优。'},
+{q:'「口音信息对 ASR 精度无影响」是否正确？',opts:['对','错'],ans:1,exp:'口音差异导致发音特征偏移，影响声学模型匹配度。'},
+{q:'语音内容转录场景下，PocketSphinx、Kaldi、DeepSpeech 三者，哪一项整体准确率最高？',opts:['A PocketSphinx','B Kaldi','C DeepSpeech','D 三者接近'],ans:1,exp:'Kaldi 支持大词汇表与自定义解码图，最易达最新精度。'},
+{q:'在长句复杂语料的手工校对阶段，提高标注准确性的综合措施？',opts:['A 硬件','B 复杂模型','C 多标注','D 以上皆可'],ans:3,exp:'与题 6/12/17 逻辑相同，多措并举最稳。'},
+
+/* --- 图像标注 21-32 --- */
+{q:'以下哪款工具最常用于<strong>标框</strong>（Bounding-Box）标注？',opts:['A Photoshop','B OpenCV','C LabelMe','D 三者相同'],ans:2,exp:'LabelMe 由 MIT 发布，专为框/分割 Web 标注设计。'},
+{q:'在标框任务中，需要重点关注的两个参数是：',opts:['A 位置','B 大小','C 形状','D 位置和大小'],ans:3,exp:'IoU 误差主要由框中心坐标与尺寸决定。'},
+{q:'标框阶段最常见的错误是：',opts:['A 框位置不准','B 框过大/过小','C 形状错误','D 以上均常见'],ans:0,exp:'统计显示定位偏移是首要问题。'},
+{q:'发现框位置偏差后，下列解决方案最直接有效：',opts:['A 重新标注','B 人工微调位置','C 增加标注者','D A 或 B'],ans:3,exp:'需重新绘制或微调坐标以校正。'},
+{q:'对高精度需求的场景（如自动驾驶），下列哪种框标注方式最可靠？',opts:['A 自动','B 半自动','C 手动','D 三者均可'],ans:2,exp:'人工全手动成本高但误差最小。'},
+{q:'「框标注与下游图像识别精度无关」是否正确？',opts:['对','错'],ans:1,exp:'误差框会降低检测/分割训练 IoU，直接拖低精度。'},
+{q:'以下哪款工具最常用于<strong>区域（语义/实例分割）</strong>标注？',opts:['A Photoshop','B OpenCV','C LabelMe','D 三者相同'],ans:2,exp:'LabelMe 支持多边形分割并可导出 JSON mask。'},
+{q:'区域标注需要重点控制的参数有：',opts:['A 颜色','B 位置','C 形状','D 位置和形状'],ans:3,exp:'多边形顶点位置与轮廓形状决定像素级 IoU。'},
+{q:'区域标注最常见的错误是：',opts:['A 区域位置不准','B 颜色填充错误','C 形状走样','D 以上均常见'],ans:0,exp:'轮廓偏移导致像素级 IoU 下降。'},
+{q:'若发现区域位置有系统性偏差，应采用的首选纠正措施是：',opts:['A 重新标注','B 调整颜色','C 增加标注员','D 以上都是'],ans:0,exp:'必须重新描绘或修边保证像素吻合。'},
+{q:'高精度分割任务（医学影像等）普遍采用以下标注方式：',opts:['A 自动','B 半自动','C 手动','D 三者均可'],ans:2,exp:'专家逐像素描绘是最稳妥做法。'},
+{q:'「遵循统一标注规范能够显著提升图像标注一致性」这一结论是否正确？',opts:['对','错'],ans:0,exp:'统一分辨率、坐标系、类名等能降低主观差异。'}
+];
+
+/* ---------- DOM 渲染 ---------- */
+const container = document.getElementById('quizContainer');
+const scoreBox = document.getElementById('scoreBox');
+let answered = 0, correct = 0;
+
+questions.forEach((item, idx) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'question';
+    qDiv.id = 'q' + idx;
+
+    const qText = document.createElement('p');
+    qText.innerHTML = `<strong>${idx + 1}. </strong>${item.q}`;
+    qDiv.appendChild(qText);
+
+    const optDiv = document.createElement('div');
+    optDiv.className = 'options';
+
+    item.opts.forEach((opt, oIdx) => {
+        const label = document.createElement('label');
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'q' + idx;
+        radio.addEventListener('change', () => checkAnswer(idx, oIdx));
+        label.appendChild(radio);
+        label.append(opt);
+        optDiv.appendChild(label);
+    });
+    qDiv.appendChild(optDiv);
+
+    const expl = document.createElement('div');
+    expl.className = 'explanation';
+    expl.innerHTML = `<strong>解析：</strong>${item.exp}`;
+    qDiv.appendChild(expl);
+
+    container.appendChild(qDiv);
+});
+
+/* ---------- 评判逻辑 ---------- */
+function checkAnswer(qIdx, selIdx){
+    const q = questions[qIdx];
+    const qDiv = document.getElementById('q'+qIdx);
+    const already = qDiv.classList.contains('correct') || qDiv.classList.contains('incorrect');
+
+    /* 首次作答统计 */
+    if(!already){
+        answered++;
+        if(selIdx === q.ans) correct++;
+    }else{
+        /* 若已答过且用户改变选择，需要实时修正计分 */
+        const prevCorrect = qDiv.dataset.correct === 'true';
+        if(prevCorrect && selIdx !== q.ans){ correct--; }
+        if(!prevCorrect && selIdx === q.ans){ correct++; }
+    }
+
+    /* 更新状态 */
+    qDiv.classList.remove('correct','incorrect');
+    qDiv.classList.add(selIdx === q.ans ? 'correct' : 'incorrect');
+    qDiv.dataset.correct = (selIdx === q.ans);
+
+    /* 显示解析 */
+    qDiv.querySelector('.explanation').style.display = 'block';
+
+    /* 刷新计分板 */
+    scoreBox.textContent = `已答 ${answered} / ${correct} 正确`;
+}
+</script>
+
+</body>
+</html>

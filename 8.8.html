@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>数据清洗与审核工具核心概念 · 互动刷题</title>
+<style>
+ body{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+ h1,h2{color:#111;}
+ .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border-color .3s ease;}
+ .question.correct{border-color:#4caf50;}
+ .question.incorrect{border-color:#f44336;}
+ .options label{display:block;margin:0.3rem 0;cursor:pointer;}
+ .options input{margin-right:0.4rem;}
+ .explanation{display:none;margin-top:0.5rem;font-size:0.9rem;background:#f9f9f9;padding:0.5rem 0.75rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+ #scoreBox{position:fixed;top:1rem;right:1rem;background:#2196f3;color:#fff;padding:0.6rem 1rem;border-radius:4px;font-weight:bold;}
+ button.reset{margin-top:1rem;padding:0.6rem 1.2rem;border:none;background:#2196f3;color:#fff;border-radius:4px;cursor:pointer;}
+ button.reset:hover{opacity:0.9;}
+</style>
+</head>
+<body>
+<h1>数据清洗与审核工具核心概念 · 互动练习</h1>
+<p>本练习共 24 题，覆盖四大主题：</p>
+<ul>
+  <li><strong>数据标注审核与结果分析</strong>（题 1‑7）</li>
+  <li><strong>Python 数据处理与科学计算</strong>（题 8‑14）</li>
+  <li><strong>OpenRefine 数据清洗</strong>（题 15‑19）</li>
+  <li><strong>Talend Data Preparation 工作流</strong>（题 20‑24）</li>
+</ul>
+<p>点击选项后立即反馈对错并展示解析，系统会实时统计你的得分，祝学习愉快！</p>
+
+<div id="quiz"></div>
+<div id="scoreBox">0 / 0</div>
+<button class="reset" onclick="resetQuiz()">重新开始</button>
+
+<script>
+const quizData=[
+  {q:"下列哪项 <strong>不是</strong> 数据标注审核报告的核心结果？",opts:["标注错误数量","标注错误原因","标注错误类型","标注者个人表现"],ans:3,exp:"审核报告聚焦“错在哪里、为何出错、错了多少”。标注者绩效另行评估."},
+  {q:"提升审核效率通常采用“多手段结合”。以下哪种组合 <strong>最完备</strong>？",opts:["可视化工具","统计分析","机器学习","A+B+C 联合"],ans:3,exp:"可视化揭示模式，统计量化差异，机器学习发现潜在异常，三者结合效率最高."},
+  {q:"在审核结果分析中，哪一维度 <strong>最直接</strong> 指向提升数据质量的改进措施？",opts:["错误数量","错误类型","错误原因","标注者表现"],ans:2,exp:"只有找到根因，才能制定针对性的培训或流程优化."},
+  {q:"基于审核结果，下列哪种分析 <strong>优先级最高</strong>？",opts:["识别错误出现模式","单纯计数","评定个人绩效","仅生成报表"],ans:0,exp:"找到规律 → 批量修正，比孤立计数更具价值."},
+  {q:"针对“不同错误类型”的显著性检验，以下统计方法 <strong>最常用</strong>？",opts:["方差分析","卡方检验","t-test","描述性统计"],ans:1,exp:"错误类型为类别变量，卡方检验衡量分布差异最合适."},
+  {q:"“数据标注审核结果分析对提高数据质量至关重要。”此说法正确吗？",opts:["正确","错误"],ans:0,exp:"分析 → 反馈 → 改进，闭环过程决定最终数据可用性."},
+  {q:"“审核分析只需关注错误数量和类型即可。”此说法正确吗？",opts:["正确","错误"],ans:1,exp:"还需考虑根因、影响范围、风险等级等信息才能指导决策."},
+  {q:"在 Python 中，对 <strong>结构化与半结构化数据</strong> 均提供高效处理能力的库是（ ）。",opts:["NumPy","Pandas","BeautifulSoup","SciPy"],ans:1,exp:"Pandas 提供 DataFrame 与灵活 I/O，适配 CSV/JSON/SQL 等多格式."},
+  {q:"若要快速绘制数据探索图表，首选库为（ ）。",opts:["NumPy","Pandas","Matplotlib","scikit-learn"],ans:2,exp:"Matplotlib 是 Python 可视化底座，Seaborn / pandas.plot 均基于它封装."},
+  {q:"以下哪一组合最符合 “科学计算 → 数据清洗 → 机器学习” 三阶段常用库？",opts:["NumPy → Pandas → scikit-learn","NumPy → Matplotlib → Pandas","SciPy → NumPy → Matplotlib","Pandas → BeautifulSoup → scikit-learn"],ans:0,exp:"数值运算 → 表格清洗 → 建模训练的典型流水线."},
+  {q:"处理 <strong>时间序列</strong> 数据时，Pandas 提供的关键对象是（ ）。",opts:["Panel","DatetimeIndex / Series","ndarray","Tensor"],ans:1,exp:"DatetimeIndex 支持重采样、窗口函数等丰富时序操作."},
+  {q:"“Python 的所有数据处理库都是开源的。”此说法（ ）。",opts:["正确","错误"],ans:1,exp:"仍有厂商维护的闭源/商业组件（如 AWS Data Wrangler 等）。"},
+  {q:"“Pandas 主要做数据分析，NumPy 主要做可视化。”此说法（ ）。",opts:["正确","错误"],ans:1,exp:"NumPy 专注高维数组计算，Matplotlib 才是核心可视化库."},
+  {q:"下列哪一项 <strong>不</strong> 属于 scikit-learn 提供的直接功能？",opts:["监督学习模型","数据预处理 Pipeline","可视化 API","交互式 Dash-style 图表"],ans:3,exp:"交互式图需借助 Plotly/Dash；sklearn 仅带简单 plot_* 方法."},
+  {q:"在 OpenRefine 中，将多种拼写写法合并为统一值 的快捷操作是（ ）。",opts:["合并重复行（Cluster & Edit）","去除重复行","合并列","去除空值"],ans:0,exp:"Cluster 算法聚合同义字符串."},
+  {q:"若要 <strong>删除整列空值行</strong>，应使用（ ）。",opts:["去除重复行","过滤器 + 批量删除","合并列","导出"],ans:1,exp:"先按 isBlank() 过滤，再批量删除记录."},
+  {q:"OpenRefine 的 <strong>表达式栏（GREL）</strong> 主要用于（ ）。",opts:["查询地址栏","数据转换与标准化","排序","导入/导出"],ans:1,exp:"GREL/JS 支持 split、replace、toDate 等强大转换."},
+  {q:"“OpenRefine 只能处理结构化数据。”此说法（ ）。",opts:["正确","错误"],ans:1,exp:"亦可解析半结构化 JSON、XML，并支持转成整洁表."},
+  {q:"导出清洗结果为 CSV 的正确步骤是（ ）。",opts:["点击筛选器按钮","点击排序按钮","点击 ‘导出’ → CSV","复制粘贴"],ans:2,exp:"导出菜单可选多格式（TSV、Excel、JSON 等）。"},
+  {q:"Talend Data Preparation 中，以下哪组操作属于 <strong>典型清洗三步</strong>？",opts:["过滤重复行 → 替换空值 → 规范化格式","仅过滤重复行","仅导出数据","仅建模"],ans:0,exp:"去重、缺失值处理、标准化是最常见的“三件套”。"},
+  {q:"Talend Data Preparation 支持的 <strong>数据源范围</strong> 为（ ）。",opts:["MySQL","Oracle","Excel","以上都支持"],ans:3,exp:"通过连接器可对接 RDBMS、文件、云存储等多种数据源."},
+  {q:"处理缺失值时，可选方式 <strong>不含</strong>（ ）。",opts:["删除记录","固定值填充","平均值填充","随机删除列"],ans:3,exp:"随意删列风险高，亦非 Talend 常规功能."},
+  {q:"Talend Data Preparation 可完成哪类任务？",opts:["数据清洗","数据转换","数据导出","以上都可以"],ans:3,exp:"定位为 ETL 轻量前置工具，覆盖清洗→转换→导出全链条."},
+  {q:"“Talend Data Preparation 提供的清洗功能一定比其他工具更强大。”此说法（ ）。",opts:["正确","错误（主观夸大）"],ans:1,exp:"工具优劣取决于场景；OpenRefine 在复杂文本处理时更灵活."}
+];
+let score=0;
+function buildQuiz(){
+  const quiz=document.getElementById('quiz');
+  quiz.innerHTML='';
+  quizData.forEach((item,idx)=>{
+    const qDiv=document.createElement('div');
+    qDiv.className='question';
+    qDiv.innerHTML=`<h3>${idx+1}. ${item.q}</h3>`;
+    const opts=document.createElement('div');
+    opts.className='options';
+    item.opts.forEach((opt,i)=>{
+      const id=`q${idx}_o${i}`;
+      opts.innerHTML+=`<label><input type="radio" name="q${idx}" id="${id}" onclick="checkAnswer(${idx},${i})"> ${String.fromCharCode(65+i)}. ${opt}</label>`;
+    });
+    qDiv.appendChild(opts);
+    qDiv.innerHTML+=`<div class="explanation" id="exp${idx}">${item.exp}</div>`;
+    quiz.appendChild(qDiv);
+  });
+  updateScore();
+}
+function checkAnswer(qIdx,optIdx){
+  const qDiv=document.getElementsByClassName('question')[qIdx];
+  if(qDiv.classList.contains('correct')||qDiv.classList.contains('incorrect'))return;
+  const correct=optIdx===quizData[qIdx].ans;
+  if(correct){qDiv.classList.add('correct');score++;}
+  else{qDiv.classList.add('incorrect');}
+  document.getElementById('exp'+qIdx).style.display='block';
+  updateScore();
+}
+function updateScore(){
+  document.getElementById('scoreBox').textContent=`${score} / ${quizData.length}`;
+}
+function resetQuiz(){score=0;buildQuiz();}
+window.onload=buildQuiz;
+</script>
+</body>
+</html>

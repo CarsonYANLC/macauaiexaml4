@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>标注任务核心概念练习</title>
+<style>
+ body{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+ h1,h2{color:#111;}
+ .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border-color .3s ease;}
+ .question.correct{border-color:#4caf50;}
+ .question.incorrect{border-color:#f44336;}
+ .options label{display:block;margin:0.3rem 0;cursor:pointer;}
+ .options input{margin-right:.4rem;}
+ .explanation{display:none;margin-top:0.5rem;font-size:0.9rem;background:#f9f9f9;padding:0.5rem 0.75rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+ #scoreBox{position:fixed;top:0;right:0;background:#2196f3;color:#fff;padding:0.5rem 1rem;border-radius:0 0 0 8px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+</style>
+</head>
+<body>
+<div id="scoreBox">得分: 0 / 34</div>
+<h1>标注任务核心概念练习</h1>
+<section id="overview">
+<h2>总体讲解</h2>
+<p>本套练习围绕三大核心主题：<strong>文本标注</strong>（序列标注、关系抽取、属性标注）、<strong>语音标注</strong>（ASR 识别与 TTS 合成）以及其常用<span style="white-space:nowrap">模型&nbsp;&&nbsp;评估指标</span>。通过 34 道题目，你将系统梳理：</p>
+<ul>
+<li>序列标注常用标签方案（IOB/BIO）、编码器（Bi-LSTM）、解码器（CRF）以及对中文预分词的要求。</li>
+<li>关系抽取在信息抽取流程中的定位，与命名实体识别的差异，以及 Transformer 架构的优势。</li>
+<li>属性标注与实体属性-值三元组的联系，对知识图谱补全的意义。</li>
+<li>ASR/TTS 标注的声学特征（MFCC）、典型粒度（逐词/句子）、静音标记、以及以 F1-score 为代表的质量评价。</li>
+</ul>
+<p>建议先快速阅读上述要点，再完成下方练习并即时查看解析，加深对概念的理解。</p>
+</section>
+<div id="quiz"></div>
+<script>
+const questions = [
+{q:"在文本序列标注任务中，字母常用来表示背景类别的标签。",o:["A","B","C","O"],a:3,e:"“O”(Outside) 表示既非实体起始也非内部的普通词。"},
+{q:"序列标注模型最常用的损失函数是 。",o:["交叉熵","平滑 L1","Hinge","均方误差"],a:0,e:"交叉熵可度量预测分布与真实分布的差异，是多类分类标准做法。"},
+{q:"为提高序列标注性能，以下哪项技术应用最广？",o:["Attention","Word2Vec","CRF","SVM"],a:2,e:"条件随机场联合解码，可显式建模标签间依赖。"},
+{q:"处理中文序列标注时，经常采用的分词方式是 。",o:["空格分词","规则分词","词典分词","深度学习分词"],a:2,e:"词典+最大匹配是传统中文预分词主流手段。"},
+{q:"序列标注中最常用的标签方案之一是 。",o:["IOB","IOBES","BIO","BILUO"],a:0,e:"IOB/BIO 简单直观，被多数数据集采纳。"},
+{q:"在序列标注任务里，可将双向 LSTM 作为编码器使用。",o:["正确","错误"],a:0,e:"Bi-LSTM 同时捕捉前后文语义，是经典表征网络。"},
+{q:"序列标注要求给每个单词都打上标签。",o:["正确","错误"],a:1,e:"常见做法仅对目标字段打标签，其余统一标 “O”。"},
+{q:"关系标注中广泛采用的核心方法是 。",o:["依赖解析","核心关系抽取","文本分类","实体关系抽取"],a:3,e:"Relation Extraction 即实体关系抽取。"},
+{q:"目前在关系标注任务中表现最佳的架构通常是 。",o:["LSTM","Transformer","CRF","Attention"],a:1,e:"Transformer 能高效捕捉长距离依赖并并行计算。"},
+{q:"关系标注主要服务于下列哪类 NLP 任务？",o:["信息抽取","文本分类","语音识别","机器翻译"],a:0,e:"信息抽取需抽取实体及其关系构建知识图谱。"},
+{q:"关系标注最常见的标注粒度是 。",o:["逐词","句子","段落","篇章"],a:0,e:"需精确对应实体词或词组位置。"},
+{q:"评估关系标注效果最常用的指标为 。",o:["F1-score","Accuracy","Precision","Recall"],a:0,e:"F1 综合精准率与召回率，更能反映整体性能。"},
+{q:"关系标注与命名实体识别是同一任务。",o:["正确","错误"],a:1,e:"NER 只识别实体类型，Relation Extraction 需判定实体对间语义关系。"},
+{q:"关系标注旨在识别文本中实体之间的语义关系。",o:["正确","错误"],a:0,e:"它关注实体对的语义连接，而非句子连贯性。"},
+{q:"文本属性标注里最常用来表示实体类型的标签体系是 。",o:["POS","Dependency","Slot filling","命名实体类别"],a:3,e:"如 PER/ORG/LOC/MISC 等命名实体类别标识实体属性。"},
+{q:"下列模型中，文本属性标注任务常用的是 。",o:["BERT","LSTM","CRF","Transformer"],a:0,e:"BERT 预训练后下游微调，显著提升属性抽取效果。"},
+{q:"文本属性标注多应用于 领域。",o:["信息提取","自然语言理解","文本分类","语音识别"],a:0,e:"属性信息作为结构化 IE 的关键元数据。"},
+{q:"文本属性标注常采用的标注粒度是 。",o:["逐词","句子","段落","篇章"],a:0,e:"需对具体词或短语贴属性标签。"},
+{q:"文本属性标注可以帮助理解实体之间的关系。",o:["正确","错误"],a:0,e:"抽取属性后，实体-属性-值三元组便于进一步关系推理。"},
+{q:"文本属性标注与命名实体识别是完全相同的任务。",o:["正确","错误"],a:1,e:"属性标注还需抽取数值、时间等附加信息。"},
+{q:"ASR 语音标注最常用的声学特征为 。",o:["MFCC","LPC","傅里叶谱","波形编码"],a:0,e:"MFCC 模拟人耳听觉特性，是识别声学前端标准。"},
+{q:"ASR 语音标注一般采用的粒度是 。",o:["逐词","句子","段落","篇章"],a:0,e:"逐词时间对齐便于训练声学模型和语言模型。"},
+{q:"ASR 标注里常用字母 表示 静音 段。",o:["O","I","E","S"],a:0,e:"“O” 表示 Other/Out-of-speech 静音区。"},
+{q:"ASR 标注核心步骤首要执行 。",o:["语音识别","语音转文本","语音合成","特征提取"],a:3,e:"提取 MFCC、梅尔谱等特征后才能进行后续对齐。"},
+{q:"评估 ASR 标注质量时最关注 。",o:["F1-score","Accuracy","Precision","Recall"],a:0,e:"F1 兼顾插入、删除、替换错误。"},
+{q:"ASR 标注的目的在于理解语音中词语之间的语义关系。",o:["正确","错误"],a:1,e:"主要目标是声学-文本对齐，语义关系由上层模块完成。"},
+{q:"ASR 语音标注与 TTS 标注是同一类型任务。",o:["正确","错误"],a:1,e:"ASR 面向识别，TTS 面向合成，数据组织及标签不同。"},
+{q:"TTS 标注同样常用 作为声学特征。",o:["MFCC","LPC","傅里叶谱","波形编码"],a:0,e:"MFCC/梅尔谱反映音色，是声码器训练必备输入。"},
+{q:"TTS 语音标注常见粒度为 。",o:["逐词","句子","段落","篇章"],a:1,e:"多用整句配时长、韵律、音素级标签驱动合成。"},
+{q:"TTS 标注中，字母 常代表 非语音 段落。",o:["O","I","E","S"],a:0,e:"用 O 标示静区供时长预测忽略。"},
+{q:"TTS 标注流程的核心环节是 。",o:["语音识别","语音转文本","语音合成","特征提取"],a:2,e:"标注数据最终用于训练合成器生成语音。"},
+{q:"评估 TTS 标注集时，最常引用的数值指标是 。",o:["F1-score","Accuracy","Precision","Recall"],a:0,e:"统一框架下亦采用 F1 衡量标签定位与韵律正确率。"},
+{q:"TTS 标注的根本目标是生成与输入文本对应的自然语音。",o:["正确","错误"],a:0,e:"标注提供监督，驱动语音合成质量。"},
+{q:"TTS 标注与 ASR 标注完全相同。",o:["正确","错误"],a:1,e:"两者训练方向、标签集和评价维度均不同。"}
+];
+
+let score = 0;
+function buildQuiz(){
+  const container=document.getElementById('quiz');
+  questions.forEach((item,idx)=>{
+    const qDiv=document.createElement('div');
+    qDiv.className='question';
+    let html=`<strong>${idx+1}. ${item.q}</strong><div class="options">`;
+    item.o.forEach((opt,optIdx)=>{
+      html+=`<label><input type="radio" name="q${idx}" value="${optIdx}" onclick="checkAnswer(${idx},${optIdx},this)"> ${opt}</label>`;
+    });
+    html+='</div><div class="explanation" id="exp-'+idx+'"></div>';
+    qDiv.innerHTML=html;
+    container.appendChild(qDiv);
+  });
+}
+function checkAnswer(qIdx,optIdx,inputEl){
+  const q=questions[qIdx];
+  const parentDiv=inputEl.closest('.question');
+  if(q.done)return;
+  q.done=true;
+  const exp=document.getElementById('exp-'+qIdx);
+  if(optIdx===q.a){
+    score++;
+    parentDiv.classList.add('correct');
+    exp.innerHTML='✅ <strong>回答正确！</strong> '+q.e;
+  }else{
+    parentDiv.classList.add('incorrect');
+    exp.innerHTML='❌ <strong>回答错误。</strong> 正确答案：'+q.o[q.a]+'。 '+q.e;
+  }
+  exp.style.display='block';
+  document.getElementById('scoreBox').innerText=`得分: ${score} / ${questions.length}`;
+}
+buildQuiz();
+</script>
+</body>
+</html>

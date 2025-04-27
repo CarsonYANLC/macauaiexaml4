@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>标注任务核心概念互动练习</title>
+<meta charset="UTF-8" />
+<style>
+  body{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+  h1,h2{color:#111;}
+  .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border-color .3s ease;}
+  .question.correct{border-color:#4caf50;}
+  .question.incorrect{border-color:#f44336;}
+  .options label{display:block;margin:0.3rem 0;cursor:pointer;}
+  .options input{margin-right:0.4rem;}
+  .explanation{display:none;margin-top:0.5rem;font-size:0.9rem;background:#f9f9f9;padding:0.5rem 0.75rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+  #scoreBox{position:fixed;top:0;right:0;background:#2196f3;color:#fff;padding:0.5rem 1rem;border-radius:0 0 0 8px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.2);z-index:1000;}
+</style>
+</head>
+<body>
+<div id="scoreBox">得分: 0 / 30</div>
+
+<h1>标注任务核心概念 – 互动刷题</h1>
+
+<section id="overview">
+<h2>概念导学</h2>
+<p>本练习覆盖 <strong>文本 / 多音字标注</strong>、<strong>语音标注</strong>、<strong>图像标框</strong> 与 <strong>图像分割</strong> 4 大场景：<br>
+① <em>评价指标</em> (准确率、召回率、F1、IoU / mAP)；② <em>质量影响因素</em>；③ <em>类别不平衡处理</em>；④ <em>效率提升策略</em>；⑤ <em>质量评估难点</em>。30 题帮助你系统自测核心要点！</p>
+</section>
+
+<div id="quiz"></div>
+
+<script>
+// 题库
+const questions=[
+ {q:"文本语义标注的质量只取决于标注者的专业水平。",opts:["正确","错误"],ans:1,expl:"还受数据多样性、标注规范、审核流程等多因素影响。"},
+ {q:"在评估文本语义标注时，准确率、召回率、F1 分数任何一个都可单独充分代表整体性能。",opts:["正确","错误"],ans:1,expl:"单一指标各有盲区，需综合使用或根据任务权衡。"},
+ {q:"多音字标注任务中，影响质量最关键的因素是（ ）。",opts:["标注者专业","样本数量","数据多样性","标注数据的准确性"],ans:3,expl:"读音正确与否直接决定标注可用性。"},
+ {q:"目前多音字标注最普遍的方式是（ ）。",opts:["手动标注","自动标注","规则标注","机器学习标注"],ans:0,expl:"对细粒度发音差异仍需人工判断与校对。"},
+ {q:"评估多音字标注质量最常用的单一指标是（ ）。",opts:["准确率","召回率","F1 分数","以上都常用"],ans:2,expl:"F1 兼顾正确标注与漏标，适合类别不平衡情况。"},
+ {q:"多音字标注流程中最具挑战的环节是（ ）。",opts:["确定正确读音","加标签","质量评估","以上同样困难"],ans:0,expl:"需要结合上下文和语义，自动工具尚难完全胜任。"},
+ {q:"提升多音字标注效率的有效做法是（ ）。",opts:["更多样本","语音识别辅助","自动标注工具","以上都是"],ans:3,expl:"样本、工具与语音提示相辅相成可显著加速流程。"},
+ {q:"所有多音字都能通过机器学习实现全自动准确标注。",opts:["正确","错误"],ans:1,expl:"长尾读音、歧义词和语境罕见用法仍需人工介入。"},
+ {q:"计算文本标注准确率时常用的计算结构是（ ）。",opts:["混淆矩阵","决策树","SVM","KNN"],ans:0,expl:"Confusion Matrix 量化 TP/FP/FN，由此派生多指标。"},
+ {q:"针对类别极度不平衡的数据集，下列何种指标最能替代简单准确率？",opts:["粗粒度准确率","粒度准确率","F1 分数","以上都行"],ans:2,expl:"F1 兼顾精准与召回，减弱多数类别主导效应。"},
+ {q:"下列哪项指标在计算时显式考虑了各类别样本数量差异？",opts:["准确率","F1 分数","类召回率","都不考虑"],ans:1,expl:"F1 是 P 与 R 的调和平均，隐含类别平衡因素。"},
+ {q:"F1 分数是所有文本标注任务的最佳单一性能指标。",opts:["正确","错误"],ans:1,expl:"有时需偏重 Precision 或 Recall；也存在 AUC、平均 IoU 等更合适指标。"},
+ {q:"任何文本标注任务都可以只用准确率来评价。",opts:["正确","错误"],ans:1,expl:"在类别失衡或多标签任务中，准确率可能误导。"},
+ {q:"对于不平衡数据，改进召回率评估的首选做法是使用（ ）。",opts:["粗粒度召回率","粒度召回率（逐类计算再平均）","F1 分数","以上都可"],ans:1,expl:"逐类 Recall 再宏平均能避免主频类别掩盖小类别表现。"},
+ {q:"召回率是评估文本标注任务性能的最佳单一指标。",opts:["正确","错误"],ans:1,expl:"若误标成本高，Precision 反而更关键。"},
+ {q:"影响语音标注质量最大的因素通常是（ ）。",opts:["语言水平","对语音特征的敏感度","工具熟练度","工作经验"],ans:1,expl:"能否正确区分音素、停顿、重音直接关系标签准确性。"},
+ {q:"在规模化语音标注中，效率最高的方法是（ ）。",opts:["手动","自动","基于规则","基于机器学习"],ans:3,expl:"结合声学模型与主动学习可极大减少人工量。"},
+ {q:"下列哪组指标一起最能全面反映语音识别系统对标注数据的适配度？",opts:["准确率","召回率","F1 分数","以上都是"],ans:3,expl:"三指标从不同侧面刻画识别错误情况。"},
+ {q:"语音标注项目中最耗费人力的难点是（ ）。",opts:["数据清理","模型训练","质量评估","上传存储"],ans:2,expl:"需复听抽检、纠正、统计多层错误。"},
+ {q:"提升语音标注效率的综合策略是（ ）。",opts:["更多样本","语音识别辅助","自动标注工具","以上都是"],ans:3,expl:"结合主动学习与预标注、加强工具链可显著提速。"},
+ {q:"所有语音标注任务都可以只用准确率评估。",opts:["正确","错误"],ans:1,expl:"音素级、韵律级任务更需 Precision/Recall 或 PER, CER 等细分指标。"},
+ {q:"语音标注质量仅依赖标注者专业水平。",opts:["正确","错误"],ans:1,expl:"还受录音品质、协议设计、审核策略等影响。"},
+ {q:"影响图像 标框 标注质量最大的因素是（ ）。",opts:["标注者专业水平","数据量","数据多样性","数据准确性"],ans:0,expl:"熟练度决定框位置与尺度偏差。"},
+ {q:"评估图像标框准确性最常用的单一指标是（ ）。",opts:["准确率","召回率","F1 分数 / mAP@IoU","以上都常用"],ans:2,expl:"需同时衡量漏框与错框，IoU-based F1 或 mAP 更全面。"},
+ {q:"图像标框项目中最难处理的阶段是（ ）。",opts:["数据清理","模型训练","质量评估与复审","全都一样"],ans:2,expl:"需人工核实 IoU、类别与一致性，对效率要求高。"},
+ {q:"当前图像标框最可靠的生产方式是（ ）。",opts:["手动标注","自动标注","规则标注","机器学习标注"],ans:0,expl:"高精度任务（自动驾驶等）仍依赖人工精细框选。"},
+ {q:"提升标框标注效率的有效措施是（ ）。",opts:["更多样本","可视化工具","自动预标注 + 人工校正","以上都是"],ans:2,expl:"先由模型粗框，人工微调可节省 50% 以上工时。"},
+ {q:"所有图像标框项目都可用准确率评价。",opts:["正确","错误"],ans:1,expl:"需用 IoU、mAP、Recall 等综合指标反映定位误差。"},
+ {q:"图像标框质量只与标注者水平相关。",opts:["正确","错误"],ans:1,expl:"任务指南、可视化分辨率、审核和众包平台同样关键。"},
+];
+
+let score=0;
+function buildQuiz(){
+  const container=document.getElementById('quiz');
+  questions.forEach((item,idx)=>{
+    const qDiv=document.createElement('div');
+    qDiv.className='question';
+    let html=`<strong>${idx+1}. ${item.q}</strong><div class="options">`;
+    item.opts.forEach((opt,optIdx)=>{
+      html+=`<label><input type="radio" name="q${idx}" value="${optIdx}" onclick="checkAnswer(${idx},${optIdx},this)"> ${String.fromCharCode(65+optIdx)}. ${opt}</label>`;
+    });
+    html+=`</div><div class="explanation" id="exp-${idx}"></div>`;
+    qDiv.innerHTML=html;
+    container.appendChild(qDiv);
+  });
+}
+
+function checkAnswer(qIdx,optIdx,inputEl){
+  const q=questions[qIdx];
+  if(q.done){return;}
+  q.done=true;
+  const qDiv=inputEl.closest('.question');
+  const exp=document.getElementById(`exp-${qIdx}`);
+  if(optIdx===q.ans){
+    score++;
+    qDiv.classList.add('correct');
+    exp.innerHTML=`✅ <strong>回答正确！</strong> ${q.expl}`;
+  }else{
+    qDiv.classList.add('incorrect');
+    exp.innerHTML=`❌ <strong>回答错误。</strong> 正确答案：${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]}。 ${q.expl}`;
+  }
+  exp.style.display='block';
+  document.getElementById('scoreBox').innerText=`得分: ${score} / ${questions.length}`;
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
+

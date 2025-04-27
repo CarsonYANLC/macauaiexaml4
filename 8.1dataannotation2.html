@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>Video & Image Annotation 互动刷题</title>
+<style>
+ body{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+ h1,h2{color:#111;}
+ .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1rem;transition:border-color .3s ease;}
+ .question.correct{border-color:#4caf50;}
+ .question.incorrect{border-color:#f44336;}
+ .options label{display:block;margin:0.3rem 0;cursor:pointer;}
+ .options input{margin-right:0.4rem;}
+ .explanation{display:none;margin-top:0.5rem;font-size:0.9rem;background:#f9f9f9;padding:0.5rem 0.75rem;border-left:3px solid #2196f3;border-radius:0 4px 4px 0;}
+ #scoreBox{position:fixed;top:0;right:0;background:#2196f3;color:#fff;padding:0.5rem 1rem;border-radius:0 0 0 8px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+</style>
+</head>
+<body>
+<div id="scoreBox">得分: 0 / 26</div>
+
+<h1>Video & Image Annotation – 互动刷题</h1>
+
+<section id="overview">
+<h2>总体讲解</h2>
+<p>本套练习聚焦 <strong>视频 / 图像标注</strong> 的五大核心要点：<br>① 颜色空间与分辨率；② 编码压缩与元数据；③ 标注工具与流程；④ 精度评估指标；⑤ 视频时序特性。26 题覆盖全部知识面，立即作答并查看解析！</p>
+</section>
+
+<div id="quiz"></div>
+
+<script>
+const questions=[
+{q:"视频图像标注中最常用的颜色空间是：",opts:["RGB","HSL","CMYK","YUV"],ans:0,expl:"计算机视觉模型通常以 RGB 三通道像素输入。"},
+{q:"对视频帧做静态图像标注时，常见文件格式包括：",opts:["PNG","JPG","BMP","PNG 或 JPG"],ans:3,expl:"两者皆支持无损/有损存储且被主流工具识别。"},
+{q:"视频标注工作最关键的操作是：",opts:["颜色选择","图像调整","标注工具使用","图像导出"],ans:2,expl:"精准选框、分割或轨迹需依赖专业标注工具。"},
+{q:"在对象检测视频标注中，最常用基础工具是：",opts:["画笔","喷枪","魔术棒","矩形选择"],ans:3,expl:"矩形框操作快速、通用，适配 YOLO/Faster-RCNN 输入。"},
+{q:"评价视频标注准确性的核心指标通常使用：",opts:["F1-score","Accuracy","Precision","Recall"],ans:0,expl:"需同时衡量正确命中与漏标、误标情况。"},
+{q:"视频数字图像标注与纯静态图像标注完全相同。",opts:["正确","错误"],ans:1,expl:"视频需考虑时间一致性、目标追踪等附加维度。"},
+{q:"视频图像标注的主要目标之一是为 CV 模型提供高质量训练数据。",opts:["正确","错误"],ans:0,expl:"准确标框/分割序列可训练检测、跟踪、动作识别网络。"},
+{q:"针对编解码流程，最常见的视频压缩标准是：",opts:["JPEG","MP4","H.264","AVI"],ans:2,expl:"H.264/AVC 兼顾压缩率与编码复杂度，市场占有率最高。"},
+{q:"压缩视频标注的目标帧通常指：",opts:["静态关键帧","连续动态图像帧","音频流","文件格式"],ans:1,expl:"需对连续帧目标进行时序一致标注。"},
+{q:"压缩视频标注通常采用的方式是：",opts:["自动","半自动","人工","交互式"],ans:2,expl:"高压缩后失真大，机器难以自动精准标注，人工复核最可靠。"},
+{q:"压缩视频标注流程中最耗时的阶段是：",opts:["视频压缩","帧抽取","标注处理","数据校验"],ans:2,expl:"逐帧检查并绘框/分割是人工密集型瓶颈。"},
+{q:"压缩视频标注评估时首要关注：",opts:["处理速度","标注精度","压缩效率","图像质量"],ans:1,expl:"精度直接影响模型训练效果。"},
+{q:"压缩视频标注对后续视频分析工作至关重要。",opts:["正确","错误"],ans:0,expl:"低质标注会误导检测/分割模型，降低整体性能。"},
+{q:"压缩视频标注与原始视频标注没有任何区别。",opts:["正确","错误"],ans:1,expl:"压缩失真、帧间预测带来独有伪影与挑战。"},
+{q:"在视频领域，“帧”概念属于：",opts:["时间单位","空间单位","视频格式","压缩策略"],ans:0,expl:"帧率 (fps) 描述单位时间内显示/记录帧的数量。"},
+{q:"“关键帧”通常指：",opts:["第一帧","最后一帧","压缩参考帧","任意帧"],ans:2,expl:"I-frame 可独立解码，后续 P/B 帧参考之。"},
+{q:"视频标注中，“位率(码率)”度量的是：",opts:["分辨率","压缩比","视频质量","文件格式"],ans:2,expl:"位率越高，一般视觉保真越好，文件更大。"},
+{q:"“帧率”指每秒显示(或采集)的帧数。",opts:["正确","错误"],ans:0,expl:"fps 直接影响运动平滑度及带宽需求。"},
+{q:"“像素”在视频标注中是 ______ 的度量单位。",opts:["颜色深度","图像分辨率","视频压缩比","视频质量"],ans:1,expl:"分辨率=水平像素×垂直像素。"},
+{q:"视频术语中的“场”(Field) 与 “帧”(Frame) 完全等同。",opts:["正确","错误"],ans:1,expl:"隔行扫描中一帧由两场组成，时间分辨率更高。"},
+{q:"下列视频格式中，对图像标注支持最好的是：",opts:["MP4","AVI","MOV","MKV"],ans:0,expl:"MP4 容器普遍兼容 JSON/XML 标注元数据拓展。"},
+{q:"常见免费视频标注工具 — VLC (VideoLAN) — 支持帧级标注导出。",opts:["正确","错误"],ans:0,expl:"VLC 提供 Lua 脚本与插件记录时间戳与标签。"},
+{q:"下列视频编解码格式中，以高画质著称的是：",opts:["H.264","AVI","MPEG-2","ProRes"],ans:3,expl:"Apple ProRes 为后期制作提供接近无损的码率。"},
+{q:"在视频文件元数据里， ______ 记录了标签和注释信息。",opts:["编码格式","分辨率","元数据","色彩深度"],ans:2,expl:"Metadata 可嵌入 bbox 坐标、类别、文本描述等。"},
+{q:"所有视频格式都天生支持图像标注元数据。",opts:["正确","错误"],ans:1,expl:"部分旧格式缺乏可扩展容器结构，需要外挂文件。"},
+{q:"评估文本语义标注质量常用的方法是：",opts:["准确率","召回率","F1 分数","以上都是"],ans:3,expl:"三指标互补，可全面衡量分类型标注正确性、完整性。"}
+];
+
+let score=0;
+function buildQuiz(){
+ const container=document.getElementById('quiz');
+ questions.forEach((item,idx)=>{
+   const qDiv=document.createElement('div');
+   qDiv.className='question';
+   let html=`<strong>${idx+1}. ${item.q}</strong><div class="options">`;
+   item.opts.forEach((opt,optIdx)=>{
+     html+=`<label><input type="radio" name="q${idx}" value="${optIdx}" onclick="checkAnswer(${idx},${optIdx},this)"> ${String.fromCharCode(65+optIdx)}. ${opt}</label>`;
+   });
+   html+=`</div><div class="explanation" id="exp-${idx}"></div>`;
+   qDiv.innerHTML=html;
+   container.appendChild(qDiv);
+ });
+}
+function checkAnswer(qIdx,optIdx,inputEl){
+ const q=questions[qIdx];
+ if(q.done)return;
+ q.done=true;
+ const qDiv=inputEl.closest('.question');
+ const exp=document.getElementById('exp-'+qIdx);
+ if(optIdx===q.ans){
+   score++;
+   qDiv.classList.add('correct');
+   exp.innerHTML='✅ <strong>回答正确！</strong> '+q.expl;
+ }else{
+   qDiv.classList.add('incorrect');
+   exp.innerHTML='❌ <strong>回答错误。</strong> 正确答案：'+String.fromCharCode(65+q.ans)+'. '+q.opts[q.ans]+'。 '+q.expl;
+ }
+ exp.style.display='block';
+ document.getElementById('scoreBox').innerText=`得分: ${score} / ${questions.length}`;
+}
+buildQuiz();
+</script>
+</body>
+</html>
