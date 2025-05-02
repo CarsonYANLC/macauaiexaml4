@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>题库 4-25 vs 4-28 修订全对照（29 题）</title>
+<style>
+ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f4f6f9;margin:0;padding:1.7rem;color:#212529;}
+ h1{text-align:center;margin:0 0 1.4rem;}
+ .qbox{background:#fff;border-radius:8px;margin-bottom:1.7rem;padding:1.2rem 1.3rem;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+ .qbox:nth-child(odd){background:#fcfcfc;}
+ h2{margin:0 0 .7rem;font-size:1.08rem;}
+ table{width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:.6rem;}
+ th,td{border:1px solid #dee2e6;padding:.32rem .48rem;vertical-align:top;}
+ th{background:#eff1f4;text-align:left;font-weight:600;}
+ .old{color:#d6336c;text-decoration:line-through;}
+ .new{color:#198754;font-weight:bold;}
+ .tag{display:inline-block;font-size:.72rem;border-radius:4px;padding:.12rem .44rem;margin-left:.35rem;color:#fff}
+ .stem{background:#0d6efd}.opt{background:#20c997}.ans{background:#fd7e14}
+ .reason{margin:0;font-size:.83rem;background:#f7f9fb;padding:.46rem .8rem;border-left:3px solid #0d6efd;border-radius:4px;}
+</style>
+</head>
+<body>
+<h1>题库修订对照（共 29 题）</h1>
+
+<!-- ===== 以下逐题展开 ===== -->
+<!-- 1 -->
+<div class="qbox">
+<h2>1. 制定文本标注规范的主要目的是（）。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原内容</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">提高标注数据的准确性</td></tr>
+<tr><td>选项 B</td><td colspan="2">提高机器学习模型的性能</td></tr>
+<tr><td>选项 C</td><td colspan="2">降低标注成本</td></tr>
+<tr><td>选项 D</td><td colspan="2">以上都是</td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">规范同时提升数据质量、支撑模型效果、减少返工成本，应选 D。</p>
+</div>
+
+<!-- 2 -->
+<div class="qbox">
+<h2>2. 在制定文本标注规范时，（）因素最影响标注效率。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">标注界面的易用性</td></tr>
+<tr><td>选项 B</td><td colspan="2">标注任务的具体要求</td></tr>
+<tr><td>选项 C</td><td colspan="2">标注者的技能水平</td></tr>
+<tr><td>选项 D</td><td colspan="2">以上都是</td></tr>
+<tr><td>正确答案</td><td><span class="old">C</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">效率由<strong>界面</strong>+<strong>任务描述</strong>+<strong>人员技能</strong>共同决定。</p>
+</div>
+
+<!-- 3 -->
+<div class="qbox">
+<h2>3. 以下（）文本标注质量评估指标常用于审核制度中的质量评估。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">准确率</td></tr>
+<tr><td>选项 B</td><td colspan="2">召回率</td></tr>
+<tr><td>选项 C</td><td colspan="2">F1 分数</td></tr>
+<tr><td>选项 D</td><td colspan="2">以上都是</td></tr>
+<tr><td>正确答案</td><td><span class="old">C</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">审核制度通常综合 P/R/F1 三项指标。</p>
+</div>
+
+<!-- 4 -->
+<div class="qbox">
+<h2>4. 以下（）语音标注工具特别适合用于分析语音中的说话人数量。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">Audacity</td></tr>
+<tr><td>选项 B</td><td colspan="2">PocketSphinx</td></tr>
+<tr><td>选项 C</td><td colspan="2">Kaldi</td></tr>
+<tr><td>选项 D</td><td colspan="2">以上都不适用</td></tr>
+<tr><td>正确答案</td><td><span class="old">D</span></td><td><span class="new">C</span></td></tr>
+</table>
+<p class="reason">Kaldi 拥有说话人分离/计数最佳实践。</p>
+</div>
+
+<!-- 5 -->
+<div class="qbox">
+<h2>5. <span class="old">Talend Data Preparation提供的数据清洗功能比其他工具更强大。</span><span class="new">Talend Data Preparation提供的数据清洗功能一定比其他工具更强大。</span>（判断）<span class="tag stem">题干修改</span><span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td><span class="old">…更强大</span></td><td><span class="new">…一定更强大</span></td></tr>
+<tr><td>选项 A</td><td colspan="2">正确</td></tr>
+<tr><td>选项 B</td><td colspan="2">错误</td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">加入绝对化词“<em>一定</em>”导致结论不严谨，应判错误。</p>
+</div>
+
+<!-- 6 -->
+<div class="qbox">
+<h2>6. 为了保证智能客服系统的正常运行，以下（）选项是最关键的维护步骤。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">检测网络连接</td></tr>
+<tr><td>选项 B</td><td colspan="2">备份数据库</td></tr>
+<tr><td>选项 C</td><td colspan="2">更新安全补丁</td></tr>
+<tr><td>选项 D</td><td colspan="2">检查硬件状态</td></tr>
+<tr><td>正确答案</td><td><span class="old">B</span></td><td><span class="new">C</span></td></tr>
+</table>
+<p class="reason">未及时更新补丁可导致系统被攻破或停服。</p>
+</div>
+
+<!-- 7 -->
+<div class="qbox">
+<h2>7. 智能监控系统的存储设备维护不包括哪些方面（）。<span class="tag opt">选项修改</span><span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">增加存储空间</td></tr>
+<tr><td>选项 B</td><td colspan="2">数据备份与恢复</td></tr>
+<tr><td>选项 C</td><td colspan="2">清理无用视频</td></tr>
+<tr><td>选项 D</td><td><span class="old">更换存储设备</span></td><td><span class="new">存储设备折旧</span></td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">“折旧”属财务范畴，与维护操作无关。</p>
+</div>
+
+<!-- 8 -->
+<div class="qbox">
+<h2>8. 数据抽取的主要挑战是（）。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">数据质量</td></tr>
+<tr><td>选项 B</td><td colspan="2">数据多样性</td></tr>
+<tr><td>选项 C</td><td colspan="2">数据存储</td></tr>
+<tr><td>选项 D</td><td colspan="2">数据安全</td></tr>
+<tr><td>正确答案</td><td><span class="old">B</span></td><td><span class="new">A</span></td></tr>
+</table>
+<p class="reason">脏数据会使整个 ETL 链路失效，质量为首要挑战。</p>
+</div>
+
+<!-- 9 -->
+<div class="qbox">
+<h2>9. 数据装载通常<span class="old">紧接着</span><span class="new">接下来</span>是哪个环节？<span class="tag stem">题干修改</span></h2>
+<table>
+<tr><th>字段</th><th>原/新</th><th></th></tr>
+<tr><td>选项 A</td><td colspan="2">数据清理</td></tr>
+<tr><td>选项 B</td><td colspan="2">数据变换</td></tr>
+<tr><td>选项 C</td><td colspan="2">数据归约</td></tr>
+<tr><td>选项 D</td><td colspan="2">数据挖掘</td></tr>
+<tr><td>正确答案</td><td colspan="2">C（未变）</td></tr>
+</table>
+<p class="reason">用“接下来”更符合流程先后表述；答案不变。</p>
+</div>
+
+<!-- 10 -->
+<div class="qbox">
+<h2>10. AIoT 在以下（）领域的应用发展速度最慢。<span class="tag opt">选项修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>选项 A</td><td colspan="2">工业自动化</td></tr>
+<tr><td>选项 B</td><td colspan="2">智慧零售</td></tr>
+<tr><td>选项 C</td><td><span class="old">智能医疗</span></td><td><span class="new">由于法规、隐私等原因智能医疗推进较慢</span></td></tr>
+<tr><td>选项 D</td><td colspan="2">智能制造</td></tr>
+<tr><td>正确答案</td><td colspan="2">C（未变）</td></tr>
+</table>
+<p class="reason">补充限制原因，使描述更完整。</p>
+</div>
+
+<!-- 11 -->
+<div class="qbox">
+<h2>11. 在智能物联网系统中，以下平台最常用于数据存储和分析。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>A</td><td colspan="2">Amazon&nbsp;S3</td></tr>
+<tr><td>B</td><td colspan="2">Microsoft&nbsp;Azure</td></tr>
+<tr><td>C</td><td colspan="2">Google&nbsp;Cloud&nbsp;Storage</td></tr>
+<tr><td>D</td><td colspan="2">Oracle&nbsp;Cloud</td></tr>
+<tr><td>正确答案</td><td><span class="old">B</span></td><td><span class="new">A</span></td></tr>
+</table>
+<p class="reason">AWS S3 在 IoT 数据湖/归档场景市占率最高。</p>
+</div>
+
+<!-- 12 -->
+<div class="qbox">
+<h2>12. KBMS 智慧库管理系统在进行功能测试时，主要使用的测试工具是（）。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td colspan="2">无变化</td></tr>
+<tr><td>A</td><td colspan="2">JMeter</td></tr>
+<tr><td>B</td><td colspan="2">Selenium</td></tr>
+<tr><td>C</td><td colspan="2">Postman</td></tr>
+<tr><td>D</td><td colspan="2">JUnit</td></tr>
+<tr><td>正确答案</td><td><span class="old">D</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">功能测试重 UI 流程自动化，应选 Selenium。</p>
+</div>
+
+<!-- 13 -->
+<div class="qbox">
+<h2>13. KBMS 系统在知识收集方面主要关注的是如何从各种渠道获取数据。（）<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><td>题干不变</td><td colspan="2"></td></tr>
+<tr><td>选项 A</td><td colspan="2">正确</td></tr>
+<tr><td>选项 B</td><td colspan="2">错误</td></tr>
+<tr><td>正确答案</td><td><span class="old">B</span></td><td><span class="new">A</span></td></tr>
+</table>
+<p class="reason">多源知识整合是知识收集的核心目标。</p>
+</div>
+
+<!-- 14 -->
+<div class="qbox">
+<h2>14. <span class="old">KBMS系统中，以下…</span><br><span class="new">在大规模文本知识库情况下，在 KBMS 系统中，以下…</span><span class="tag stem">题干修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>选项 A</td><td colspan="2">基于规则的自然语言处理技术</td></tr>
+<tr><td>选项 B</td><td colspan="2">基于机器学习的自然语言处理技术</td></tr>
+<tr><td>选项 C</td><td colspan="2">关键词提取技术</td></tr>
+<tr><td>选项 D</td><td colspan="2">语音识别技术</td></tr>
+<tr><td>正确答案</td><td colspan="2">B（未变）</td></tr>
+</table>
+<p class="reason">补充“<em>大规模文本</em>”场景，强调 ML 分类优势。</p>
+</div>
+
+<!-- 15 -->
+<div class="qbox">
+<h2>15. KBMS 系统中，知识的存储与检索主要依赖于人工智能技术。（）<span class="tag stem">题干/选项修改</span><span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>题干</td><td><span class="old">在大规模文本知识库情况下…</span></td><td><span class="new">知识存储与检索依赖 AI</span></td></tr>
+<tr><td>选项 A</td><td><span class="old">基于规则的 NLP 技术</span></td><td><span class="new">正确</span></td></tr>
+<tr><td>选项 B</td><td><span class="old">基于机器学习的 NLP 技术</span></td><td><span class="new">错误</span></td></tr>
+<tr><td>选项 C</td><td class="old">关键词提取技术</td><td class="new">—</td></tr>
+<tr><td>选项 D</td><td class="old">语音识别技术</td><td class="new">—</td></tr>
+<tr><td>正确答案</td><td><span class="old">B</span></td><td><span class="new">A</span></td></tr>
+</table>
+<p class="reason">题型改为判断题；深度语义检索等 AI 技术已成主流。</p>
+</div>
+
+<!-- 16 -->
+<div class="qbox">
+<h2>16. 在谓词逻辑中，以下符号组合可以表示“某些 X 是 Y”。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原/修订</th><th></th></tr>
+<tr><td>选项 A</td><td colspan="2">∃x&y</td></tr>
+<tr><td>选项 B</td><td colspan="2">∃x||y</td></tr>
+<tr><td>选项 C</td><td colspan="2">∃!x&y</td></tr>
+<tr><td>选项 D</td><td colspan="2">以上都不对</td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">正确表达应为 ∃x (X(x) ∧ Y(x))，四项皆不符。</p>
+</div>
+
+<!-- 17 -->
+<div class="qbox">
+<h2>17. 在谓词逻辑表示法中，个体符号是指（）。<span class="tag opt">选项修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">谓词</td></tr>
+<tr><td>B</td><td colspan="2">函数</td></tr>
+<tr><td>C</td><td colspan="2">常量</td></tr>
+<tr><td>D</td><td><span class="old">变量</span></td><td><span class="new">常量和变量</span></td></tr>
+<tr><td>正确答案</td><td colspan="2">D（未变）</td></tr>
+</table>
+<p class="reason">个体符号可为常量或变量。</p>
+</div>
+
+<!-- 18 -->
+<div class="qbox">
+<h2>18. 在谓词逻辑表示法中，谓词用来表示（）。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">具体事物</td></tr>
+<tr><td>B</td><td colspan="2">事物的属性</td></tr>
+<tr><td>C</td><td colspan="2">命题</td></tr>
+<tr><td>D</td><td colspan="2">逻辑关系</td></tr>
+<tr><td>正确答案</td><td><span class="old">D</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">本题考察“描述对象属性”的定义。</p>
+</div>
+
+<!-- 19 -->
+<div class="qbox">
+<h2>19. 在谓词逻辑表示法中，项是指（）。<span class="tag opt">选项修改</span><span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">谓词</td></tr>
+<tr><td>B</td><td colspan="2">函数</td></tr>
+<tr><td>C</td><td colspan="2">常量</td></tr>
+<tr><td>D</td><td><span class="old">变量</span></td><td><span class="new">常量和变量</span></td></tr>
+<tr><td>正确答案</td><td><span class="old">C</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">项 (term) 可是常量、变量或函数项。</p>
+</div>
+
+<!-- 20 -->
+<div class="qbox">
+<h2>20. 在谓词逻辑表示法中，存在量词符号 “exists” 表示（）。<span class="tag opt">选项修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">全称量词</td></tr>
+<tr><td>B</td><td colspan="2">形容量词</td></tr>
+<tr><td>C</td><td colspan="2">数据量词</td></tr>
+<tr><td>D</td><td><span class="old">条件量词</span></td><td><span class="new">存在量词</span></td></tr>
+<tr><td>正确答案</td><td colspan="2">D（未变）</td></tr>
+</table>
+<p class="reason">修正术语错误。</p>
+</div>
+
+<!-- 21 -->
+<div class="qbox">
+<h2>21. 在产生式规则表示法中，若某个事实能满足某个条件，则称该事实（）该规则。<span class="tag opt">选项修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">匹配</td></tr>
+<tr><td>B</td><td><span class="old">匹配</span></td><td><span class="new">触发</span></td></tr>
+<tr><td>C</td><td colspan="2">重写</td></tr>
+<tr><td>D</td><td colspan="2">激活</td></tr>
+<tr><td>正确答案</td><td colspan="2">A（未变）</td></tr>
+</table>
+<p class="reason">保持术语准确：Match vs Fire。</p>
+</div>
+
+<!-- 22 -->
+<div class="qbox">
+<h2>22. 在产生式规则表示法中，若多个规则同时匹配某个事实，则只执行最先匹配的规则。（）<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><td>选项 A</td><td colspan="2">正确</td></tr>
+<tr><td>选项 B</td><td colspan="2">错误</td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">冲突解决策略并非简单先到先用。</p>
+</div>
+
+<!-- 23 -->
+<div class="qbox">
+<h2>23. 在产生式系统中，怎样处理匹配冲突和操作冲突？（）<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">匹配冲突通过优先级解决，操作冲突通过时间顺序解决</td></tr>
+<tr><td>B</td><td colspan="2">匹配冲突通过时间顺序解决，操作冲突通过优先级解决</td></tr>
+<tr><td>C</td><td colspan="2">匹配冲突和操作冲突都通过优先级解决</td></tr>
+<tr><td>D</td><td colspan="2">匹配冲突和操作冲突都通过时间顺序解决</td></tr>
+<tr><td>正确答案</td><td><span class="old">B</span></td><td><span class="new">A</span></td></tr>
+</table>
+<p class="reason">常规做法：先比较优先级，再按执行时序。</p>
+</div>
+
+<!-- 24 -->
+<div class="qbox">
+<h2>24. 在产生式系统中，如何处理新知识的问题？（）<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">通过归纳推理得到新知识</td></tr>
+<tr><td>B</td><td colspan="2">通过演绎推理得到新知识</td></tr>
+<tr><td>C</td><td colspan="2">通过类比推理得到新知识</td></tr>
+<tr><td>D</td><td colspan="2">通过机器学习得到新知识</td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">系统根据规则推导属于演绎过程。</p>
+</div>
+
+<!-- 25 -->
+<div class="qbox">
+<h2>25. 在产生式系统中，规则的匹配冲突只能通过优先级来解决。（）<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><td>A 正确</td><td colspan="2"></td></tr>
+<tr><td>B 错误</td><td colspan="2"></td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">还可用随机、最近使用、特定度等多种策略。</p>
+</div>
+
+<!-- 26 -->
+<div class="qbox">
+<h2>26. 在产生式系统中，操作冲突只能通过时间顺序来解决。（）<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><td>A 正确</td><td colspan="2"></td></tr>
+<tr><td>B 错误</td><td colspan="2"></td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">B</span></td></tr>
+</table>
+<p class="reason">也可按优先级、撤销/重排等策略处理。</p>
+</div>
+
+<!-- 27 -->
+<div class="qbox">
+<h2>27. 下列（）知识的表达方式不属于产生式系统。<span class="tag opt">选项修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">规则</td></tr>
+<tr><td>B</td><td colspan="2">框架</td></tr>
+<tr><td>C</td><td colspan="2">与或表达式</td></tr>
+<tr><td>D</td><td><span class="old">与或表达式</span></td><td><span class="new">归纳表达式</span></td></tr>
+<tr><td>正确答案</td><td colspan="2">B（未变）</td></tr>
+</table>
+<p class="reason">框架为结构化知识，非规则推理形式。</p>
+</div>
+
+<!-- 28 -->
+<div class="qbox">
+<h2>28. 以下（）选项是知识整理的难点。<span class="tag ans">答案修改</span></h2>
+<table>
+<tr><th>字段</th><th>原/修订</th><th></th></tr>
+<tr><td>A</td><td colspan="2">知识的获取</td></tr>
+<tr><td>B</td><td colspan="2">知识的表达</td></tr>
+<tr><td>C</td><td colspan="2">知识的组织</td></tr>
+<tr><td>D</td><td colspan="2">以上都是</td></tr>
+<tr><td>正确答案</td><td><span class="old">A</span></td><td><span class="new">D</span></td></tr>
+</table>
+<p class="reason">三环节均具挑战，故选“以上都是”。</p>
+</div>
+
+<!-- 29 -->
+<div class="qbox">
+<h2>29. <span class="old">下列（）数据库可以存储结构化数据</span><br><span class="new">下列选项中，哪一个是开源的、用于存储结构化数据的关系型数据库</span><span class="tag stem">题干修改</span></h2>
+<table>
+<tr><th>字段</th><th>原</th><th>修订后</th></tr>
+<tr><td>A</td><td colspan="2">MySQL</td></tr>
+<tr><td>B</td><td colspan="2">Oracle</td></tr>
+<tr><td>C</td><td colspan="2">MongoDB</td></tr>
+<tr><td>D</td><td colspan="2">Redis</td></tr>
+<tr><td>正确答案</td><td colspan="2">A（未变）</td></tr>
+</table>
+<p class="reason">题干补充“开源、关系型”限定，使答案唯一。</p>
+</div>
+
+</body>
+</html>
