@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>谓词逻辑与知识系统刷题</title>
+<style>
+  body{background:#fff;font-family:"Helvetica Neue","Segoe UI",sans-serif;margin:0;padding:20px;color:#222;line-height:1.6}
+  h1{font-size:1.8rem;margin-bottom:0.3em}
+  .summary{border-left:4px solid #888;padding-left:15px;margin-bottom:30px}
+  .question{border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:18px}
+  .question.correct{border-color:#3c9}
+  .question.incorrect{border-color:#e33}
+  .options{margin-top:10px}
+  .option{display:block;margin:6px 0;cursor:pointer}
+  .option input{margin-right:6px}
+  .explanation{margin-top:10px;font-size:0.9rem;color:#555;display:none}
+  .feedback{font-weight:700;margin-top:5px}
+  #result{font-size:1.2rem;font-weight:700;margin-top:30px;padding:12px 16px;border-top:2px solid #444}
+</style>
+</head>
+<body>
+  <h1>谓词逻辑与知识系统刷题</h1>
+  <div class="summary">
+    <p>本套练习共 <strong>70 题</strong>，覆盖四大板块：谓词逻辑基础、产生式规则系统、智能系统优化与数据分析、知识表示与质量属性。</p>
+    <p>核心概念包括：<br>① 谓词逻辑符号与语义（逻辑非、合取、量词、项、谓词、命题构造）；<br>② 规则系统机理（匹配、触发、冲突解决、事实区与规则区）；<br>③ 智能系统优化三要素（<em>数据 → 算法 → 架构 / 反馈</em>）；<br>④ 知识质量属性（可利用性、可实现性、可组织性、可维护性等）。</p>
+    <p>题库中存在若干 <em>相似问法</em>，如 #33/#34（冲突处理策略）、#54/#55（谓词与命题逻辑表达力）、#60/#61（可利用性相关性）。请留意用词差异，加深概念辨析。</p>
+  </div>
+  <div id="quiz"></div>
+  <div id="result">已答对 0 / 0 题</div>
+
+<script>
+const questions=[
+{stem:"在谓词逻辑中，以下 （ ） 符号代表逻辑非（NOT）。",options:["&","||","!","空符号"],answer:2,explanation:"\"!\" 在计算机与逻辑表达式里普遍表示否定；看到 \"!P\" 就读作“非 P”。"},
+{stem:"在谓词逻辑中，以下 （ ） 符号代表合取（AND）。",options:["&","||","!","空符号"],answer:0,explanation:"\"&\" 读作“并且”。两个条件都真整体才真。"},
+{stem:"在谓词逻辑中，以下 （ ） 符号代表存在量词。",options:["&","||","!","∃"],answer:3,explanation:"∃ 读作“存在”。如 ∃x P(x) 表示存在某个 x 满足 P。"},
+{stem:"在谓词逻辑中，以下 （ ） 符号代表全称量词。",options:["&","||","!","∀"],answer:3,explanation:"∀ 读作“对于所有…”。如 ∀x P(x)。"},
+{stem:"在谓词逻辑中，下列 （ ） 符号组合最能表达“某些 X 是 Y”。",options:["∃x&y","∃x||y","∃!x&y","以上都不对"],answer:3,explanation:"标准写法应为 ∃x (X(x) ∧ Y(x))，列表中均不符合故选最后。"},
+{stem:"在谓词逻辑中，全称量词和存在量词都可以用符号表示。",options:["对","错"],answer:0,explanation:"∀、∃ 就是对应符号。"},
+{stem:"在谓词逻辑中，全称量词和存在量词是等价的。",options:["对","错"],answer:1,explanation:"二者语义相反：全称强调全部，存在强调至少一个。"},
+{stem:"“小鸟会飞”在逻辑上最符合哪种关系？",options:["归纳","条件","等价","并列"],answer:1,explanation:"可形式化为 Bird(x) → Fly(x)，属于条件/蕴含关系。"},
+{stem:"“不小于 (≥)” 的逻辑本质是下列哪一类关系？",options:["大小比较","相等","包含","交集"],answer:0,explanation:"≥ 直接比较两个值大小，是典型比较谓词。"},
+{stem:"若两数相除结果大于 0，则它们必定 （ ）。",options:["相等","同号","互为反数","互质"],answer:1,explanation:"同正或同负时商为正；异号商为负。"},
+{stem:"关于质数的正确定义是：",options:["只能被 1 和自身整除的自然数","只能被 2 整除","能被任意整数整除","大于0小于1"],answer:0,explanation:"素数除 1 与自身外无其它正因数。"},
+{stem:"用来表示“至少存在一个元素满足条件”的量词是 （ ）。",options:["全称","存在","否定","双重"],answer:1,explanation:"存在量词 (∃) 描述“有这么一个…”。"},
+{stem:"谓词公式只能表达静态事实，无法描述动态过程。",options:["对","错"],answer:1,explanation:"可通过加入时间参数或时序逻辑描述变化。"},
+{stem:"谓词公式可用于定义函数和运算符。",options:["对","错"],answer:0,explanation:"如 f(x)=y ⇔ P(x,y) 用谓词刻画映射。"},
+{stem:"谓词逻辑表示法中，“个体符号”指 （ ）。",options:["谓词","函数","常量","常量和变量"],answer:3,explanation:"个体符号可代入量词的位置，包含常量与变量。"},
+{stem:"谓词用来表示 （ ）。",options:["具体事物","事物属性/关系","整个命题","逻辑联结词"],answer:1,explanation:"谓词与“属性、关系”同义，如 Larger(x,y)。"},
+{stem:"在谓词逻辑中，“项”是指 （ ）。",options:["谓词","函数","常量","常量和变量"],answer:3,explanation:"项 (term) = 可以代入谓词参数的位置的元素。"},
+{stem:"全称量词符号 “∀” 表示 （ ）。",options:["存在量词","条件量词","逻辑关系","普遍量词"],answer:3,explanation:"中文常译“普遍量词”或“全称量词”。"},
+{stem:"存在量词符号 “∃” 表示 （ ）。",options:["全称量词","形容量词","数据量词","存在量词"],answer:3,explanation:"见题 3，表示至少存在一个。"},
+{stem:"“项 + 谓词” 的组合可以构成命题。",options:["对","错"],answer:0,explanation:"如 Prime(7) 立即真/假，已是命题。"},
+// 产生式系统 21-38
+{stem:"产生式规则的一般形式是 （ ）。",options:["if <条件> then <动作>","when <条件> then <动作>","if <条件> then <动> else <动>","while <条件> do <动作>"],answer:0,explanation:"主流教材与专家系统壳统一采用 if…then…"},
+{stem:"在产生式规则中，<条件> 通常由一系列 （ ） 组成。",options:["命题","语句","规则","事实"],answer:3,explanation:"条件部分列出需匹配的事实模式。"},
+{stem:"<动作> 通常由一系列 （ ） 组成。",options:["命题","语句","规则","事实"],answer:1,explanation:"动作为待执行的操作，可写为语句序列。"},
+{stem:"若某个事实满足规则条件，则称该事实 （ ） 该规则。",options:["匹配","触发","重写","激活"],answer:0,explanation:"第一步叫匹配 (match)。"},
+{stem:"当多条规则同时匹配时，系统将进入冲突状态，需要额外冲突处理。",options:["对","错"],answer:0,explanation:"这一步称 conflict‑resolution。"},
+{stem:"“只执行最先匹配到的规则” 是解决冲突的唯一办法。",options:["对","错"],answer:1,explanation:"还可用优先级、最近使用等策略。"},
+{stem:"若事实满足条件并导致规则被安排执行，可说该事实“触发”了该规则。",options:["对","错"],answer:0,explanation:"触发强调加入待执行队列。"},
+{stem:"产生式系统主要由 （ ） 组成。",options:["知识库+推理机","事实+规则","问题求解器+知识获取器","数据库+程序"],answer:0,explanation:"知识库(事实+规则)+推理机组成核心。"},
+{stem:"通用做法：匹配冲突用优先级解决，操作冲突用时间顺序解决。",options:["A","B","C","D"],answer:0,explanation:"匹配看规则优先级；动作按顺序执行。"},
+{stem:"解决多规则冲突最常见的方法是 （ ）。",options:["建立规则优先级","修改规则","删除规则","化简规则"],answer:0,explanation:"给规则加序号/权重最简便。"},
+{stem:"产生式系统的工作循环通常包括：分析问题→搜索知识库→提出假设→执行规则→解决问题。",options:["A","B","C","D"],answer:3,explanation:"对应经典认知循环结构 (ACT‑R)。"},
+{stem:"在产生式系统中，新知识的获取通常依赖 （ ）。",options:["归纳","演绎","类比","机器学习"],answer:1,explanation:"按规则推导属于演绎推理。"},
+{stem:"“规则冲突只能靠优先级解决” 是错误的说法。",options:["对","错"],answer:0,explanation:"亦可随机、最近使用等多策略。"},
+{stem:"“操作冲突只能按时间顺序解决” 亦是错误说法。",options:["对","错"],answer:0,explanation:"可用事务、互斥锁等控制。"},
+{stem:"下列 （ ） 知识表达方式不属于产生式系统。",options:["规则","框架","与或图","归纳表达式"],answer:1,explanation:"框架是槽结构模型，非 if‑then 规则。"},
+{stem:"产生式系统最常使用的知识表示方法是 （ ）。",options:["谓词逻辑","产生式规则","框架","过程"],answer:1,explanation:"名字已揭示——产生式规则。"},
+{stem:"产生式规则在人工智能里最典型的应用领域是 （ ）。",options:["机器学习","自然语言","专家系统","数据挖掘"],answer:2,explanation:"经典专家系统 MYCIN、CLIPS 基于规则。"},
+{stem:"产生式系统的知识库同时存储事实与规则两类元素。",options:["对","错"],answer:0,explanation:"事实区动态变化，规则区相对固定。"},
+// 智能系统优化 39‑48
+{stem:"下列哪种做法同时能有效缩短决策时延？",options:["提高算法并行度","缓存中间结果","精简输入特征","以上都是"],answer:3,explanation:"硬件+软件+数据侧协同均可降时延。"},
+{stem:"在智能系统优化过程中，最容易被忽视的因素是 （ ）。",options:["数据质量","算法设计","系统架构","用户反馈"],answer:3,explanation:"开发者常忽略持续收集用户体验数据。"},
+{stem:"提升系统精度的常见做法是 （ ）。",options:["增强学习/泛化能力","换高配服务器","降低推理时长","随机增加正则项"],answer:0,explanation:"模型泛化直接决定准确率。"},
+{stem:"为提高系统鲁棒性最关键的手段是 （ ）。",options:["提升算法精度","提升泛化能力","减少决策时间","压缩模型大小"],answer:1,explanation:"鲁棒性=面向未见环境仍稳定表现。"},
+{stem:"下面哪一因素对“优化效果”最具决定性？",options:["数据质量","算法设计","系统架构","用户反馈"],answer:0,explanation:"垃圾进→垃圾出。"},
+{stem:"优化决策时间 必然依赖 提高算法精度。",options:["对","错"],answer:1,explanation:"可牺牲少量精度换极快时延。"},
+{stem:"在所有优化因素里，用户反馈 总是最重要的。",options:["对","错"],answer:1,explanation:"重要性取决于具体场景需求。"},
+{stem:"下列工具中，最适合“快速制作数据可视化图表”的是 （ ）。",options:["Excel","PowerPoint","Word","Notepad"],answer:0,explanation:"Excel 内置丰富图表一键生成。"},
+{stem:"在撰写数据分析报告时，首要步骤 应当是 （ ）。",options:["收集数据","清洗数据","分析数据","撰写报告"],answer:0,explanation:"没有可靠数据，后续皆空谈。"},
+{stem:"下列 （ ） 算法属于分类方法。",options:["决策树","K‑均值","主成分分析","傅里叶变换"],answer:0,explanation:"决策树输出离散类别；K‑均值是聚类。"},
+// 知识表示 49‑70
+{stem:"下列 AI 技术中，对知识表达能力要求最高的是 （ ）。",options:["机器学习","自然语言处理","计算机视觉","专家系统"],answer:3,explanation:"专家系统需将人类经验显式化。"},
+{stem:"能表达更复杂概念和关系的逻辑是 （ ）。",options:["命题逻辑","产生式规则","谓词逻辑","语义网络"],answer:2,explanation:"谓词逻辑支持量词、嵌套。"},
+{stem:"若要描述“多概念之间的网状关系”，最合适的表示为 （ ）。",options:["产生式规则","语义网络","决策树","贝叶斯网"],answer:1,explanation:"节点=概念，边=关系，天然网状结构。"},
+{stem:"处理不确定性与模糊性的知识表示方式首选 （ ）。",options:["命题逻辑","产生式规则","谓词逻辑","模糊逻辑"],answer:3,explanation:"模糊逻辑量化“部分真”。"},
+{stem:"最能直观表达因果关系的知识形式是 （ ）。",options:["产生式规则","语义网络","决策树","贝叶斯网"],answer:0,explanation:"if…then… 本质即因→果结构。"},
+{stem:"谓词逻辑的表达能力确实强于命题逻辑。",options:["对","错"],answer:0,explanation:"量词与函数扩展表达力。"},
+{stem:"命题逻辑就足以表达所有复杂概念与关系。",options:["对","错"],answer:1,explanation:"无法区分 ∃∀ 之类嵌套语义。"},
+{stem:"“知识可利用性” 最贴切的描述是 （ ）。",options:["可访问","可理解","可更新","可共享"],answer:0,explanation:"能被系统快速检索/调用。"},
+{stem:"影响可利用性的因素包括 （ ）。",options:["精度","广度","深度","以上全部"],answer:3,explanation:"三者共同影响检索与推理效果。"},
+{stem:"提高可利用性需同时关注 （ ）。",options:["表示","获取","存储","以上全部"],answer:3,explanation:"三环节决定知识可用度。"},
+{stem:"哪些开发环节必须考虑可利用性？",options:["知识获取","知识表示","知识推理","以上全部"],answer:3,explanation:"任一环节缺失都会降低效率。"},
+{stem:"“可利用性越高 → 系统性能越好” 这一说法绝对正确。",options:["对","错"],answer:1,explanation:"若知识本身错误，仍会快速得到错误结论。"},
+{stem:"可利用性与知识的精度、广度、深度毫无关系。",options:["对","错"],answer:1,explanation:"直接相关。"},
+{stem:"“知识可实现性” 的最好概括是 （ ）。",options:["必须能应用于实际问题","必须有趣","必须真实","必须全面"],answer:0,explanation:"能落地解决真问题才有价值。"},
+{stem:"可实现性主要解决 （ ） 的问题。",options:["算法性能","数据质量","知识精度","应用场景"],answer:3,explanation:"确保知识能支撑具体业务。"},
+{stem:"以下描述可实现性最准确：",options:["知识须可落地应用","知识须有趣","知识须真实","知识须全面"],answer:0,explanation:"可落地是衡量实现性的核心。"},
+{stem:"可实现性 = 知识必须“真实准确”。",options:["对","错"],answer:1,explanation:"真实性重要但不足以保证可实现。"},
+{stem:"可实现性主要用来解决“知识获取”的挑战。",options:["对","错"],answer:1,explanation:"获取是来源问题，实施落地是应用问题。"},
+{stem:"“知识可组织性” 要求最核心的是 “有序”。",options:["有序","清晰","标准","客观"],answer:0,explanation:"有序结构方便检索、更新、推理。"},
+{stem:"可组织性主要服务于 （ ）。",options:["知识库建立","知识更新","知识维护","知识获取"],answer:0,explanation:"先有良好组织结构，库才能扩展。"},
+{stem:"“知识可维护性” 最贴切的描述是 （ ）。",options:["有用","可理解","不断更新","准确"],answer:2,explanation:"易更新、易修订是维护性核心。"},
+{stem:"“知识可理解性与自然性” 要求表达方式贴近人类认知规律。",options:["对","错"],answer:0,explanation:"如类自然语言或图形化表达以便非技术人员阅读。"}
+];
+
+let answered=0,correct=0;
+const quiz=document.getElementById('quiz');
+const resultBox=document.getElementById('result');
+
+questions.forEach((q,idx)=>{
+  const card=document.createElement('div');
+  card.className='question';
+  const title=document.createElement('div');
+  title.innerHTML=`<strong>${idx+1}. </strong>${q.stem}`;
+  card.appendChild(title);
+
+  const opts=document.createElement('div');
+  opts.className='options';
+
+  q.options.forEach((optText,optIdx)=>{
+    const label=document.createElement('label');
+    label.className='option';
+    const radio=document.createElement('input');
+    radio.type='radio';
+    radio.name='q'+idx;
+    radio.value=optIdx;
+    radio.addEventListener('change',()=>check(idx,optIdx,card));
+    label.appendChild(radio);
+    label.appendChild(document.createTextNode(optText));
+    opts.appendChild(label);
+  });
+  card.appendChild(opts);
+  const explain=document.createElement('div');
+  explain.className='explanation';
+  explain.textContent='解析：'+q.explanation;
+  card.appendChild(explain);
+  quiz.appendChild(card);
+});
+
+function check(qIdx,chosenIdx,card){
+  const q=questions[qIdx];
+  if(card.classList.contains('done')) return; // 防止重复提交
+  card.classList.add('done');
+  answered++;
+  const explain=card.querySelector('.explanation');
+  const fb=document.createElement('div');
+  fb.className='feedback';
+  if(chosenIdx===q.answer){
+      correct++;
+      card.classList.add('correct');
+      fb.textContent='✔ 回答正确';
+  }else{
+      card.classList.add('incorrect');
+      fb.textContent=`✖ 回答错误；正确选项为：${q.options[q.answer]}`;
+  }
+  card.insertBefore(fb,explain);
+  explain.style.display='block';
+  updateResult();
+}
+function updateResult(){
+  resultBox.textContent=`已答对 ${correct} / ${answered} 题`;
+}
+</script>
+</body>
+</html>
