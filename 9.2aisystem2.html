@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>智能客服 × AIoT × KBMS 交互式刷题</title>
+<style>
+  body{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#333;margin:0;padding:2rem;line-height:1.6;}
+  h1,h2{color:#111;margin-top:0;}
+  #summary{background:#f5f5f5;padding:1rem 1.5rem;border-left:4px solid #2196f3;border-radius:6px;margin-bottom:2rem;}
+  .question{border:1px solid #e5e5e5;border-radius:8px;padding:1rem;margin-bottom:1.5rem;transition:border-color .3s ease;position:relative;}
+  .question.correct{border-color:#4caf50;}
+  .question.incorrect{border-color:#f44336;}
+  .options label{display:block;margin:0.4rem 0;cursor:pointer;}
+  .options input{margin-right:0.5rem;}
+  .explanation{display:none;margin-top:0.6rem;font-size:0.9rem;background:#fafafa;padding:0.6rem 0.9rem;border-left:3px solid #2196f3;border-radius:3px;}
+  .result{font-weight:bold;margin-top:0.5rem;}
+  .result.correct{color:#4caf50;}
+  .result.incorrect{color:#f44336;}
+  #scorebox{position:fixed;right:1rem;top:1rem;background:#2196f3;color:#fff;padding:0.6rem 1rem;border-radius:6px;font-weight:bold;z-index:999;}
+</style>
+</head>
+<body>
+<h1>智能客服 & AIoT 综合测试</h1>
+<div id="summary">
+  <h2>知识点总览</h2>
+  <p>本套题共 70 题，围绕 <strong>智能客服系统</strong>、<strong>AIoT 终端与人机交互</strong>、<strong>云-端系统设计</strong> 以及 <strong>知识库管理 (KBMS)</strong> 四大板块，重点考查：</p>
+  <ul>
+    <li>数据整合 & 预处理：数据清理、变换、标准化及多模态融合。</li>
+    <li>前端 UI / UX：聊天机器人组件、可访问性三原则、跨设备适配。</li>
+    <li>NLP & 知识库：语义检索、FAQ 匹配、情感分析、Transformer。</li>
+    <li>生成模型 & 评估：温度采样、F1 指标、模型剪枝与性能权衡。</li>
+    <li>AIoT / 云服务：数据安全、实时告警、REST API、分布式计算。</li>
+    <li>KBMS：RDF/OWL 表示、知识质量三维度、语义检索。</li>
+  </ul>
+  <p>请在答题过程中关注 <strong>核心概念区分</strong> 与 <strong>跨领域共性</strong>（如“先数据→模型→UI”）。</p>
+</div>
+<div id="scorebox">得分：0 / 70</div>
+<!-- ===================== 题目区域 ===================== -->
+<div id="quiz">
+<!-- Section ① -->
+<div class="question" data-id="1">
+  <p class="q-text">1. 智能客服系统整合异构数据最常用的 AI 技术是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q1" data-correct="false">A NLP</label>
+    <label><input type="radio" name="q1" data-correct="true">B 机器学习</label>
+    <label><input type="radio" name="q1" data-correct="false">C 数据挖掘</label>
+    <label><input type="radio" name="q1" data-correct="false">D 计算机视觉</label>
+  </div>
+  <p class="explanation">机器学习通过特征工程将文本、数值、日志等转换为统一向量，使多源数据能在同一空间被分析；NLP/视觉仅处理单一模态，数据挖掘更偏后期统计。 </p>
+</div>
+<div class="question" data-id="2">
+  <p class="q-text">2. 整合客户数据的首要步骤是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q2" data-correct="true">A 数据清理</label>
+    <label><input type="radio" name="q2" data-correct="false">B 数据变换</label>
+    <label><input type="radio" name="q2" data-correct="false">C 数据归约</label>
+    <label><input type="radio" name="q2" data-correct="false">D 数据挖掘</label>
+  </div>
+  <p class="explanation">“扫地”在先——去重、补缺、统一时间格式，否则后续统计分析将被脏数据拖偏。</p>
+</div>
+<div class="question" data-id="3">
+  <p class="q-text">3. 把社交媒体、CRM、日志格式对齐的过程叫（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q3" data-correct="false">A 标准化</label>
+    <label><input type="radio" name="q3" data-correct="false">B 归一化</label>
+    <label><input type="radio" name="q3" data-correct="true">C 数据变换</label>
+    <label><input type="radio" name="q3" data-correct="false">D 去噪</label>
+  </div>
+  <p class="explanation">数据变换强调字段重命名、编码重排，属于“结构映射”；标准化 / 归一化仅针对数值缩放。</p>
+</div>
+<div class="question" data-id="4">
+  <p class="q-text">4. 哪类数据最难整合进客服系统？（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q4" data-correct="false">A 文本</label>
+    <label><input type="radio" name="q4" data-correct="false">B 图像</label>
+    <label><input type="radio" name="q4" data-correct="false">C 音频</label>
+    <label><input type="radio" name="q4" data-correct="true">D 视频</label>
+  </div>
+  <p class="explanation">视频 = 帧序列 + 声音 + 字幕，体积最大、模态最多，存取、标注、转码都最费时。</p>
+</div>
+<div class="question" data-id="5">
+  <p class="q-text">5. 下面哪个行业对客服数据整合需求最高（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q5" data-correct="false">A 医疗</label>
+    <label><input type="radio" name="q5" data-correct="false">B 制造</label>
+    <label><input type="radio" name="q5" data-correct="true">C 金融</label>
+    <label><input type="radio" name="q5" data-correct="false">D 教育</label>
+  </div>
+  <p class="explanation">金融行业需合并多渠道历史数据以支撑 KYC、反欺诈和精准风控。</p>
+</div>
+<!-- Section ② -->
+<div class="question" data-id="6">
+  <p class="q-text">6. 与客户直接对话的组件是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q6" data-correct="false">A NLP 引擎</label>
+    <label><input type="radio" name="q6" data-correct="true">B 聊天机器人</label>
+    <label><input type="radio" name="q6" data-correct="false">C 知识图谱</label>
+    <label><input type="radio" name="q6" data-correct="false">D 语音识别</label>
+  </div>
+  <p class="explanation">Chatbot 负责收发消息，是“面孔+嘴巴”；NLP/ASR/知识图谱位于后台提供能力。</p>
+</div>
+<div class="question" data-id="7">
+  <p class="q-text">7. 网页客服 UI 常用前端技术栈（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q7" data-correct="false">A AJAX</label>
+    <label><input type="radio" name="q7" data-correct="false">B HTML5</label>
+    <label><input type="radio" name="q7" data-correct="false">C CSS3</label>
+    <label><input type="radio" name="q7" data-correct="true">D 以上都是</label>
+  </div>
+  <p class="explanation">AJAX 负责异步请求，HTML5 构建结构，CSS3 美化界面——三件套缺一不可。</p>
+</div>
+<div class="question" data-id="8">
+  <p class="q-text">8. 让用户感觉“回答不死板”的关键 UI 元素是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q8" data-correct="false">A 搜索框</label>
+    <label><input type="radio" name="q8" data-correct="false">B 聊天记录窗</label>
+    <label><input type="radio" name="q8" data-correct="false">C 情感指示灯</label>
+    <label><input type="radio" name="q8" data-correct="true">D 多样化回答方式</label>
+  </div>
+  <p class="explanation">相同含义换多种说法，搭配表情 / gif，可显著提升亲和力与“真人感”。</p>
+</div>
+<div class="question" data-id="9">
+  <p class="q-text">9. 以下哪项是基础却必备功能（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q9" data-correct="true">A 自动回复</label>
+    <label><input type="radio" name="q9" data-correct="false">B 情感分析</label>
+    <label><input type="radio" name="q9" data-correct="false">C 人工转接</label>
+    <label><input type="radio" name="q9" data-correct="false">D 知识库搜索</label>
+  </div>
+  <p class="explanation">没自动回复就只是留言板；情感、转接、搜索可视业务阶段逐步升级。</p>
+</div>
+<div class="question" data-id="10">
+  <p class="q-text">10. 设计 UI 时最难攻克的是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q10" data-correct="false">A 多交互形态</label>
+    <label><input type="radio" name="q10" data-correct="false">B 快速响应</label>
+    <label><input type="radio" name="q10" data-correct="true">C 准确理解并回答</label>
+    <label><input type="radio" name="q10" data-correct="false">D 个性化</label>
+  </div>
+  <p class="explanation">“听懂+答对”依赖后台语义解析与知识检索，纯前端无能为力。</p>
+</div>
+<div class="question" data-id="11">
+  <p class="q-text">11. “用 AI 能让界面直接处理自然语言”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q11" data-correct="true">正确</label>
+    <label><input type="radio" name="q11" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">可在浏览器跑 WebAssembly 版分词或调用云函数，前端即可做关键词检测与高亮。</p>
+</div>
+<div class="question" data-id="12">
+  <p class="q-text">12. “客服 UI 必须自带情感分析”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q12" data-correct="false">正确</label>
+    <label><input type="radio" name="q12" data-correct="true">错误</label>
+  </div>
+  <p class="explanation">情感分析通常在服务端集中完成；UI 只负责展示结果，非硬性需求。</p>
+</div>
+<!-- Section ③ -->
+<!-- (13-22) -->
+<div class="question" data-id="13">
+  <p class="q-text">13. 最常见的知识库结构是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q13" data-correct="false">A 专家库</label>
+    <label><input type="radio" name="q13" data-correct="true">B 结构化 KB</label>
+    <label><input type="radio" name="q13" data-correct="false">C 非结构化</label>
+    <label><input type="radio" name="q13" data-correct="false">D 关系 KB</label>
+  </div>
+  <p class="explanation">以表格 / JSON 形式存放标准问答，查询速度快、易维护。</p>
+</div>
+<div class="question" data-id="14">
+  <p class="q-text">14. 自动问答的“一把钥匙”是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q14" data-correct="true">A NLP</label>
+    <label><input type="radio" name="q14" data-correct="false">B 机器学习</label>
+    <label><input type="radio" name="q14" data-correct="false">C 语音识别</label>
+    <label><input type="radio" name="q14" data-correct="false">D 图像识别</label>
+  </div>
+  <p class="explanation">语义匹配、知识检索、自然语言生成均属于 NLP 范畴。</p>
+</div>
+<div class="question" data-id="15">
+  <p class="q-text">15. 客服知识库通常囊括（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q15" data-correct="false">A 客户</label>
+    <label><input type="radio" name="q15" data-correct="false">B 产品</label>
+    <label><input type="radio" name="q15" data-correct="false">C 服务</label>
+    <label><input type="radio" name="q15" data-correct="true">D 以上都是</label>
+  </div>
+  <p class="explanation">缺失任一类信息都会导致回答不精准。</p>
+</div>
+<div class="question" data-id="16">
+  <p class="q-text">16. 检索 FAQ 最常见的 NLP 技术是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q16" data-correct="false">A 文本分类</label>
+    <label><input type="radio" name="q16" data-correct="true">B 信息检索</label>
+    <label><input type="radio" name="q16" data-correct="false">C 语音识别</label>
+    <label><input type="radio" name="q16" data-correct="false">D 机器翻译</label>
+  </div>
+  <p class="explanation">将用户问句向量化后与 FAQ 向量库做相似度检索，效果最佳。</p>
+</div>
+<div class="question" data-id="17">
+  <p class="q-text">17. 处理“不确定问法”首选（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q17" data-correct="true">A 语义分析</label>
+    <label><input type="radio" name="q17" data-correct="false">B 情感分析</label>
+    <label><input type="radio" name="q17" data-correct="false">C 文本挖掘</label>
+    <label><input type="radio" name="q17" data-correct="false">D 以上都是</label>
+  </div>
+  <p class="explanation">同义词扩展、上下位词、槽位补全均属于深层语义处理。</p>
+</div>
+<div class="question" data-id="18">
+  <p class="q-text">18. “NLP 是客服的关键支柱”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q18" data-correct="true">正确</label>
+    <label><input type="radio" name="q18" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">没有分词、意图识别、槽位抽取，客服只能全人工。</p>
+</div>
+<div class="question" data-id="19">
+  <p class="q-text">19. “知识库得把所有问题都列全”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q19" data-correct="false">正确</label>
+    <label><input type="radio" name="q19" data-correct="true">错误</label>
+  </div>
+  <p class="explanation">长尾问题无穷无尽；可通过生成式回答或回退人工来补充。</p>
+</div>
+<div class="question" data-id="20">
+  <p class="q-text">20. 情感分析经典算法是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q20" data-correct="true">A SVM</label>
+    <label><input type="radio" name="q20" data-correct="false">B 拉普拉斯</label>
+    <label><input type="radio" name="q20" data-correct="false">C KNN</label>
+    <label><input type="radio" name="q20" data-correct="false">D 决策树</label>
+  </div>
+  <p class="explanation">SVM 对高维稀疏文本向量泛化能力强，经典且鲁棒。</p>
+</div>
+<div class="question" data-id="21">
+  <p class="q-text">21. 如今翻译质量最好的框架是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q21" data-correct="false">A RNN</label>
+    <label><input type="radio" name="q21" data-correct="false">B LSTM</label>
+    <label><input type="radio" name="q21" data-correct="true">C Transformer</label>
+    <label><input type="radio" name="q21" data-correct="false">D 以上都是</label>
+  </div>
+  <p class="explanation">自注意力机制能处理长距离依赖 → BLEU 分最高。</p>
+</div>
+<div class="question" data-id="22">
+  <p class="q-text">22. 训练 NLP 模型第一要务是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q22" data-correct="true">A 数据预处理</label>
+    <label><input type="radio" name="q22" data-correct="false">B 模型选型</label>
+    <label><input type="radio" name="q22" data-correct="false">C 训练</label>
+    <label><input type="radio" name="q22" data-correct="false">D 剪枝</label>
+  </div>
+  <p class="explanation">垃圾进垃圾出——数据干净 / 标准化是高质量模型的前提。</p>
+</div>
+<!-- Section ④ (23-28) -->
+<div class="question" data-id="23">
+  <p class="q-text">23. 想让回答“别每次一句话”常调的参数是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q23" data-correct="false">A NLP</label>
+    <label><input type="radio" name="q23" data-correct="true">B 温度 (temperature)</label>
+    <label><input type="radio" name="q23" data-correct="false">C 模型集成</label>
+    <label><input type="radio" name="q23" data-correct="false">D TTS</label>
+  </div>
+  <p class="explanation">采样温度越高 → 生成更随机，句式更丰富。</p>
+</div>
+<div class="question" data-id="24">
+  <p class="q-text">24. 对话模型综合评估常看（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q24" data-correct="false">A 准确率</label>
+    <label><input type="radio" name="q24" data-correct="false">B 召回率</label>
+    <label><input type="radio" name="q24" data-correct="true">C F1</label>
+    <label><input type="radio" name="q24" data-correct="false">D AUC</label>
+  </div>
+  <p class="explanation">F1 综合惩罚漏答和错答，是对话评估的黄金指标。</p>
+</div>
+<div class="question" data-id="25">
+  <p class="q-text">25. “模型训练完全自动化”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q25" data-correct="false">正确</label>
+    <label><input type="radio" name="q25" data-correct="true">错误</label>
+  </div>
+  <p class="explanation">人工仍需负责标注质检、调参、早停等关键环节。</p>
+</div>
+<div class="question" data-id="26">
+  <p class="q-text">26. “数据量越大，模型表现必定变好”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q26" data-correct="true">正确</label>
+    <label><input type="radio" name="q26" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">在噪声可控、模型容量够用的前提下，更多语料通常带来更广知识覆盖。</p>
+</div>
+<div class="question" data-id="27">
+  <p class="q-text">27. 想让回答覆盖面更广，最直接的做法（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q27" data-correct="true">A 大规模预训练语料</label>
+    <label><input type="radio" name="q27" data-correct="false">B 调温度</label>
+    <label><input type="radio" name="q27" data-correct="false">C 多模态对齐</label>
+    <label><input type="radio" name="q27" data-correct="false">D 扩硬件</label>
+  </div>
+  <p class="explanation">知识面≈模型见过的文本量；先喂“书海”才能“谈笑风生”。</p>
+</div>
+<div class="question" data-id="28">
+  <p class="q-text">28. 客服模型剪枝主要为了（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q28" data-correct="false">A 提高准确</label>
+    <label><input type="radio" name="q28" data-correct="true">B 降低延迟 / 模型大小</label>
+    <label><input type="radio" name="q28" data-correct="false">C 多样性</label>
+    <label><input type="radio" name="q28" data-correct="false">D 改语法</label>
+  </div>
+  <p class="explanation">瘦身可降 30‑70% 推理时延，适合移动端或高并发场景。</p>
+</div>
+<!-- Section ⑤ (29-34) -->
+<div class="question" data-id="29">
+  <p class="q-text">29. AIoT 最常见的人‑机交互通道（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q29" data-correct="false">A CLI</label>
+    <label><input type="radio" name="q29" data-correct="false">B GUI</label>
+    <label><input type="radio" name="q29" data-correct="true">C Web API</label>
+    <label><input type="radio" name="q29" data-correct="false">D 数据库接口</label>
+  </div>
+  <p class="explanation">手机 App / 小程序底层均通过 REST/GraphQL 接口调度设备。</p>
+</div>
+<div class="question" data-id="30">
+  <p class="q-text">30. AIoT UI 首要三原则（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q30" data-correct="true">A 可用 + 可访问 + 可维护</label>
+    <label><input type="radio" name="q30" data-correct="false">B 其它</label>
+  </div>
+  <p class="explanation">能用 → 人人都会；可访问 → 老人/残障可用；可维护 → 后期升级不崩。</p>
+</div>
+<div class="question" data-id="31">
+  <p class="q-text">31. IoT 产品多采用的设计理念（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q31" data-correct="false">A 设备中心</label>
+    <label><input type="radio" name="q31" data-correct="true">B 用户中心</label>
+    <label><input type="radio" name="q31" data-correct="false">C 网络中心</label>
+    <label><input type="radio" name="q31" data-correct="false">D 数据中心</label>
+  </div>
+  <p class="explanation">从场景和行为出发，避免“堆功能却不好用”。</p>
+</div>
+<div class="question" data-id="32">
+  <p class="q-text">32. 处理敏感数据（如智能门锁）第一优先考虑（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q32" data-correct="false">A UX</label>
+    <label><input type="radio" name="q32" data-correct="false">B 性能</label>
+    <label><input type="radio" name="q32" data-correct="true">C 安全 & 隐私</label>
+    <label><input type="radio" name="q32" data-correct="false">D 可维护</label>
+  </div>
+  <p class="explanation">密码泄露比“页面卡顿”严重得多，务必先加密 & 权限控制。</p>
+</div>
+<div class="question" data-id="33">
+  <p class="q-text">33. 轻量网页控制面板常用技术（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q33" data-correct="true">A HTML/CSS/JS</label>
+    <label><input type="radio" name="q33" data-correct="false">B Java/C++</label>
+    <label><input type="radio" name="q33" data-correct="false">C React/Node</label>
+    <label><input type="radio" name="q33" data-correct="false">D Django/Rails</label>
+  </div>
+  <p class="explanation">嵌入式 MCU 资源有限，原生三件套最轻量。</p>
+</div>
+<div class="question" data-id="34">
+  <p class="q-text">34. “UI 设计需考虑设备尺寸 / 物理限制”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q34" data-correct="true">正确</label>
+    <label><input type="radio" name="q34" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">手环仅能滑动，冰箱屏可手写——交互逻辑需因设备而异。</p>
+</div>
+<!-- Section ⑥ (35-44) -->
+<div class="question" data-id="35">
+  <p class="q-text">35. AIoT 部署量最大的行业（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q35" data-correct="true">A 制造</label>
+    <label><input type="radio" name="q35" data-correct="false">B 物流</label>
+    <label><input type="radio" name="q35" data-correct="false">C 服务</label>
+    <label><input type="radio" name="q35" data-correct="false">D 金融</label>
+  </div>
+  <p class="explanation">“工业 4.0” 场景多、设备密度高，对 AIoT 需求最旺盛。</p>
+</div>
+<div class="question" data-id="36">
+  <p class="q-text">36. 智能家居最核心卖点（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q36" data-correct="true">A 设备互联</label>
+    <label><input type="radio" name="q36" data-correct="false">B 能源管理</label>
+    <label><input type="radio" name="q36" data-correct="false">C 安防</label>
+    <label><input type="radio" name="q36" data-correct="false">D 娱乐</label>
+  </div>
+  <p class="explanation">把不同品牌的灯、空调、音箱拉到一张网，体验立刻提升。</p>
+</div>
+<div class="question" data-id="37">
+  <p class="q-text">37. 智能城市应用主要集中在（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q37" data-correct="false">A 交通</label>
+    <label><input type="radio" name="q37" data-correct="false">B 环保</label>
+    <label><input type="radio" name="q37" data-correct="false">C 公共安全</label>
+    <label><input type="radio" name="q37" data-correct="true">D 以上都是</label>
+  </div>
+  <p class="explanation">城市级平台往往同时接入交通 / 环保 / 安防子系统。</p>
+</div>
+<div class="question" data-id="38">
+  <p class="q-text">38. 推进速度最慢的领域（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q38" data-correct="false">A 工业自动化</label>
+    <label><input type="radio" name="q38" data-correct="false">B 零售</label>
+    <label><input type="radio" name="q38" data-correct="true">C 智能医疗</label>
+    <label><input type="radio" name="q38" data-correct="false">D 制造</label>
+  </div>
+  <p class="explanation">医疗监管严格、隐私要求高，落地流程最漫长。</p>
+</div>
+<div class="question" data-id="39">
+  <p class="q-text">39. AIoT 三大支柱技术是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q39" data-correct="false">A AI</label>
+    <label><input type="radio" name="q39" data-correct="false">B IoT</label>
+    <label><input type="radio" name="q39" data-correct="false">C 云计算</label>
+    <label><input type="radio" name="q39" data-correct="true">D 以上都是</label>
+  </div>
+  <p class="explanation">感知 (IoT) + 智能 (AI) + 存储/算力 (Cloud) 缺一不可。</p>
+</div>
+<div class="question" data-id="40">
+  <p class="q-text">40. “AIoT 必须同时用到 AI 和 IoT”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q40" data-correct="true">正确</label>
+    <label><input type="radio" name="q40" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">无 IoT = 无源数据；无 AI = 只上传不分析。</p>
+</div>
+<div class="question" data-id="41">
+  <p class="q-text">41. AIoT 最大风险（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q41" data-correct="true">A 数据安全与隐私</label>
+    <label><input type="radio" name="q41" data-correct="false">B 性能</label>
+    <label><input type="radio" name="q41" data-correct="false">C 成本</label>
+  </div>
+  <p class="explanation">摄像头被黑 = “在家裸奔直播”，风险最高。</p>
+</div>
+<div class="question" data-id="42">
+  <p class="q-text">42. 最易导致整个 IoT 链路瘫痪的问题（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q42" data-correct="false">A 硬件</label>
+    <label><input type="radio" name="q42" data-correct="false">B 软件</label>
+    <label><input type="radio" name="q42" data-correct="true">C 网络</label>
+    <label><input type="radio" name="q42" data-correct="false">D 数据清洗</label>
+  </div>
+  <p class="explanation">掉线 = 远程设备全部失联，业务瞬间中断。</p>
+</div>
+<div class="question" data-id="43">
+  <p class="q-text">43. 排查网络故障首选工具（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q43" data-correct="false">A Jupyter</label>
+    <label><input type="radio" name="q43" data-correct="false">B Postman</label>
+    <label><input type="radio" name="q43" data-correct="true">C Wireshark</label>
+    <label><input type="radio" name="q43" data-correct="false">D VS</label>
+  </div>
+  <p class="explanation">抓包直观呈现 MQTT/HTTP 是否丢包、握手失败。</p>
+</div>
+<div class="question" data-id="44">
+  <p class="q-text">44. 实现实时异常告警常用（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q44" data-correct="true">A 机器学习</label>
+    <label><input type="radio" name="q44" data-correct="false">B 传统规则</label>
+    <label><input type="radio" name="q44" data-correct="false">C 大数据</label>
+    <label><input type="radio" name="q44" data-correct="false">D 云计算</label>
+  </div>
+  <p class="explanation">时序异常检测模型可自动适应波动，比静态阈值更精准。</p>
+</div>
+<!-- Section ⑦ (45-58) -->
+<div class="question" data-id="45">
+  <p class="q-text">45. 第三方最爱调用的云接口类型（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q45" data-correct="true">A REST API</label>
+    <label><input type="radio" name="q45" data-correct="false">B SOAP</label>
+    <label><input type="radio" name="q45" data-correct="false">C Web GUI</label>
+    <label><input type="radio" name="q45" data-correct="false">D CLI</label>
+  </div>
+  <p class="explanation">URL + JSON 语言无关，调试友好，占据绝对主流。</p>
+</div>
+<div class="question" data-id="46">
+  <p class="q-text">46. 公网数据传输首选协议（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q46" data-correct="false">A HTTP</label>
+    <label><input type="radio" name="q46" data-correct="true">B HTTPS</label>
+    <label><input type="radio" name="q46" data-correct="false">C FTP</label>
+    <label><input type="radio" name="q46" data-correct="false">D SMTP</label>
+  </div>
+  <p class="explanation">HTTPS = HTTP+TLS，加密 + 身份校验双保险。</p>
+</div>
+<div class="question" data-id="47">
+  <p class="q-text">47. 设计云控制台首先关注（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q47" data-correct="true">A 用户体验</label>
+    <label><input type="radio" name="q47" data-correct="false">B 成本</label>
+    <label><input type="radio" name="q47" data-correct="false">C 性能</label>
+    <label><input type="radio" name="q47" data-correct="false">D 功能数</label>
+  </div>
+  <p class="explanation">按钮排列不清→用户出错率飙升，反而拖慢业务。</p>
+</div>
+<div class="question" data-id="48">
+  <p class="q-text">48. “前端也可以用 NLP 完成多语言对话框”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q48" data-correct="true">正确</label>
+    <label><input type="radio" name="q48" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">浏览器可加载 WASM 版分词、语言检测小模型，离线也能跑。</p>
+</div>
+<div class="question" data-id="49">
+  <p class="q-text">49. 采用云智能服务最多的行业（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q49" data-correct="false">A 医疗</label>
+    <label><input type="radio" name="q49" data-correct="false">B 制造</label>
+    <label><input type="radio" name="q49" data-correct="true">C 金融</label>
+    <label><input type="radio" name="q49" data-correct="false">D 娱乐</label>
+  </div>
+  <p class="explanation">风控、量化交易、客服坐席均需弹性算力与高可用性。</p>
+</div>
+<div class="question" data-id="50">
+  <p class="q-text">50. 描述云服务必提的三特性（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q50" data-correct="false">A 高可用</label>
+    <label><input type="radio" name="q50" data-correct="false">B 扩展</label>
+    <label><input type="radio" name="q50" data-correct="false">C 安全</label>
+    <label><input type="radio" name="q50" data-correct="true">D 以上都是</label>
+  </div>
+  <p class="explanation">缺一即意味着停机、无法横向扩容或泄密。</p>
+</div>
+<div class="question" data-id="51">
+  <p class="q-text">51. 云端批处理 TB 级日志最常用（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q51" data-correct="false">A ML</label>
+    <label><input type="radio" name="q51" data-correct="false">B NLP</label>
+    <label><input type="radio" name="q51" data-correct="false">C 语音</label>
+    <label><input type="radio" name="q51" data-correct="true">D 分布式计算</label>
+  </div>
+  <p class="explanation">Spark/Hadoop 把任务切片并行跑，吞吐量最高。</p>
+</div>
+<div class="question" data-id="52">
+  <p class="q-text">52. 存‑算‑析依次对应云功能（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q52" data-correct="true">A 数据存储</label>
+    <label><input type="radio" name="q52" data-correct="true">B 处理</label>
+    <label><input type="radio" name="q52" data-correct="true">C 分析</label>
+    <label><input type="radio" name="q52" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">数据湖 → Spark → BI/DL，从原始日志到洞察全链路。</p>
+</div>
+<div class="question" data-id="53">
+  <p class="q-text">53. 安全传输层协议是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q53" data-correct="false">A HTTP</label>
+    <label><input type="radio" name="q53" data-correct="false">B FTP</label>
+    <label><input type="radio" name="q53" data-correct="true">C SSL/TLS</label>
+    <label><input type="radio" name="q53" data-correct="false">D SMTP</label>
+  </div>
+  <p class="explanation">TLS 完成密钥交换 + 对称加密；HTTPS 即 HTTP over TLS。</p>
+</div>
+<div class="question" data-id="54">
+  <p class="q-text">54. “公有云已完全替代本地机房”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q54" data-correct="false">正确</label>
+    <label><input type="radio" name="q54" data-correct="true">错误</label>
+  </div>
+  <p class="explanation">金融、军工、超低时延边缘场景仍保留本地或混合云。</p>
+</div>
+<div class="question" data-id="55">
+  <p class="q-text">55. “上云能降 CAPEX & OPEX”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q55" data-correct="true">正确</label>
+    <label><input type="radio" name="q55" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">硬件改租赁，按需付费 + 运维外包，资本支出 & 运营支出均降低。</p>
+</div>
+<div class="question" data-id="56">
+  <p class="q-text">56. 云系统性能、日志、告警统管组件是（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q56" data-correct="false">A 前端</label>
+    <label><input type="radio" name="q56" data-correct="true">B 云计算平台</label>
+    <label><input type="radio" name="q56" data-correct="false">C 分布式库</label>
+    <label><input type="radio" name="q56" data-correct="false">D TTS 服务</label>
+  </div>
+  <p class="explanation">CloudWatch、Azure Monitor 等属于平台层能力。</p>
+</div>
+<div class="question" data-id="57">
+  <p class="q-text">57. 监控云健康常用的 3 类工具（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q57" data-correct="true">A 日志分析</label>
+    <label><input type="radio" name="q57" data-correct="true">B 性能压测</label>
+    <label><input type="radio" name="q57" data-correct="true">C 安全扫描</label>
+    <label><input type="radio" name="q57" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">对应“慢、崩、被黑”三类核心风险。</p>
+</div>
+<div class="question" data-id="58">
+  <p class="q-text">58. 提高云可靠性的一揽子做法（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q58" data-correct="true">A 备份恢复</label>
+    <label><input type="radio" name="q58" data-correct="true">B 算法优化</label>
+    <label><input type="radio" name="q58" data-correct="true">C 数据加密</label>
+    <label><input type="radio" name="q58" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">多活、优化、加密——可靠性、性能、安全三管齐下。</p>
+</div>
+<!-- Section ⑧ (59-70) -->
+<div class="question" data-id="59">
+  <p class="q-text">59. KBMS 的英文全称（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q59" data-correct="true">A Knowledge Base Management System</label>
+    <label><input type="radio" name="q59" data-correct="false">B Knowledge Basic Manage Service</label>
+  </div>
+  <p class="explanation">专门用于知识库创建、维护、检索与共享的软件系统。</p>
+</div>
+<div class="question" data-id="60">
+  <p class="q-text">60. KBMS 基础功能括号里哪项描述最完整（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q60" data-correct="true">A 录入、管理、查询、共享、应用</label>
+    <label><input type="radio" name="q60" data-correct="false">B 其它</label>
+  </div>
+  <p class="explanation">缺“共享/应用”＝无人能用，系统价值骤减。</p>
+</div>
+<div class="question" data-id="61">
+  <p class="q-text">61. 主流 KBMS 类型（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q61" data-correct="true">A 关系型 + 本体型</label>
+    <label><input type="radio" name="q61" data-correct="false">B NoSQL</label>
+  </div>
+  <p class="explanation">关系库存结构化条目，本体库存语义网，互补使用最普遍。</p>
+</div>
+<div class="question" data-id="62">
+  <p class="q-text">62. 机器可推理的知识表示（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q62" data-correct="false">A 文本图像</label>
+    <label><input type="radio" name="q62" data-correct="false">B 表格</label>
+    <label><input type="radio" name="q62" data-correct="true">C RDF/OWL</label>
+    <label><input type="radio" name="q62" data-correct="false">D 整数</label>
+  </div>
+  <p class="explanation">RDF/OWL 采用三元组 / 本体，算法可沿关系自动推理。</p>
+</div>
+<div class="question" data-id="63">
+  <p class="q-text">63. 知识管理可通过哪些手段完成（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q63" data-correct="false">A 软件</label>
+    <label><input type="radio" name="q63" data-correct="false">B 人工</label>
+    <label><input type="radio" name="q63" data-correct="false">C 硬件</label>
+    <label><input type="radio" name="q63" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">规模越大越需要“人 + 系统 + 存储阵列”协同。</p>
+</div>
+<div class="question" data-id="64">
+  <p class="q-text">64. “KBMS 目标是让知识自动流转”——对吗？</p>
+  <div class="options">
+    <label><input type="radio" name="q64" data-correct="true">正确</label>
+    <label><input type="radio" name="q64" data-correct="false">错误</label>
+  </div>
+  <p class="explanation">自动同步、版本控制、推送，才能让知识随处可用。</p>
+</div>
+<div class="question" data-id="65">
+  <p class="q-text">65. 知识收集要覆盖（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q65" data-correct="false">A 多媒体</label>
+    <label><input type="radio" name="q65" data-correct="false">B 多结构</label>
+    <label><input type="radio" name="q65" data-correct="false">C 多领域</label>
+    <label><input type="radio" name="q65" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">丰富度提升 → 检索与推理场景更全面。</p>
+</div>
+<div class="question" data-id="66">
+  <p class="q-text">66. 收集阶段最大的三座山（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q66" data-correct="false">A 流派整合</label>
+    <label><input type="radio" name="q66" data-correct="false">B 规范符合</label>
+    <label><input type="radio" name="q66" data-correct="false">C 完整准确</label>
+    <label><input type="radio" name="q66" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">只拼抓取量不顾质量 → 检索误导用户。</p>
+</div>
+<div class="question" data-id="67">
+  <p class="q-text">67. 评估知识质量的 3 种路径（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q67" data-correct="false">A 专家</label>
+    <label><input type="radio" name="q67" data-correct="false">B 自动指标</label>
+    <label><input type="radio" name="q67" data-correct="false">C 用户反馈</label>
+    <label><input type="radio" name="q67" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">专家给权威，指标给效率，用户给真实场景反馈。</p>
+</div>
+<div class="question" data-id="68">
+  <p class="q-text">68. 自动化 UI 测试首选（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q68" data-correct="false">A JMeter</label>
+    <label><input type="radio" name="q68" data-correct="true">B Selenium</label>
+    <label><input type="radio" name="q68" data-correct="false">C Postman</label>
+    <label><input type="radio" name="q68" data-correct="false">D JUnit</label>
+  </div>
+  <p class="explanation">录制浏览器操作脚本，高仿真自动回归测试。</p>
+</div>
+<div class="question" data-id="69">
+  <p class="q-text">69. 最智能的知识检索方式（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q69" data-correct="false">A 关键词</label>
+    <label><input type="radio" name="q69" data-correct="false">B 概念</label>
+    <label><input type="radio" name="q69" data-correct="true">C 语义检索</label>
+    <label><input type="radio" name="q69" data-correct="false">D 全文</label>
+  </div>
+  <p class="explanation">Embedding + 向量索引能识别同义 / 上下位，命中率最高。</p>
+</div>
+<div class="question" data-id="70">
+  <p class="q-text">70. 衡量知识价值要看（ ）</p>
+  <div class="options">
+    <label><input type="radio" name="q70" data-correct="false">A 频次</label>
+    <label><input type="radio" name="q70" data-correct="false">B 来源可信</label>
+    <label><input type="radio" name="q70" data-correct="false">C 传播度</label>
+    <label><input type="radio" name="q70" data-correct="true">D 全选</label>
+  </div>
+  <p class="explanation">用得多 + 来源真 + 影响广 → 价值更高，优先维护。</p>
+</div>
+</div>
+<!-- ===================== 交互脚本 ===================== -->
+<script>
+(function(){
+  const scoreBox = document.getElementById('scorebox');
+  const quiz     = document.getElementById('quiz');
+  const total    = quiz.querySelectorAll('.question').length;
+  let answered   = 0;
+  let score      = 0;
+
+  quiz.addEventListener('click', e => {
+    const inp = e.target;
+    if(!(inp.tagName==='INPUT' && inp.type==='radio')) return;
+    const qDiv = inp.closest('.question');
+    if(qDiv.classList.contains('answered')) return; // 防双答
+
+    const correct = inp.dataset.correct === 'true';
+    qDiv.classList.add(correct? 'correct':'incorrect');
+    // 显示文字反馈
+    const resSpan = document.createElement('div');
+    resSpan.className = `result ${correct? 'correct':'incorrect'}`;
+    resSpan.textContent = correct? '✔ 回答正确！':'✘ 回答错误！';
+    qDiv.appendChild(resSpan);
+
+    // 解析显示
+    qDiv.querySelector('.explanation').style.display='block';
+    qDiv.classList.add('answered');
+    qDiv.querySelectorAll('input').forEach(r=>r.disabled=true);
+
+    if(correct) score++;
+    answered++;
+    scoreBox.textContent = `得分：${score} / ${total}`;
+
+    if(answered===total){
+      setTimeout(()=>alert(`全部完成！\n最终得分：${score} / ${total}`),150);
+    }
+  });
+})();
+</script>
+</body>
+</html>
