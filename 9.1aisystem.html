@@ -12,12 +12,14 @@
  .options label{display:block;margin:0.35rem 0;cursor:pointer;}
  .options input{margin-right:0.5rem;}
  .explanation{display:none;margin-top:0.6rem;font-size:0.9rem;background:#f9f9f9;padding:0.6rem 0.8rem;border-left:4px solid #2196f3;border-radius:4px;}
+ .result{margin-top:0.6rem;font-weight:600;}
  .score-board{position:fixed;right:20px;bottom:20px;background:#2196f3;color:#fff;padding:0.75rem 1rem;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.15);} 
  @media(max-width:600px){body{padding:1rem;}}
 </style>
 </head>
 <body>
 <h1>AI 基础与系统运维——互动刷题课程</h1>
+
 <section id="intro">
   <h2>课程导学</h2>
   <p>本套题库共 <strong>8 大主题、62 道题</strong>，涵盖人工智能基础概念、智能客服与物联网/监控系统运维，及<strong>ETL 数据流程</strong>（抽取、转换、合并、装载）。通过刷题，您将：</p>
@@ -28,40 +30,45 @@
   </ul>
   <p>建议先阅读每道题下方的 <em>即时解析</em>，了解知识点后再做下一题，效果更佳。祝刷题愉快！</p>
 </section>
-<hr/>
+
 <div id="quiz"></div>
 <div class="score-board" id="scoreBoard">已答 0 / 62 题，正确 0 题</div>
+
 <script>
+// ========================  题库  ========================
 const questions=[
-// —— 人工智能基础 ——
-{q:"下列 （ ） 领域不属于人工智能的应用范围。",opts:["A 机器学习","B 自然语言处理","C 图像识别","D 机械传动装置"],ans:"D",exp:"机械传动装置只关心齿轮/轴承运动，没有\u201c算法自动学习或决策\u201d环节，故不算 AI。"},
-{q:"下列 （ ） 技术属于机器学习的分支。",opts:["A 神经网络","B 支持向量机","C 决策树","D 以上都是"],ans:"D",exp:"机器学习是一大家族，神经网络、SVM、决策树均在其内，因此选 \u201c以上都是\u201d。"},
+/* —— 人工智能基础 —— */
+{q:"下列 （ ） 领域不属于人工智能的应用范围。",opts:["A 机器学习","B 自然语言处理","C 图像识别","D 机械传动装置"],ans:"D",exp:"机械传动装置只关心齿轮/轴承运动，没有“算法自动学习或决策”环节，故不算 AI。"},
+{q:"下列 （ ） 技术属于机器学习的分支。",opts:["A 神经网络","B 支持向量机","C 决策树","D 以上都是"],ans:"D",exp:"机器学习是一大家族，神经网络、SVM、决策树均在其内，因此选“以上都是”。"},
 {q:"下列 （ ） 算法不属于分类算法。",opts:["A 支持向量机","B K 最近邻","C 回归分析","D 决策树"],ans:"C",exp:"分类算法输出类别标签；回归算法输出连续数值，故 C 不属于分类。"},
 {q:"下列 （ ） 技术可以帮助 AI 系统更好地理解自然语言。",opts:["A 词嵌入","B 逻辑回归","C K-均值","D 支持向量机"],ans:"A",exp:"词嵌入将文本映射为向量，捕获语义相似度，是 NLP 基础。"},
 {q:"下列 （ ） 数据库不适合存储大量图像数据。",opts:["A MySQL","B Cassandra","C PostgreSQL","D MongoDB"],ans:"A",exp:"MySQL 处理大 BLOB 效率和扩展性较差，不宜存储海量图片。"},
-// —— 智能客服系统运维 ——
+
+/* —— 智能客服系统运维 —— */
 {q:"当智能客服系统回复错误时，首选维护操作是 （ ）。",opts:["A 优化算法","B 更新数据库","C 更换硬件","D 提高网络速度"],ans:"A",exp:"回答错误多因模型或规则误判，应先优化算法。"},
 {q:"为了保证智能客服稳定性，维护频率应 （ ）。",opts:["A 每天","B 每周","C 每月","D 依业务特点灵活确定"],ans:"D",exp:"高峰期与业务变化快时需更频繁运维，应根据实际灵活调整。"},
-{q:"以下 （ ） 不属于智能客服系统的常规维护内容。",opts:["A 清理缓存","B 更新算法","C 调整参数","D 监控日志分析"],ans:"A",exp:"清缓存提升速度但不是核心运维内容。"},
+{q:"以下 （ ） 不属于智能客服系统的常规维护内容。",opts:["A 清理缓存","B 更新算法","C 调整参数","D 监控日志分析"],ans:"A",exp:"清理缓存提升速度但不是核心运维内容。"},
 {q:"在维护过程中最具技术挑战的是 （ ）。",opts:["A 数据备份","B 系统优化","C 安全防护","D 数据更新"],ans:"C",exp:"安全涉及多层防护与合规，技术链最长最复杂。"},
 {q:"保证智能客服正常运行的关键步骤是 （ ）。",opts:["A 检测网络","B 备份数据库","C 更新安全补丁","D 检查硬件"],ans:"C",exp:"补丁修复安全漏洞，可防止系统被攻击导致宕机。"},
 {q:"智能客服维护是一项简单任务，只需做基本操作即可。",opts:["正确","错误"],ans:"错误",exp:"真实运维含监控、灰度发布、回滚等复杂流程。"},
 {q:"维护智能客服只需考虑软件，不用考虑硬件。",opts:["正确","错误"],ans:"错误",exp:"高并发场景下硬件瓶颈同样导致性能下降。"},
-// —— 智能物联网系统 ——
+
+/* —— 智能物联网系统 —— */
 {q:"以下 （ ） 技术共同构成智能物联网核心。",opts:["A 人工智能","B 物联网","C 云计算","D 以上都是"],ans:"D",exp:"AI+IoT+Cloud 三位一体，缺一不可。"},
 {q:"AI 提升 IoT 设备性能的方式是 （ ）。",opts:["A 自动化数据采集分析","B 高效智能控制","C 增加设备互联","D 以上都是"],ans:"D",exp:"AI 既能分析数据也能智能控制，综合提升性能。"},
 {q:"以下 （ ） 场景最常使用 AI 处理 IoT 数据。",opts:["A 智能家居","B 自动驾驶","C 工业自动化","D 以上都是"],ans:"D",exp:"三场景均需实时 AI 推理。"},
 {q:"AI 如何增强设备间协同？",opts:["A 预测性能","B 优化采集","C 提升互联","D 以上都是"],ans:"D",exp:"预测+调度+通信，让设备高效协作。"},
 {q:"下列 （ ） 行业是智能 IoT 最典型应用。",opts:["A 医疗","B 制造业","C 金融","D 娱乐"],ans:"B",exp:"制造业设备众多且停机成本高，对 AI 预测维护需求最迫切。"},
 {q:"智能物联网系统通过 AI 对设备进行控制。",opts:["正确","错误"],ans:"正确",exp:"AI 算法可直接下发控制指令。"},
-{q:"所有 IoT 设备都能用 AI 优化。",opts:["正确","错误"],ans:"错误",exp:"算力/成本受限的小型设备不适合部署 AI。"},
+{q:"所有 IoT 设备都能用 AI 优化。",opts:["正确","错误"],ans:"错误",exp:"算力 / 成本受限的小型设备不适合部署 AI。"},
 {q:"以下 （ ） 方法常用于 IoT 故障检测。",opts:["A 机器学习","B 深度学习","C 模拟仿真","D 以上都是"],ans:"D",exp:"不同场景选用不同方法。"},
 {q:"在 IoT 维护中影响最大的是 （ ）。",opts:["A 网络连通","B 数据安全","C 系统复杂度","D 以上都是"],ans:"D",exp:"三者缺一都会导致系统故障或风险。"},
 {q:"以下 （ ） 技术可优化 IoT 设备能耗。",opts:["A AI 节能算法","B 边缘计算","C 云计算","D 大数据"],ans:"A",exp:"AI 通过动态调度可显著节能。"},
-// —— 智能监控系统 ——
+
+/* —— 智能监控系统 —— */
 {q:"智能监控实时分析主要依赖 （ ） 技术。",opts:["A 人工智能","B 通信","C 传感器","D 云计算"],ans:"A",exp:"实时识别异常事件要靠 AI 视频分析。"},
 {q:"以下 （ ） 功能不是监控系统常见功能。",opts:["A 人脸识别","B 行为分析","C 温度调节","D 异常报警"],ans:"C",exp:"温控属于 HVAC 系统。"},
-{q:"摄像头连接通常使用 （ ）。",opts:["A 有线/无线网络","B 天线","C 蓝牙","D 红外"],ans:"A",exp:"Ethernet/Wi‑Fi 带宽充足稳定。"},
+{q:"摄像头连接通常使用 （ ）。",opts:["A 有线/无线网络","B 天线","C 蓝牙","D 红外"],ans:"A",exp:"Ethernet / Wi-Fi 带宽充足稳定。"},
 {q:"识别异常事件主要依赖 （ ） 数据分析。",opts:["A 结构化","B 非结构化","C 实时","D 历史"],ans:"C",exp:"异常报警需秒级反应。"},
 {q:"录像长存一般选 （ ）。",opts:["A 本地硬盘","B 闪存","C 磁带","D 光盘"],ans:"A",exp:"硬盘性价比最高且容量大。"},
 {q:"智能监控只能做安防。",opts:["正确","错误"],ans:"错误",exp:"还能用于客流统计、质检、交通分析等。"},
@@ -71,7 +78,8 @@ const questions=[
 {q:"存储设备维护不包括 （ ）。",opts:["A 增加空间","B 数据备份恢复","C 清理无用视频","D 折旧计提"],ans:"D",exp:"折旧属于财务范畴。"},
 {q:"网络稳定性对监控系统影响 （ ）。",opts:["A 轻微","B 较大","C 无影响","D 取决规模"],ans:"B",exp:"网络抖动直接导致画面卡顿与报警延迟。"},
 {q:"监控维护人员通常 不需 具备 （ ） 技能。",opts:["A 网络安全","B 硬件维修","C 视频剪辑","D 故障排查"],ans:"C",exp:"维护聚焦实时系统，后期剪辑非必需。"},
-// —— ETL — 数据抽取 ——
+
+/* —— ETL — 数据抽取 —— */
 {q:"传统 ETL 中最常用的抽取方式是 （ ）。",opts:["A 结构化抽取","B 非结构化","C 数据挖掘","D 可视化"],ans:"A",exp:"大部分业务数据来自关系型数据库。"},
 {q:"数据抽取的主要目标是 （ ）。",opts:["A 提高质量","B 增加种类","C 降维","D 整合多源"],ans:"D",exp:"将不同系统的数据汇聚一处便于后续处理。"},
 {q:"抽取流程最核心的步骤是 （ ）。",opts:["A 清洗","B 转换","C 抽取","D 可视化"],ans:"C",exp:"Extract 本身就是核心。"},
@@ -79,7 +87,8 @@ const questions=[
 {q:"最常用抽取工具是 （ ）。",opts:["A Excel","B SQL","C Python","D Tableau"],ans:"B",exp:"SQL 才是数据库原生抽取语言。"},
 {q:"数据抽取是预处理的一步。",opts:["正确","错误"],ans:"正确",exp:"ETL 整体属于预处理流程。"},
 {q:"数据抽取只能处理结构化数据。",opts:["正确","错误"],ans:"错误",exp:"日志、HTML、图片等也可抽取。"},
-// —— ETL — 数据转换 ——
+
+/* —— ETL — 数据转换 —— */
 {q:"把数据格式 A→B 的步骤称为 （ ）。",opts:["A 清理","B 变换","C 归约","D 挖掘"],ans:"B",exp:"Transform 就是变换。"},
 {q:"数据变换最常见的应用场景是 （ ）。",opts:["A 可视化","B 机器学习训练","C 归约","D 挖掘"],ans:"B",exp:"模型只能接受数字化、统一量纲的数据。"},
 {q:"变换时最常见操作是 （ ）。",opts:["A 标准化","B 归一化","C 去噪","D 标准化+归一化"],ans:"D",exp:"两步组合最常用。"},
@@ -87,7 +96,8 @@ const questions=[
 {q:"分类变量处理常用 （ ）。",opts:["A 标准化","B 归一化","C 编码","D 去噪"],ans:"C",exp:"One-Hot、LabelEncoding 等编码方式。"},
 {q:"数据变换是预处理的重要步骤。",opts:["正确","错误"],ans:"正确",exp:"ETL 的 T 阶段。"},
 {q:"数据变换通常不会提高数据准确度。",opts:["正确","错误"],ans:"错误",exp:"量纲统一、清洗异常可提升模型准确率。"},
-// —— ETL — 数据合并 ——
+
+/* —— ETL — 数据合并 —— */
 {q:"将多源数据表合成一表称为 （ ）。",opts:["A 数据清理","B 数据清理","C 数据合并","D 数据归约"],ans:"C",exp:"Merge / Join / Union 即合并。"},
 {q:"合并最常见的应用是 （ ）。",opts:["A 数据分析","B 机器学习训练","C 可视化","D 监控"],ans:"A",exp:"报表往往需要一次性查询完整字段。"},
 {q:"同结构表合并常用 （ ） 操作。",opts:["A 串联","B 并联","C 聚合","D 去重"],ans:"A",exp:"行列直接 append 即可。"},
@@ -95,64 +105,88 @@ const questions=[
 {q:"异构结构数据合并常用 （ ）。",opts:["A 串联","B 并联","C 聚合","D 去重"],ans:"C",exp:"先字段映射再聚合。"},
 {q:"数据合并是预处理的重要步骤。",opts:["正确","错误"],ans:"正确",exp:"表不齐，分析无从谈起。"},
 {q:"数据合并通常不会提高准确度。",opts:["正确","错误"],ans:"错误",exp:"去重与一致性校验可提升质量。"},
-// —— ETL — 数据装载 ——
+
+/* —— ETL — 数据装载 —— */
 {q:"外部数据最终加载到 （ ） 中。",opts:["A 数据仓库","B 数据集市","C 数据湖","D 数据融合"],ans:"A",exp:"DW 提供统一语义层并服务 BI。"},
 {q:"数据装载后通常接的环节是 （ ）。",opts:["A 清理","B 变换","C 归约","D 挖掘"],ans:"C",exp:"预聚合(归约)常在写入后进行。"},
 {q:"装载阶段验证完整性常用 （ ）。",opts:["A 数据清理","B 数据变换","C 数据归约","D 数据挖掘"],ans:"A",exp:"写库前/后跑校验脚本确保字段完整。"},
 {q:"数据装载主要服务于 （ ）。",opts:["A 商业智能","B 机器学习","C 可视化","D 人工智能"],ans:"A",exp:"DW→OLAP→决策支持。"},
 {q:"将 Excel 导入数据库常用 （ ）。",opts:["A SQL 命令","B Python","C Tableau","D Power BI"],ans:"A",exp:"LOAD DATA / BULK INSERT 等 SQL 工具最快。"},
-{q:"数据装载是 ETL 的 “L”。",opts:["正确","错误"],ans:"正确",exp:"Extract→Transform→Load。"},
-{q:"“装载阶段的主要任务是提高数据准确率和复用性。”",opts:["正确","错误"],ans:"错误",exp:"L 阶段重在高效且一致地写入，准确率多在 E/T 保证。"}
+{q:"数据装载是 ETL 的 “L”。",opts:["正确","错误"],ans:"正确",exp:"Extract → Transform → Load。"},
+{q:"装载阶段的主要任务是提高数据准确率和复用性。",opts:["正确","错误"],ans:"错误",exp:"L 阶段重在高效且一致地写入，准确率多在 E/T 保证。"}
 ];
+// ========================  题库结束  ========================
+
 
 const quizContainer=document.getElementById('quiz');
 let answered=0,correct=0;
 
+// 辅助：判断选项是否以 “A ”/“B ” 开头
+const isLetteredOpt = s => /^[A-D]\s/.test(s);
+
 questions.forEach((item,idx)=>{
- const qDiv=document.createElement('div');
- qDiv.className='question';
- const qTitle=document.createElement('h3');
- qTitle.textContent=`${idx+1}. ${item.q}`;
- qDiv.appendChild(qTitle);
- const optsDiv=document.createElement('div');
- optsDiv.className='options';
- item.opts.forEach((opt,i)=>{
-   const id=`q${idx}o${i}`;
-   const label=document.createElement('label');
-   const input=document.createElement('input');
-   input.type='radio';
-   input.name=`q${idx}`;
-   input.value=opt.charAt(0); // first char A/B/… or 正/错
-   label.appendChild(input);
-   label.appendChild(document.createTextNode(opt));
-   label.htmlFor=id;
-   input.id=id;
-   input.addEventListener('change',()=>handleAnswer(idx,input,qDiv,item));
-   optsDiv.appendChild(label);
- });
- qDiv.appendChild(optsDiv);
- const expl=document.createElement('div');
- expl.className='explanation';
- expl.textContent='解析：'+item.exp;
- qDiv.appendChild(expl);
- quizContainer.appendChild(qDiv);
+  const qDiv=document.createElement('div');
+  qDiv.className='question';
+  qDiv.innerHTML=`<h3>${idx+1}. ${item.q}</h3>`;
+
+  const optsDiv=document.createElement('div');
+  optsDiv.className='options';
+
+  item.opts.forEach((opt,i)=>{
+    const id=`q${idx}o${i}`;
+    const label=document.createElement('label');
+    const input=document.createElement('input');
+    input.type='radio';
+    input.name=`q${idx}`;
+    // 判定：选择题存字母，判断题存完整文本
+    input.value=isLetteredOpt(opt) ? opt.charAt(0) : opt.trim();
+    input.id=id;
+    label.htmlFor=id;
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(opt));
+    input.addEventListener('change',()=>handleAnswer(input,item,qDiv));
+    optsDiv.appendChild(label);
+  });
+
+  qDiv.appendChild(optsDiv);
+
+  const expl=document.createElement('div');
+  expl.className='explanation';
+  expl.textContent='解析：'+item.exp;
+  qDiv.appendChild(expl);
+
+  quizContainer.appendChild(qDiv);
 });
 
-function handleAnswer(idx,input,qDiv,item){
-  if(qDiv.classList.contains('correct')||qDiv.classList.contains('incorrect')) return; // answered
+function handleAnswer(input,item,qDiv){
+  if(qDiv.classList.contains('correct')||qDiv.classList.contains('incorrect')) return; // 已答
+
   answered++;
   const isCorrect=input.value===item.ans;
-  if(isCorrect){correct++; qDiv.classList.add('correct');}
-  else{qDiv.classList.add('incorrect');}
+  if(isCorrect){
+    correct++;
+    qDiv.classList.add('correct');
+  }else{
+    qDiv.classList.add('incorrect');
+  }
+
+  // 显示对/错提示
+  const res=document.createElement('div');
+  res.className='result';
+  res.textContent=isCorrect ? '回答正确！' : '回答错误！';
+  qDiv.appendChild(res);
+
+  // 展示解析
   qDiv.querySelector('.explanation').style.display='block';
+
+  // 锁定本题
+  qDiv.querySelectorAll('input').forEach(r=>r.disabled=true);
+
   updateScore();
-  // disable other options
-  const radios=qDiv.querySelectorAll('input');
-  radios.forEach(r=>r.disabled=true);
 }
 
 function updateScore(){
- document.getElementById('scoreBoard').textContent=`已答 ${answered} / 62 题，正确 ${correct} 题`;
+  document.getElementById('scoreBoard').textContent=`已答 ${answered} / ${questions.length} 题，正确 ${correct} 题`;
 }
 </script>
 </body>
