@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>实体 & 关系标注工具</title>
+  <script src="https://cdn.jsdelivr.net/npm/leader-line@1.0.7/leader-line.min.js"></script>
+  <style>
+    :root {
+      --color-person:#ff7878;
+      --color-action:#ffd66b;
+      --color-law:#82c8ff;
+      --color-location:#c5a3ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:#f6f8fa;color:#333;height:100vh;display:flex}
+
+    /* 主区域 */
+    #main{flex:1 1 auto;position:relative;overflow:auto;padding:1.25rem;display:flex;justify-content:center}
+    #textWrapper{max-width:920px;width:100%}
+    #textContainer{line-height:1.9;font-size:1rem;word-wrap:break-word}
+    .token{cursor:pointer;padding:.05rem .1rem;border-radius:2px}
+    .token.selected{background:#ffd6a0}
+    .entity{position:relative;z-index:2;padding:.05rem .1rem;border-radius:3px;color:#fff}
+    .entity[data-type="人物"]{background:var(--color-person)}
+    .entity[data-type="行为"]{background:var(--color-action)}
+    .entity[data-type="法律"]{background:var(--color-law)}
+    .entity[data-type="地点"]{background:var(--color-location)}
+    .ll-line-label{background:#fff;padding:.05rem .25rem;border-radius:4px;border:1px solid #d0d7de;font-size:.75rem}
+
+    /* 侧边栏 */
+    #sidePanel{width:340px;background:#fff;border-left:1px solid #e5e5e5;display:flex;flex-direction:column}
+    #sidePanel h2{margin:0;padding:1rem;border-bottom:1px solid #e5e5e5;font-size:1rem}
+    #controls{padding:1rem;border-bottom:1px solid #e5e5e5}
+    label{font-size:.9rem;display:block;margin:.35rem 0 .2rem}
+    select,button,textarea{width:100%;font-size:.9rem;border:1px solid #d0d7de;border-radius:6px;padding:.48rem .65rem;margin-bottom:.6rem;background:#fff}
+    textarea{resize:vertical;height:110px}
+    button{cursor:pointer}
+    button.primary{background:#0969da;color:#fff;border:none}
+    button.secondary{background:#eaeef2;color:#24292f;border:none}
+    hr{border:none;border-top:1px solid #e5e5e5;margin:1rem 0}
+    #entityList,#relationList{flex:1 1 auto;overflow:auto;padding:1rem}
+    .list-header{font-size:.85rem;color:#57606a;margin-bottom:.35rem}
+    .badge{display:inline-block;font-size:.75rem;padding:.2rem .45rem;border-radius:4px;color:#fff;margin-right:.35rem}
+  </style>
+</head>
+<body>
+  <!-- 主文本区 -->
+  <div id="main">
+    <div id="textWrapper">
+      <div id="textContainer"></div>
+    </div>
+  </div>
+
+  <!-- 侧边栏 -->
+  <aside id="sidePanel">
+    <h2>操作面板</h2>
+    <div id="controls">
+      <label>粘贴 / 修改文本</label>
+      <textarea id="rawInput"></textarea>
+      <button class="secondary" id="loadTextBtn">加载文本</button>
+      <label>或上传 .txt 文件</label>
+      <input type="file" id="fileInput" accept=".txt" style="margin-bottom:1rem">
+
+      <label>实体类型</label>
+      <select id="entityType">
+        <option value="人物">人物</option>
+        <option value="行为">行为</option>
+        <option value="法律">法律</option>
+        <option value="地点">地点</option>
+      </select>
+      <button class="primary" id="startEntity">开始选择实体 (拖拽)</button>
+      <button class="secondary" id="finishEntity">完成实体标注</button>
+
+      <hr>
+      <label>关系类型</label>
+      <select id="relationType">
+        <option value="前提条件">前提条件</option>
+        <option value="因果关系">因果关系</option>
+        <option value="依附关系">依附关系</option>
+      </select>
+      <p style="font-size:.8rem;color:#57606a;margin:.3rem 0 .6rem">提示：依次点击两个实体即可连线</p>
+    </div>
+
+    <div id="entityList">
+      <div class="list-header">已标注实体</div>
+      <ul id="entityUl" style="padding-left:1rem"></ul>
+    </div>
+    <div id="relationList">
+      <div class="list-header">已标注关系</div>
+      <ul id="relationUl" style="padding-left:1rem"></ul>
+    </div>
+  </aside>
+
+<script>
+/**************** 初始化 ****************/
+const defaultText=`《民法典》第一千零七十九条 夫妻一方申请离婚，经人民法院审理后，应当准予离婚。如果感情确已破裂，调解无效的，应当准予离婚。`;
+const rawInput=document.getElementById('rawInput');rawInput.value=defaultText;
+const textContainer=document.getElementById('textContainer');
+const entityTypeSel=document.getElementById('entityType');
+const relationTypeSel=document.getElementById('relationType');
+const entityUl=document.getElementById('entityUl');
+const relationUl=document.getElementById('relationUl');
+let entities=[];let relations=[];
+
+/************* 文本加载 & 渲染 *************/
+function tokenize(text){return text.split(/([\u4e00-\u9fa5]|\w+|[^\u4e00-\u9fa5\w\s])/).filter(t=>t);} 
+function renderText(text){
+  textContainer.innerHTML='';relations.forEach(r=>r.line.remove());entities=[];relations=[];entityUl.innerHTML='';relationUl.innerHTML='';
+  tokenize(text).forEach((tok,idx)=>{
+    const span=document.createElement('span');span.textContent=tok;span.dataset.idx=idx;span.classList.add('token');textContainer.appendChild(span);
+  });
+}
+renderText(defaultText);
+
+document.getElementById('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{rawInput.value=ev.target.result;};r.readAsText(f,'utf-8');});
+document.getElementById('loadTextBtn').onclick=()=>{const t=rawInput.value.trim();if(t)renderText(t);};
+
+/************* 实体拖拽 *************/
+let entityMode=false,dragStart=null,currentSel=new Set();
+textContainer.addEventListener('mousedown',e=>{if(!entityMode||!e.target.classList.contains('token'))return;dragStart=+e.target.dataset.idx;currentSel.clear();document.querySelectorAll('.token').forEach(t=>t.classList.remove('selected'));e.preventDefault();});
+textContainer.addEventListener('mouseover',e=>{if(!entityMode||dragStart===null||!e.target.classList.contains('token'))return;highlight(dragStart,+e.target.dataset.idx);});
+window.addEventListener('mouseup',()=>{if(entityMode)dragStart=null;});
+function highlight(s,e){currentSel.clear();const [a,b]=s<e?[s,e]:[e,s];for(let i=a;i<=b;i++)currentSel.add(i);document.querySelectorAll('.token').forEach(t=>t.classList.toggle('selected',currentSel.has(+t.dataset.idx)));}
+
+document.getElementById('startEntity').onclick=()=>{entityMode=true;currentSel.clear();document.querySelectorAll('.token').forEach(t=>t.classList.remove('selected'));};
+
+document.getElementById('finishEntity').onclick=()=>{
+  if(!entityMode||currentSel.size===0)return;const type=entityTypeSel.value,id='E'+(entities.length+1),idxArr=[...currentSel].sort((a,b)=>a-b);
+  const wrap=document.createElement('span');wrap.className='entity';wrap.dataset.type=type;wrap.dataset.id=id;
+  idxArr.forEach(i=>{const tok=document.querySelector(`.token[data-idx='${i}']`);wrap.appendChild(tok.cloneNode(true));tok.style.display='none';});
+  document.querySelector(`.token[data-idx='${idxArr[0]}']`).parentNode.insertBefore(wrap,document.querySelector(`.token[data-idx='${idxArr[0]}']`));
+  entities.push({id,type,tokenIdx:idxArr,elem:wrap});addEntityItem(id,type);wrap.addEventListener('click',entityClick);
+  entityMode=false;currentSel.clear();document.querySelectorAll('.token').forEach(t=>t.classList.remove('selected'));
+};
+function addEntityItem(id,type){const li=document.createElement('li');li.innerHTML=`<span class='badge' style='background:${getColor(type)}'>${type}</span>${id}`;entityUl.appendChild(li);} 
+function getColor(type){const root=getComputedStyle(document.documentElement);switch(type){case'人物':return root.getPropertyValue('--color-person');case'行为':return root.getPropertyValue('--color-action');case'法律':return root.getPropertyValue('--color-law');case'地点':return root.getPropertyValue('--color-location');default:return'#777';}}
+
+/************* 关系连线 *************/
+let temp=[];
+function entityClick(e){const id=e.currentTarget.dataset.id;if(temp.length===0){temp.push(id);e.currentTarget.style.outline='2px solid #ffa500';}else{if(id===temp[0])return;temp.push(id);const [fromId,toId]=temp,type=relationTypeSel.value,fromEnt=entities.find(x=>x.id===fromId),toEnt=entities.find(x=>x.id===toId);
+  if(fromEnt&&toEnt){const line=new LeaderLine(fromEnt.elem,toEnt.elem,{color:'#f38ba8',size:2,startPlug:'disc',endPlug:'arrow3',label:type,path:'arc',zIndex:1});relations.push({fromId,toId,type,line});const li=document.createElement('li');li.textContent=`${fromId} —(${type})-> ${toId}`;relationUl.appendChild(li);} document.querySelectorAll('.entity').forEach(el=>el.style.outline='none');temp=[];}}
+</script>
+</body>
+</html>
