@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>图片标注器 · 绘制/编辑双模式</title>
+
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+     height:100vh;display:flex;overflow:hidden;background:#f5f7fa}
+button,select,input{padding:.35rem .7rem;border:1px solid #bbb;border-radius:4px;background:#fff;cursor:pointer}
+button:hover{background:#f0f0f0}
+.small{font-size:.85rem;color:#555}
+
+/* 侧栏 */
+#sidebar{width:260px;background:#fff;border-right:1px solid #ddd;padding:1rem;display:flex;flex-direction:column}
+#sidebar section{margin-bottom:1.2rem}
+#classList li{display:flex;align-items:center;margin:.35rem 0}
+#classList span.color{width:16px;height:16px;border-radius:3px;margin-right:.4rem}
+#classList button{background:none;border:none;color:#d00;margin-left:auto}
+
+/* 主区域 */
+#canvasWrap{flex:1;display:flex;flex-direction:column}
+#toolbar{background:#fff;border-bottom:1px solid #ddd;padding:.4rem .6rem;display:flex;gap:.4rem;align-items:center}
+#canvasHolder{flex:1;overflow:auto;background:#222;position:relative}
+canvas{background:#000;cursor:crosshair}
+
+/* 标注框 */
+.box{position:absolute;border:2px solid transparent}
+.box-label{position:absolute;top:-18px;left:0;font-size:12px;padding:0 4px;border-radius:2px;color:#fff;pointer-events:none}
+
+/* 模态 */
+#labelModal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
+#labelModal.hidden{display:none}
+.modal{background:#fff;padding:1rem 1.4rem;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.3);text-align:center}
+
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<!-- 侧栏 -->
+<aside id="sidebar">
+  <h3 style="margin-bottom:.7rem">图片标注器</h3>
+
+  <section>
+    <button onclick="imageInput.click()">上传图片</button>
+    <input id="imageInput" type="file" accept="image/*" multiple>
+  </section>
+
+  <section>
+    <label class="small">类别列表</label>
+    <ul id="classList"></ul>
+    <input id="newClass" placeholder="新增类别…" style="width:60%">
+    <button onclick="addClass()">添加</button>
+  </section>
+
+  <section>
+    <label class="small">撤销 / 重做</label><br>
+    <button onclick="undo()">撤销</button>
+    <button onclick="redo()">重做</button>
+  </section>
+
+  <section>
+    <label class="small">导入 / 导出</label><br>
+    <button onclick="importJSON()">导入 JSON</button>
+    <button onclick="exportJSON()">导出 JSON</button>
+  </section>
+</aside>
+
+<!-- 主区 -->
+<div id="canvasWrap">
+  <div id="toolbar">
+    <button onclick="zoom(1.1)">放大 +</button>
+    <button onclick="zoom(0.9)">缩小 −</button>
+
+    <button id="modeBtn" onclick="toggleMode()"
+            style="margin-left:auto;background:#ffd36e;border-color:#ffbb33">
+      切换到编辑模式 (E)
+    </button>
+    <span id="filename" class="small" style="margin-left:.6rem"></span>
+  </div>
+
+  <div id="canvasHolder">
+    <canvas id="canvas"></canvas>
+  </div>
+</div>
+
+<!-- 选类模态 -->
+<div id="labelModal" class="hidden">
+  <div class="modal">
+    <p style="margin-bottom:.6rem">为新框选择类别</p>
+    <select id="labelSelect"></select>
+    <button onclick="applyLabel()" style="margin-left:.6rem">确定</button>
+  </div>
+</div>
+
+<script>
+/* ---------- 状态 ---------- */
+const canvas      = document.getElementById('canvas');
+const ctx         = canvas.getContext('2d');
+const holder      = document.getElementById('canvasHolder');
+const imageInput  = document.getElementById('imageInput');
+const labelModal  = document.getElementById('labelModal');
+const labelSelect = document.getElementById('labelSelect');
+const filenameEl  = document.getElementById('filename');
+const modeBtn     = document.getElementById('modeBtn');
+
+let currentImg   = null;
+let boxes        = [];
+let history      = [];
+let redoStack    = [];
+let scale        = 1;
+let drawing      = false;
+let startX=0, startY=0, pending = -1;
+let mode         = 'draw';          // 'draw' or 'edit'
+
+const colors = ['#e74c3c','#2ecc71','#3498db','#f1c40f','#9b59b6','#1abc9c','#e67e22'];
+const classColors = {};
+
+/* ---------- 工具 ---------- */
+const randColor = ()=> colors[Math.floor(Math.random()*colors.length)];
+const saveSnap  = ()=>{ history.push(JSON.stringify(boxes)); redoStack.length=0 };
+function undo(){ if(history.length){ redoStack.push(JSON.stringify(boxes)); boxes=JSON.parse(history.pop()); refresh(); } }
+function redo(){ if(redoStack.length){ history.push(JSON.stringify(boxes)); boxes=JSON.parse(redoStack.pop()); refresh(); } }
+function zoom(k){ scale*=k; ctx.setTransform(scale,0,0,scale,0,0); refresh(); }
+
+/* ---------- 模式切换 ---------- */
+function setMode(m){
+  mode = m;
+  modeBtn.textContent = m==='draw' ? '切换到编辑模式 (E)' : '切换到绘制模式 (E)';
+  modeBtn.style.background = m==='draw' ? '#ffd36e' : '#b3e5ff';
+  document.querySelectorAll('.box').forEach(b=>{
+    b.style.pointerEvents = m==='draw' ? 'none' : 'auto';
+  });
+  sync(true);                     // 重新绑定/解绑 interact
+}
+function toggleMode(){ setMode(mode==='draw'?'edit':'draw'); }
+document.addEventListener('keydown',e=>{ if(e.key.toLowerCase()==='e') toggleMode(); });
+
+/* ---------- 类别管理 ---------- */
+function addClass(n){
+  n = n || document.getElementById('newClass').value.trim();
+  if(!n || classColors[n]) return;
+  classColors[n]=randColor();
+  document.getElementById('newClass').value='';
+  rebuildClassUI();
+}
+function delClass(n){
+  if(confirm(`删除类别 ${n}？`)){
+    delete classColors[n];
+    boxes=boxes.filter(b=>b.label!==n); rebuildClassUI(); refresh();
+  }
+}
+function rebuildClassUI(){
+  const ul=document.getElementById('classList'); ul.innerHTML='';
+  labelSelect.innerHTML='';
+  for(const [n,c] of Object.entries(classColors)){
+    ul.insertAdjacentHTML('beforeend',
+      `<li><span class="color" style="background:${c}"></span>${n}
+      <button onclick="delClass('${n}')">✕</button></li>`);
+    labelSelect.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
+  }
+}
+
+/* ---------- 图片 ---------- */
+imageInput.onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image();
+  img.src=URL.createObjectURL(f);
+  img.onload=()=>{ loadImg(img,f.name); };
+};
+function loadImg(img,name){
+  currentImg = img; scale = 1;
+  ctx.setTransform(1,0,0,1,0,0);
+  canvas.width = img.width; canvas.height = img.height;
+  boxes=[]; history=[]; redoStack=[];
+  filenameEl.textContent = name;
+  refresh();
+}
+
+/* ---------- 绘制底图 ---------- */
+function draw(){
+  if(!currentImg) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(currentImg,0,0);
+}
+
+/* ---------- 同步框 ---------- */
+function sync(rebind=false){
+  if(rebind) interact('.box').unset();
+  document.querySelectorAll('.box').forEach(b=>b.remove());
+
+  boxes.forEach((b,i)=>{
+    if(!b.label) return;
+    const d=document.createElement('div');
+    d.className='box'; d.dataset.i=i;
+    Object.assign(d.style,{
+      borderColor:b.color, transform:'none',
+      left:b.x*scale+'px', top:b.y*scale+'px',
+      width:b.w*scale+'px', height:b.h*scale+'px',
+      pointerEvents: mode==='draw'?'none':'auto'
+    });
+    d.innerHTML=`<div class="box-label" style="background:${b.color}">${b.label}</div>`;
+    holder.appendChild(d);
+    if(mode==='edit') bindInteract(d);
+  });
+}
+function bindInteract(el){
+  interact(el)
+    .draggable({
+      listeners:{
+        move(ev){
+          const i=+el.dataset.i;
+          boxes[i].x += ev.dx/scale;
+          boxes[i].y += ev.dy/scale;
+          sync(false);
+        }
+      }
+    })
+    .resizable({
+      edges:{left:true,right:true,top:true,bottom:true},
+      listeners:{
+        move(ev){
+          const i=+el.dataset.i;
+          boxes[i].x += ev.deltaRect.left/scale;
+          boxes[i].y += ev.deltaRect.top/scale;
+          boxes[i].w  = ev.rect.width /scale;
+          boxes[i].h  = ev.rect.height/scale;
+          sync(false);
+        }
+      }
+    });
+}
+
+/* ---------- 刷新 ---------- */
+function refresh(){ draw(); sync(true); }
+
+/* ---------- 画新框 ---------- */
+holder.addEventListener('mousedown',e=>{
+  if(mode!=='draw' || !currentImg || e.button!==0) return;
+  const rect=canvas.getBoundingClientRect();
+  startX=(e.clientX-rect.left)/scale + holder.scrollLeft;
+  startY=(e.clientY-rect.top )/scale + holder.scrollTop;
+  drawing=true;
+});
+holder.addEventListener('mousemove',e=>{
+  if(!drawing) return;
+  const rect=canvas.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/scale + holder.scrollLeft,
+        y=(e.clientY-rect.top )/scale + holder.scrollTop;
+  draw();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1/scale; ctx.setLineDash([4/scale,4/scale]);
+  ctx.strokeRect(startX,startY,x-startX,y-startY); ctx.setLineDash([]);
+});
+holder.addEventListener('mouseup',e=>{
+  if(!drawing) return; drawing=false;
+  const rect=canvas.getBoundingClientRect();
+  const endX=(e.clientX-rect.left)/scale + holder.scrollLeft,
+        endY=(e.clientY-rect.top )/scale + holder.scrollTop;
+  const w=Math.abs(endX-startX), h=Math.abs(endY-startY);
+  if(w<4||h<4){ draw(); return; }
+  saveSnap();
+  boxes.push({x:Math.min(startX,endX),y:Math.min(startY,endY),w,h,label:null,color:'#fff'});
+  pending=boxes.length-1;
+  labelModal.classList.remove('hidden'); labelSelect.focus();
+  draw();
+});
+
+/* ---------- 模态 ---------- */
+function applyLabel(){
+  const lbl=labelSelect.value;
+  if(!lbl){ alert('请选择类别'); return; }
+  Object.assign(boxes[pending],{label:lbl,color:classColors[lbl]});
+  labelModal.classList.add('hidden'); refresh();
+}
+labelModal.onclick=e=>{ if(e.target===labelModal) labelModal.classList.add('hidden'); };
+
+/* ---------- 导入 / 导出 ---------- */
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(boxes,null,2)],{type:'application/json'});
+  download(blob,'annotations.json');
+}
+function importJSON(){
+  const f=document.createElement('input'); f.type='file'; f.accept='application/json';
+  f.onchange=e=>{
+    const rd=new FileReader();
+    rd.onload=()=>{ boxes=JSON.parse(rd.result); history=[]; redoStack=[]; refresh(); };
+    rd.readAsText(e.target.files[0]);
+  };
+  f.click();
+}
+function download(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url);
+}
+
+/* ---------- 预置类别 ---------- */
+['person','car','dog'].forEach(addClass); rebuildClassUI(); setMode('draw');
+</script>
+</body>
+</html>
